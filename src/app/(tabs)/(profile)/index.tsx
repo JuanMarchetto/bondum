@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Avatar, IconButton, Badge, Button } from '../../../components/ui'
+import { Card, Avatar, IconButton, Badge, Button, SettingsMenu } from '../../../components'
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
@@ -13,7 +13,6 @@ export default function ProfileScreen() {
     { icon: '📱', label: 'Scan', onPress: () => router.push('/scan') },
     { icon: '📤', label: 'Send', onPress: () => {} },
     { icon: '🎁', label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
-    { icon: '⚙️', label: 'Settings', onPress: () => {} },
   ]
 
   // Mock rewards
@@ -70,6 +69,17 @@ export default function ProfileScreen() {
               onPress={action.onPress}
             />
           ))}
+          {/* Settings Menu with native dropdown */}
+          <SettingsMenu
+            trigger={
+              <View className="items-center">
+                <View className="w-14 h-14 rounded-full bg-violet-100 items-center justify-center mb-1">
+                  <Text className="text-2xl">⚙️</Text>
+                </View>
+                <Text className="text-gray-600 text-xs">Settings</Text>
+              </View>
+            }
+          />
         </View>
 
         {/* Wallet Address */}
