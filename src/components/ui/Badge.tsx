@@ -34,18 +34,14 @@ export function Badge({ children, variant = 'default', className = '' }: BadgePr
         ${className}
       `}
     >
-      {typeof children === 'string' ? (
-        <Text
-          className={`
-            text-sm font-semibold
-            ${variantTextClasses[variant]}
-          `}
-        >
-          {children}
-        </Text>
-      ) : (
-        children
-      )}
+      <Text
+        className={`
+          text-sm font-semibold
+          ${variantTextClasses[variant]}
+        `}
+      >
+        {children}
+      </Text>
     </View>
   )
 }
