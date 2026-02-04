@@ -29,22 +29,34 @@
   "main": "./index.js",
   "version": "1.0.0",
   "dependencies": {
+    "@privy-io/expo": "^0.63.4",
     "@solana/kit": "^5.5.0",
+    "@tanstack/react-query": "^5.90.20",
     "@wallet-ui/react-native-kit": "^3.1.0",
+    "assert": "^2.1.0",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
+    "events": "^3.3.0",
     "expo": "~54.0.22",
+    "expo-camera": "^17.0.10",
     "expo-constants": "~18.0.13",
     "expo-dev-client": "^6.0.20",
+    "expo-image": "^3.0.11",
     "expo-linking": "~8.0.11",
     "expo-router": "~6.0.14",
+    "expo-secure-store": "^15.0.8",
     "expo-status-bar": "~3.0.8",
-    "react": "~19.1.0",
+    "process": "^0.11.10",
+    "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
     "react-native-quick-crypto": "^1.0.7",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.16.0",
+    "readable-stream": "^4.7.0",
     "tailwindcss": "~4.1.16",
-    "uniwind": "~1.0.0"
+    "uniwind": "~1.0.0",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
@@ -52,6 +64,10 @@
     "eslint-config-expo": "~10.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "react-native-nitro-modules": "^0.33.7",
+    "react": "19.1.0"
   },
   "private": true
 }

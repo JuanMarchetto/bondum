@@ -1,15 +1,26 @@
 {
   "expo": {
-    "scheme": "acme",
+    "scheme": "bondum",
     "userInterfaceStyle": "automatic",
-    "orientation": "default",
+    "orientation": "portrait",
     "web": {
       "output": "static"
     },
-    "name": "bondum-mobile",
+    "name": "Bondum",
     "slug": "bondum-mobile",
     "android": {
-      "package": "com.anonymous.kitexpouniwind"
-    }
+      "package": "xyz.bondum.mobile"
+    },
+    "ios": {
+      "bundleIdentifier": "xyz.bondum.mobile"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Bondum to access your camera to scan QR codes and earn rewards."
+        }
+      ]
+    ]
   }
 }
