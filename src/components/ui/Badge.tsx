@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, type ViewStyle } from 'react-native'
 import type { ReactNode } from 'react'
 
 type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'outline'
@@ -7,6 +7,7 @@ interface BadgeProps {
   children: ReactNode
   variant?: BadgeVariant
   className?: string
+  style?: ViewStyle
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
@@ -33,7 +34,7 @@ const variantTextColors: Record<BadgeVariant, string | undefined> = {
   outline: '#8b5cf6',
 }
 
-export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+export function Badge({ children, variant = 'default', className = '', style }: BadgeProps) {
   return (
     <View
       className={`
@@ -41,14 +42,16 @@ export function Badge({ children, variant = 'default', className = '' }: BadgePr
         ${variantClasses[variant]}
         ${className}
       `}
-      style={variant === 'outline'
-        ? { borderWidth: 2, borderColor: '#8b5cf6', borderRadius: 12 }
-        : { borderRadius: 8 }
-      }
+      style={[
+        variant === 'outline'
+          ? { borderWidth: 2, borderColor: '#8b5cf6', borderRadius: 12 }
+          : { borderRadius: 8 },
+        style,
+      ]}
     >
       <Text
         className={`
-          text-sm font-extrabold
+          ${variant === 'outline' ? 'text-lg' : 'text-sm'} font-extrabold
           ${variantTextClasses[variant]}
         `}
         style={variantTextColors[variant] ? { color: variantTextColors[variant] } : undefined}

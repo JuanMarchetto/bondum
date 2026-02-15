@@ -81,7 +81,7 @@ export default function RewardDetailScreen() {
 
   if (claimed) {
     return (
-      <View className="flex-1 bg-violet-50">
+      <View className="flex-1 bg-gray-100">
         {/* Header */}
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
           <View className="items-center mb-4">
@@ -117,7 +117,7 @@ export default function RewardDetailScreen() {
             </Text>
 
             {reward.type === 'token' ? (
-              <View className="bg-violet-500 rounded-2xl px-12 py-8 mb-6">
+              <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
                 <Text className="text-white text-3xl font-extrabold">{reward.value}</Text>
               </View>
             ) : reward.type === 'nft' ? (
@@ -146,7 +146,7 @@ export default function RewardDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-gray-100">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="flex-row items-center mb-4">
@@ -173,31 +173,39 @@ export default function RewardDetailScreen() {
       </View>
 
       {/* Reward Detail */}
-      <View className="flex-1 px-4 pt-6">
-        <View className="bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+      <View className="flex-1 px-2 pt-6 justify-center">
+        <View className="bg-white rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5', flex: 0.9 }}>
           <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
-            <Text className="text-violet-500 text-lg font-bold">Reward</Text>
-            <Badge variant="outline">{reward.available} available</Badge>
+            <Text className="text-4xl font-extrabold">
+              <Text className="text-gray-900">{reward.cost.toLocaleString()} </Text>
+              <Text style={{ color: '#8b5cf6' }}>$BONDUM</Text>
+            </Text>
+            <View style={{ borderWidth: 4, borderColor: '#8b5cf6', borderRadius: 12, backgroundColor: 'white', paddingHorizontal: 12, paddingVertical: 4 }}>
+              <Text className="text-2xl font-extrabold" style={{ color: '#8b5cf6' }}>{reward.available} available</Text>
+            </View>
           </View>
 
-          <Text className="text-gray-900 font-semibold mb-5">{reward.description}</Text>
+          <Text className="text-gray-900 font-semibold text-3xl" style={{ marginTop: 48, marginBottom: 48 }}>{reward.description}</Text>
 
           <View
-            className={`rounded-xl py-10 items-center mb-6 ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+            className={`rounded-xl py-32 items-center mb-6 ${reward.type === 'nft' ? 'bg-gray-1000' : 'bg-red-600'}`}
           >
             <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
           </View>
 
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            onPress={handleClaim}
-            loading={isClaiming}
-            disabled={(user?.balance || 0) < reward.cost}
-          >
-            Claim reward
-          </Button>
+          <View className="items-center">
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-[66%]"
+              style={{ paddingVertical: 20, borderRadius: 20 }}
+              onPress={handleClaim}
+              loading={isClaiming}
+              disabled={(user?.balance || 0) < reward.cost}
+            >
+              <Text className="text-white font-bold text-4xl">Claim reward</Text>
+            </Button>
+          </View>
 
           {(user?.balance || 0) < reward.cost && (
             <Text className="text-red-500 text-center mt-3 text-sm">

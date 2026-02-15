@@ -1,4 +1,4 @@
-import { Pressable, Text, ActivityIndicator, View } from 'react-native'
+import { Pressable, Text, ActivityIndicator, View, type ViewStyle } from 'react-native'
 import type { ReactNode } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
@@ -13,6 +13,7 @@ interface ButtonProps {
   loading?: boolean
   fullWidth?: boolean
   className?: string
+  style?: ViewStyle
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -50,21 +51,25 @@ export function Button({
   loading = false,
   fullWidth = false,
   className = '',
+  style,
 }: ButtonProps) {
   const isDisabled = disabled || loading
+
+  const hasCustomBorderRadius = style?.borderRadius !== undefined
 
   return (
     <Pressable
       onPress={onPress}
       disabled={isDisabled}
       className={`
-        rounded-full items-center justify-center flex-row
+        ${hasCustomBorderRadius ? '' : 'rounded-full'} items-center justify-center flex-row
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${fullWidth ? 'w-full' : ''}
         ${isDisabled ? 'opacity-50' : ''}
         ${className}
       `}
+      style={style}
     >
       {loading ? (
         <ActivityIndicator
