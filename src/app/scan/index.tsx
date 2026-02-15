@@ -31,7 +31,7 @@ export default function ScanScreen() {
   if (!permission.granted) {
     return (
       <View className="flex-1 bg-violet-50">
-        <View className="bg-violet-500 px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16 }}>
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
           <View className="flex-row items-center mb-4">
             <Pressable onPress={() => router.back()} className="mr-4">
               <Text className="text-white text-2xl">←</Text>
@@ -58,7 +58,7 @@ export default function ScanScreen() {
   if (scanResult) {
     return (
       <View className="flex-1 bg-violet-50">
-        <View className="bg-violet-500 px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16 }}>
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
           <View className="flex-row items-center mb-4">
             <Pressable onPress={() => router.back()} className="mr-4">
               <Text className="text-white text-2xl">←</Text>
@@ -112,7 +112,7 @@ export default function ScanScreen() {
   return (
     <View className="flex-1 bg-violet-50">
       {/* Header */}
-      <View className="bg-violet-500 px-5 pb-6 rounded-b-3xl z-10" style={{ paddingTop: insets.top + 16 }}>
+      <View className="px-5 pb-6 rounded-b-3xl z-10" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="flex-row items-center mb-4">
           <Pressable onPress={() => router.back()} className="mr-4">
             <Text className="text-white text-2xl">←</Text>

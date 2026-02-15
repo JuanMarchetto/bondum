@@ -56,7 +56,7 @@ export default function WelcomeScreen() {
   if (authMode === 'otp') {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <View className="flex-1 bg-violet-500 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
           <View className="flex-1 items-center justify-center">
             <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-6">
               <Text className="text-violet-500 text-3xl">📧</Text>
@@ -114,7 +114,7 @@ export default function WelcomeScreen() {
   if (authMode === 'email') {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <View className="flex-1 bg-violet-500 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+        <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
           <View className="flex-1 items-center justify-center">
             <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-6">
               <Text className="text-violet-500 text-3xl">✉️</Text>
@@ -168,7 +168,7 @@ export default function WelcomeScreen() {
 
   // Auth selection screen (default)
   return (
-    <View className="flex-1 bg-violet-500 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
+    <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
       {/* Logo Section */}
       <View className="flex-1 items-center justify-center">
         <View className="w-32 h-32 bg-white rounded-full items-center justify-center mb-8 shadow-lg">

@@ -17,7 +17,7 @@ const sizeClasses = {
 }
 
 const variantClasses = {
-  default: 'bg-violet-100',
+  default: 'bg-gray-200',
   outline: 'bg-white border border-violet-200',
 }
 
@@ -40,7 +40,7 @@ export function IconButton({
       >
         {icon}
       </View>
-      {label && <Text className="text-violet-500 text-xs mt-2 font-medium">{label}</Text>}
+      {label && <Text className="text-gray-500 text-sm mt-2 font-medium">{label}</Text>}
     </Pressable>
   )
 }

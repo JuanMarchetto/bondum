@@ -1,10 +1,11 @@
-import { View } from 'react-native'
+import { View, type ViewStyle } from 'react-native'
 import type { ReactNode } from 'react'
 
 interface CardProps {
   children: ReactNode
   className?: string
   padding?: 'none' | 'sm' | 'md' | 'lg'
+  style?: ViewStyle
 }
 
 const paddingClasses = {
@@ -14,7 +15,7 @@ const paddingClasses = {
   lg: 'p-6',
 }
 
-export function Card({ children, className = '', padding = 'md' }: CardProps) {
+export function Card({ children, className = '', padding = 'md', style }: CardProps) {
   return (
     <View
       className={`
@@ -22,6 +23,7 @@ export function Card({ children, className = '', padding = 'md' }: CardProps) {
         ${paddingClasses[padding]}
         ${className}
       `}
+      style={style}
     >
       {children}
     </View>

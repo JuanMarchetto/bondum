@@ -20,7 +20,7 @@ export function Header({
   rightContent,
 }: HeaderProps) {
   return (
-    <View className="bg-violet-500 px-5 pt-12 pb-6">
+    <View className="px-5 pt-12 pb-6" style={{ backgroundColor: '#8b66df' }}>
       {/* Logo */}
       <View className="items-center mb-4">
         <Text className="text-white text-2xl font-extrabold tracking-wide">

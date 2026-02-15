@@ -56,7 +56,7 @@ export default function RewardsScreen() {
   return (
     <View className="flex-1 bg-violet-50">
       {/* Header */}
-      <View className="bg-violet-500 px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16 }}>
+      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="items-center mb-4">
           <Text className="text-white text-2xl font-extrabold tracking-wide">
             B<Text className="text-violet-200">O</Text>NDUM

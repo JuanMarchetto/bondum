@@ -25,10 +25,10 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-violet-50">
       {/* Header */}
-      <View className="bg-violet-500 px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16 }}>
+      <View className="px-5 pb-10 rounded-b-3xl min-h-[50vh]" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
         {/* Logo */}
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-white text-2xl font-extrabold tracking-wide">
+        <View className="flex-row items-center justify-between mb-24">
+          <Text className="text-white text-4xl font-extrabold tracking-wide">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
           <View className="flex-row items-center gap-3">
@@ -39,23 +39,25 @@ export default function HomeScreen() {
         </View>
 
         {/* User Info */}
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-violet-200 text-sm">Status</Text>
-            <Text className="text-white text-3xl font-extrabold">{user?.username || 'User'}</Text>
-            <Text className="text-white text-lg font-bold">{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+        <View className="flex-row items-center justify-between mb-1">
+          <View className="flex-1">
+            <Text className="text-violet-200 text-2xl font-extrabold">Status</Text>
+            <Text className="text-white text-6xl font-extrabold">{user?.username || 'User'}</Text>
           </View>
           <Pressable onPress={() => router.push('/(tabs)/(profile)')}>
             <Avatar source={user?.avatarUrl} size="xl" />
           </Pressable>
         </View>
 
+        {/* Balance */}
+        <Text className="text-gray-900 text-4xl font-extrabold">{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+
         {/* NFT Collection Card */}
-        <Pressable className="mt-4">
-          <Card className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-violet-500 text-sm">View collection</Text>
-              <Text className="text-gray-900 text-lg font-bold">You have {user?.nftCount || 0} NFT</Text>
+        <Pressable className="mt-9 mx-2">
+          <Card className="flex-row items-center justify-between" padding="none" style={{ padding: 24 }}>
+            <View className="flex-1">
+              <Text className="text-lg leading-tight"><Text className="text-gray-400">View </Text><Text className="text-violet-500">collection</Text></Text>
+              <Text className="text-gray-900 text-4xl font-extrabold leading-tight">You have {user?.nftCount || 0} NFT</Text>
             </View>
             <View className="flex-row">
               <View className="w-12 h-12 rounded-lg bg-violet-200 -mr-2" />
@@ -84,16 +86,16 @@ export default function HomeScreen() {
           <Text className="text-gray-900 text-lg font-bold mb-3">Available Rewards</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
             {rewards.map((reward) => (
-              <Card key={reward.id} className="mr-4 w-72">
+              <View key={reward.id} className="mr-4 w-[80%] bg-gray-100 rounded-2xl p-4">
                 <View className="flex-row items-start justify-between mb-2">
-                  <Text className="text-violet-500 font-medium">Reward</Text>
+                  <Text className="text-violet-500 text-lg font-bold">Reward</Text>
                   <Badge variant="outline">{reward.available} available</Badge>
                 </View>
                 <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
                 <View className="bg-red-600 rounded-xl py-6 items-center">
                   <Text className="text-white text-3xl font-extrabold">{reward.value}</Text>
                 </View>
-              </Card>
+              </View>
             ))}
           </ScrollView>
         </View>
