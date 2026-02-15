@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, Pressable, Image } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { Card, Badge, Button, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = require('../../../assets/avatar.png')
+const bondumLogo = require('../../../assets/bondum_logo.png')
 
 // Mock reward data - in real app, fetch from API
 const getReward = (id: string) => {
@@ -85,15 +86,13 @@ export default function RewardDetailScreen() {
         {/* Header */}
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
           <View className="items-center mb-4">
-            <Text className="text-white text-4xl font-extrabold tracking-wide">
-              B<Text className="text-violet-200">O</Text>NDUM
-            </Text>
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
           </View>
 
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-              <Text className="text-violet-200">~ {(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+              <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
+              <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
@@ -149,13 +148,13 @@ export default function RewardDetailScreen() {
     <View className="flex-1 bg-gray-100">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-        <View className="flex-row items-center mb-4">
+        <View className="flex-row items-center mb-4 relative">
           <Pressable onPress={() => router.back()} className="mr-4">
-            <Text className="text-white text-2xl">←</Text>
+            <Text className="text-white" style={{ fontSize: 64 }}>←</Text>
           </Pressable>
-          <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
-            B<Text className="text-violet-200">O</Text>NDUM
-          </Text>
+          <View className="absolute left-0 right-0 items-center">
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+          </View>
         </View>
 
         <View className="flex-row items-center justify-between">
@@ -174,7 +173,7 @@ export default function RewardDetailScreen() {
 
       {/* Reward Detail */}
       <View className="flex-1 px-2 pt-6 justify-center">
-        <View className="bg-white rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5', flex: 0.9 }}>
+        <View className="bg-white rounded-3xl p-5 self-center" style={{ borderWidth: 1, borderColor: '#9b9db5', flex: 0.9, width: '96%' }}>
           <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
             <Text className="text-4xl font-extrabold">
               <Text className="text-gray-900">{reward.cost.toLocaleString()} </Text>
@@ -185,7 +184,7 @@ export default function RewardDetailScreen() {
             </View>
           </View>
 
-          <Text className="text-gray-900 font-semibold text-3xl" style={{ marginTop: 48, marginBottom: 48 }}>{reward.description}</Text>
+          <Text className="text-gray-900 font-semibold text-3xl" style={{ marginTop: 12, marginBottom: 48 }}>{reward.description}</Text>
 
           <View
             className={`rounded-xl py-32 items-center mb-6 ${reward.type === 'nft' ? 'bg-gray-1000' : 'bg-red-600'}`}

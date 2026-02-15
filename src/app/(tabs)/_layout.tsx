@@ -6,7 +6,6 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
     home: '🏠',
     trade: '🔄',
     rewards: '🎁',
-    profile: '👤',
   }
 
   return (
@@ -47,7 +46,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(trade)"
         options={{
-          title: 'Trade',
+          title: 'Swap',
           tabBarIcon: ({ focused }) => <TabIcon name="trade" focused={focused} />,
         }}
       />
@@ -56,13 +55,6 @@ export default function TabsLayout() {
         options={{
           title: 'Rewards',
           tabBarIcon: ({ focused }) => <TabIcon name="rewards" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="(profile)"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />
     </Tabs>

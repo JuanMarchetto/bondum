@@ -1,8 +1,10 @@
-import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button, Card } from '../../components/ui'
+
+const bondumLogo = require('../../assets/bondum_logo.png')
 
 type AuthMode = 'select' | 'email' | 'otp'
 
@@ -175,9 +177,9 @@ export default function WelcomeScreen() {
           <Text className="text-violet-500 text-4xl font-extrabold">B</Text>
         </View>
 
-        <Text className="text-white text-4xl font-extrabold tracking-wide mb-2">
-          B<Text className="text-violet-200">O</Text>NDUM
-        </Text>
+        <View className="mb-2">
+          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+        </View>
 
         <Text className="text-violet-200 text-lg text-center mb-4">Scan. Earn. Enjoy.</Text>
 

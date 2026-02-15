@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Image } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Avatar, Button, Card, BellIcon } from '../../components/ui'
 
 const avatarImage = require('../../assets/avatar.png')
+const bondumLogo = require('../../assets/bondum_logo.png')
 
 export default function ScanScreen() {
   const insets = useSafeAreaInsets()
@@ -34,13 +35,13 @@ export default function ScanScreen() {
     return (
       <View className="flex-1 bg-violet-50">
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-          <View className="flex-row items-center mb-4">
+          <View className="flex-row items-center mb-4 relative">
             <Pressable onPress={() => router.back()} className="mr-4">
-              <Text className="text-white text-2xl">←</Text>
+              <Text className="text-white" style={{ fontSize: 64 }}>←</Text>
             </Pressable>
-            <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
-              B<Text className="text-violet-200">O</Text>NDUM
-            </Text>
+            <View className="absolute left-0 right-0 items-center">
+              <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+            </View>
           </View>
         </View>
 
@@ -61,19 +62,19 @@ export default function ScanScreen() {
     return (
       <View className="flex-1 bg-violet-50">
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-          <View className="flex-row items-center mb-4">
+          <View className="flex-row items-center mb-4 relative">
             <Pressable onPress={() => router.back()} className="mr-4">
-              <Text className="text-white text-2xl">←</Text>
+              <Text className="text-white" style={{ fontSize: 64 }}>←</Text>
             </Pressable>
-            <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
-              B<Text className="text-violet-200">O</Text>NDUM
-            </Text>
+            <View className="absolute left-0 right-0 items-center">
+              <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+            </View>
           </View>
 
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-              <Text className="text-violet-200">~ {(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+              <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
+              <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
@@ -115,13 +116,13 @@ export default function ScanScreen() {
     <View className="flex-1 bg-violet-50">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl z-10" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-        <View className="flex-row items-center mb-4">
+        <View className="flex-row items-center mb-4 relative">
           <Pressable onPress={() => router.back()} className="mr-4">
-            <Text className="text-white text-2xl">←</Text>
+            <Text className="text-white" style={{ fontSize: 64 }}>←</Text>
           </Pressable>
-          <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
-            B<Text className="text-violet-200">O</Text>NDUM
-          </Text>
+          <View className="absolute left-0 right-0 items-center">
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+          </View>
         </View>
 
         <View className="flex-row items-center justify-between">

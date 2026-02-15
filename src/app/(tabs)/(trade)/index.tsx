@@ -1,10 +1,11 @@
-import { View, Text, TextInput, Pressable } from 'react-native'
+import { View, Text, TextInput, Pressable, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card, Button, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = require('../../../assets/avatar.png')
+const bondumLogo = require('../../../assets/bondum_logo.png')
 
 export default function TradeScreen() {
   const insets = useSafeAreaInsets()
@@ -18,16 +19,14 @@ export default function TradeScreen() {
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         {/* Logo */}
         <View className="items-center mb-4">
-          <Text className="text-white text-4xl font-extrabold tracking-wide">
-            B<Text className="text-violet-200">O</Text>NDUM
-          </Text>
+          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
         </View>
 
         {/* User Info */}
         <View className="flex-row items-center justify-between">
           <View>
-            <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200">~ {(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+            <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
+            <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">

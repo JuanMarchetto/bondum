@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native'
+import { View, Text, ScrollView, Pressable, useWindowDimensions, Image } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
 const avatarImage = require('../../../assets/avatar.png')
+const bondumLogo = require('../../../assets/bondum_logo.png')
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets()
@@ -31,10 +32,8 @@ export default function HomeScreen() {
       {/* Header */}
       <View className="px-5 pb-10 rounded-b-3xl min-h-[50vh]" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
         {/* Logo */}
-        <View className="flex-row items-center justify-between mb-24">
-          <Text className="text-white text-4xl font-extrabold tracking-wide">
-            B<Text className="text-violet-200">O</Text>NDUM
-          </Text>
+        <View className="flex-row items-center justify-between" style={{ marginBottom: 73 }}>
+          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
               <BellIcon size={32} color="white" />
@@ -48,9 +47,7 @@ export default function HomeScreen() {
             <Text className="text-violet-200 text-2xl font-extrabold">Status</Text>
             <Text className="text-white text-6xl font-extrabold">{user?.username || 'User'}</Text>
           </View>
-          <Pressable onPress={() => router.push('/(tabs)/(profile)')}>
-            <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
-          </Pressable>
+          <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
         </View>
 
         {/* Balance */}
@@ -72,9 +69,9 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false}>
         {/* Quick Actions */}
-        <View className="flex-row justify-around mb-6">
+        <View className="flex-row justify-around mb-4">
           {quickActions.map((action) => (
             <IconButton
               key={action.label}
@@ -86,16 +83,16 @@ export default function HomeScreen() {
         </View>
 
         {/* Rewards Section */}
-        <View className="mb-6">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
+        <View className="mb-4">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
             {rewards.map((reward) => (
-              <View key={reward.id} className="mr-4 w-[80%] bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+              <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
                   <Text className="text-violet-500 text-lg font-bold">Reward</Text>
                   <Badge variant="outline">{reward.available} available</Badge>
                 </View>
-                <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
-                <View className="bg-red-600 rounded-xl py-10 items-center">
+                <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
+                <View className="bg-red-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
                   <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
                 </View>
               </View>
@@ -104,7 +101,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Bottom padding for tab bar */}
-        <View className="h-4" />
+        <View className="h-2" />
       </ScrollView>
     </View>
   )
