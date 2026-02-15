@@ -3,7 +3,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Badge, Button, Avatar } from '../../../components/ui'
+import { Card, Badge, Button, Avatar, BellIcon } from '../../../components/ui'
+
+const avatarImage = require('../../../assets/avatar.png')
 
 // Mock reward data - in real app, fetch from API
 const getReward = (id: string) => {
@@ -83,7 +85,7 @@ export default function RewardDetailScreen() {
         {/* Header */}
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
           <View className="items-center mb-4">
-            <Text className="text-white text-2xl font-extrabold tracking-wide">
+            <Text className="text-white text-4xl font-extrabold tracking-wide">
               B<Text className="text-violet-200">O</Text>NDUM
             </Text>
           </View>
@@ -95,9 +97,9 @@ export default function RewardDetailScreen() {
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
-                <Text className="text-white text-xl">🔔</Text>
+                <BellIcon size={32} color="white" />
               </Pressable>
-              <Avatar source={user?.avatarUrl} size="lg" />
+              <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
             </View>
           </View>
         </View>
@@ -151,7 +153,7 @@ export default function RewardDetailScreen() {
           <Pressable onPress={() => router.back()} className="mr-4">
             <Text className="text-white text-2xl">←</Text>
           </Pressable>
-          <Text className="text-white text-2xl font-extrabold tracking-wide flex-1 text-center mr-8">
+          <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
         </View>
@@ -163,29 +165,27 @@ export default function RewardDetailScreen() {
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
-              <Text className="text-white text-xl">🔔</Text>
+              <BellIcon size={32} color="white" />
             </Pressable>
-            <Avatar source={user?.avatarUrl} size="lg" />
+            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
           </View>
         </View>
       </View>
 
       {/* Reward Detail */}
       <View className="flex-1 px-4 pt-6">
-        <Card padding="lg">
-          <View className="flex-row items-start justify-between mb-2">
-            <Text className="text-gray-900 font-bold text-lg">
-              {reward.cost.toLocaleString()} <Text className="text-violet-500">$BONDUM</Text>
-            </Text>
+        <View className="bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+          <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
+            <Text className="text-violet-500 text-lg font-bold">Reward</Text>
             <Badge variant="outline">{reward.available} available</Badge>
           </View>
 
-          <Text className="text-gray-700 mb-4">{reward.description}</Text>
+          <Text className="text-gray-900 font-semibold mb-5">{reward.description}</Text>
 
           <View
-            className={`rounded-2xl py-12 items-center mb-6 ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+            className={`rounded-xl py-10 items-center mb-6 ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
           >
-            <Text className="text-white text-4xl font-extrabold">{reward.value}</Text>
+            <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
           </View>
 
           <Button
@@ -204,7 +204,7 @@ export default function RewardDetailScreen() {
               Not enough $BONDUM tokens. You need {reward.cost - (user?.balance || 0)} more.
             </Text>
           )}
-        </Card>
+        </View>
       </View>
     </View>
   )

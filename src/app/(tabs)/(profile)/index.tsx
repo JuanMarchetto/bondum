@@ -2,7 +2,9 @@ import { View, Text, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Avatar, IconButton, Badge, Button, SettingsMenu } from '../../../components'
+import { Card, Avatar, IconButton, Badge, Button, SettingsMenu, BellIcon } from '../../../components'
+
+const avatarImage = require('../../../assets/avatar.png')
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
@@ -24,12 +26,15 @@ export default function ProfileScreen() {
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         {/* Logo */}
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-white text-2xl font-extrabold tracking-wide">
+          <Text className="text-white text-4xl font-extrabold tracking-wide">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
-          <Pressable className="p-2">
-            <Text className="text-white text-xl">🔔</Text>
-          </Pressable>
+          <View className="flex-row items-center gap-3">
+            <Pressable className="p-2">
+              <BellIcon size={32} color="white" />
+            </Pressable>
+            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
+          </View>
         </View>
 
         {/* User Info */}

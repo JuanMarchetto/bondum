@@ -2,7 +2,9 @@ import { View, Text, TextInput, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Button, Avatar } from '../../../components/ui'
+import { Card, Button, Avatar, BellIcon } from '../../../components/ui'
+
+const avatarImage = require('../../../assets/avatar.png')
 
 export default function TradeScreen() {
   const insets = useSafeAreaInsets()
@@ -16,7 +18,7 @@ export default function TradeScreen() {
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         {/* Logo */}
         <View className="items-center mb-4">
-          <Text className="text-white text-2xl font-extrabold tracking-wide">
+          <Text className="text-white text-4xl font-extrabold tracking-wide">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
         </View>
@@ -29,9 +31,9 @@ export default function TradeScreen() {
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
-              <Text className="text-white text-xl">🔔</Text>
+              <BellIcon size={32} color="white" />
             </Pressable>
-            <Avatar source={user?.avatarUrl} size="lg" />
+            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
           </View>
         </View>
       </View>

@@ -14,7 +14,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   success: 'bg-green-100',
   warning: 'bg-yellow-100',
   error: 'bg-red-100',
-  outline: 'bg-white border border-violet-500',
+  outline: 'bg-white',
 }
 
 const variantTextClasses: Record<BadgeVariant, string> = {
@@ -22,23 +22,36 @@ const variantTextClasses: Record<BadgeVariant, string> = {
   success: 'text-green-600',
   warning: 'text-yellow-600',
   error: 'text-red-600',
-  outline: 'text-violet-500',
+  outline: '',
+}
+
+const variantTextColors: Record<BadgeVariant, string | undefined> = {
+  default: undefined,
+  success: undefined,
+  warning: undefined,
+  error: undefined,
+  outline: '#8b5cf6',
 }
 
 export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
   return (
     <View
       className={`
-        px-3 py-1 rounded-lg
+        px-3 py-1
         ${variantClasses[variant]}
         ${className}
       `}
+      style={variant === 'outline'
+        ? { borderWidth: 2, borderColor: '#8b5cf6', borderRadius: 12 }
+        : { borderRadius: 8 }
+      }
     >
       <Text
         className={`
-          text-sm font-semibold
+          text-sm font-extrabold
           ${variantTextClasses[variant]}
         `}
+        style={variantTextColors[variant] ? { color: variantTextColors[variant] } : undefined}
       >
         {children}
       </Text>

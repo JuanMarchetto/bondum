@@ -1,13 +1,17 @@
-import { View, Text, ScrollView, Pressable } from 'react-native'
+import { View, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Badge, Avatar, IconButton } from '../../../components/ui'
+import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
+
+const avatarImage = require('../../../assets/avatar.png')
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
+  const { width } = useWindowDimensions()
+  const avatarSize = Math.round(width * 0.3)
 
   const quickActions = [
     { icon: '📱', label: 'Scan', onPress: () => router.push('/scan') },
@@ -23,7 +27,7 @@ export default function HomeScreen() {
   ]
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-white">
       {/* Header */}
       <View className="px-5 pb-10 rounded-b-3xl min-h-[50vh]" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
         {/* Logo */}
@@ -33,19 +37,19 @@ export default function HomeScreen() {
           </Text>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
-              <Text className="text-white text-xl">🔔</Text>
+              <BellIcon size={32} color="white" />
             </Pressable>
           </View>
         </View>
 
-        {/* User Info */}
+        {/* User Info + Avatar */}
         <View className="flex-row items-center justify-between mb-1">
           <View className="flex-1">
             <Text className="text-violet-200 text-2xl font-extrabold">Status</Text>
             <Text className="text-white text-6xl font-extrabold">{user?.username || 'User'}</Text>
           </View>
           <Pressable onPress={() => router.push('/(tabs)/(profile)')}>
-            <Avatar source={user?.avatarUrl} size="xl" />
+            <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
           </Pressable>
         </View>
 
@@ -83,17 +87,16 @@ export default function HomeScreen() {
 
         {/* Rewards Section */}
         <View className="mb-6">
-          <Text className="text-gray-900 text-lg font-bold mb-3">Available Rewards</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
             {rewards.map((reward) => (
-              <View key={reward.id} className="mr-4 w-[80%] bg-gray-100 rounded-2xl p-4">
-                <View className="flex-row items-start justify-between mb-2">
+              <View key={reward.id} className="mr-4 w-[80%] bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+                <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
                   <Text className="text-violet-500 text-lg font-bold">Reward</Text>
                   <Badge variant="outline">{reward.available} available</Badge>
                 </View>
-                <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
-                <View className="bg-red-600 rounded-xl py-6 items-center">
-                  <Text className="text-white text-3xl font-extrabold">{reward.value}</Text>
+                <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
+                <View className="bg-red-600 rounded-xl py-10 items-center">
+                  <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
                 </View>
               </View>
             ))}

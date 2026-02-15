@@ -1,42 +1,57 @@
-import { View } from 'react-native'
-import { Image } from 'expo-image'
+import { View, type ViewStyle, type ImageStyle } from 'react-native'
+import { Image, type ImageSource } from 'expo-image'
 
-type AvatarSize = 'sm' | 'md' | 'lg' | 'xl'
+type AvatarSize = 'sm' | 'md' | 'lg' | 'xl' | 'custom'
 
 interface AvatarProps {
-  source?: string | null
+  source?: string | ImageSource | number | null
   size?: AvatarSize
+  customSize?: number
   className?: string
+  style?: ViewStyle
 }
 
-const sizeClasses: Record<AvatarSize, string> = {
-  sm: 'w-8 h-8',
-  md: 'w-12 h-12',
-  lg: 'w-16 h-16',
-  xl: 'w-20 h-20',
+const sizeValues: Record<Exclude<AvatarSize, 'custom'>, number> = {
+  sm: 36,
+  md: 48,
+  lg: 64,
+  xl: 80,
 }
 
-export function Avatar({ source, size = 'md', className = '' }: AvatarProps) {
+export function Avatar({ source, size = 'md', customSize, className = '', style }: AvatarProps) {
+  const s = size === 'custom' && customSize ? customSize : sizeValues[size as Exclude<AvatarSize, 'custom'>]
+
   if (!source) {
     return (
       <View
-        className={`
-          rounded-full bg-violet-200 items-center justify-center
-          ${sizeClasses[size]}
-          ${className}
-        `}
+        className={className}
+        style={[
+          {
+            width: s,
+            height: s,
+            borderRadius: s / 2,
+            backgroundColor: '#ddd8fe',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+          style,
+        ]}
       />
     )
   }
 
   return (
     <Image
-      source={{ uri: source }}
-      className={`
-        rounded-full
-        ${sizeClasses[size]}
-        ${className}
-      `}
+      source={source}
+      className={className}
+      style={[
+        {
+          width: s,
+          height: s,
+          borderRadius: s / 2,
+        } as ImageStyle,
+        style as ImageStyle,
+      ]}
       contentFit="cover"
       transition={200}
     />

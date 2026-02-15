@@ -4,7 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Avatar, Button, Card } from '../../components/ui'
+import { Avatar, Button, Card, BellIcon } from '../../components/ui'
+
+const avatarImage = require('../../assets/avatar.png')
 
 export default function ScanScreen() {
   const insets = useSafeAreaInsets()
@@ -36,7 +38,7 @@ export default function ScanScreen() {
             <Pressable onPress={() => router.back()} className="mr-4">
               <Text className="text-white text-2xl">←</Text>
             </Pressable>
-            <Text className="text-white text-2xl font-extrabold tracking-wide flex-1 text-center mr-8">
+            <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
               B<Text className="text-violet-200">O</Text>NDUM
             </Text>
           </View>
@@ -63,7 +65,7 @@ export default function ScanScreen() {
             <Pressable onPress={() => router.back()} className="mr-4">
               <Text className="text-white text-2xl">←</Text>
             </Pressable>
-            <Text className="text-white text-2xl font-extrabold tracking-wide flex-1 text-center mr-8">
+            <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
               B<Text className="text-violet-200">O</Text>NDUM
             </Text>
           </View>
@@ -75,9 +77,9 @@ export default function ScanScreen() {
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
-                <Text className="text-white text-xl">🔔</Text>
+                <BellIcon size={32} color="white" />
               </Pressable>
-              <Avatar source={user?.avatarUrl} size="lg" />
+              <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
             </View>
           </View>
         </View>
@@ -117,7 +119,7 @@ export default function ScanScreen() {
           <Pressable onPress={() => router.back()} className="mr-4">
             <Text className="text-white text-2xl">←</Text>
           </Pressable>
-          <Text className="text-white text-2xl font-extrabold tracking-wide flex-1 text-center mr-8">
+          <Text className="text-white text-4xl font-extrabold tracking-wide flex-1 text-center mr-8">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
         </View>
@@ -129,9 +131,9 @@ export default function ScanScreen() {
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
-              <Text className="text-white text-xl">🔔</Text>
+              <BellIcon size={32} color="white" />
             </Pressable>
-            <Avatar source={user?.avatarUrl} size="lg" />
+            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
           </View>
         </View>
       </View>

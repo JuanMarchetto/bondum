@@ -2,7 +2,9 @@ import { View, Text, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Badge, Avatar } from '../../../components/ui'
+import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
+
+const avatarImage = require('../../../assets/avatar.png')
 
 interface Reward {
   id: string
@@ -58,7 +60,7 @@ export default function RewardsScreen() {
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="items-center mb-4">
-          <Text className="text-white text-2xl font-extrabold tracking-wide">
+          <Text className="text-white text-4xl font-extrabold tracking-wide">
             B<Text className="text-violet-200">O</Text>NDUM
           </Text>
         </View>
@@ -70,9 +72,9 @@ export default function RewardsScreen() {
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
-              <Text className="text-white text-xl">🔔</Text>
+              <BellIcon size={32} color="white" />
             </Pressable>
-            <Avatar source={user?.avatarUrl} size="lg" />
+            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
           </View>
         </View>
       </View>
@@ -83,22 +85,20 @@ export default function RewardsScreen() {
 
         {mockRewards.map((reward) => (
           <Pressable key={reward.id} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
-            <Card className="mb-4">
-              <View className="flex-row items-start justify-between mb-2">
-                <Text className="text-gray-900 font-bold">
-                  {reward.cost.toLocaleString()} <Text className="text-violet-500">$BONDUM</Text>
-                </Text>
+            <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+              <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
+                <Text className="text-violet-500 text-lg font-bold">Reward</Text>
                 <Badge variant="outline">{reward.available} available</Badge>
               </View>
 
-              <Text className="text-gray-700 mb-3">{reward.title}</Text>
+              <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
 
               <View
-                className={`rounded-xl py-6 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+                className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
               >
-                <Text className="text-white text-2xl font-extrabold">{reward.value}</Text>
+                <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
               </View>
-            </Card>
+            </View>
           </Pressable>
         ))}
 
