@@ -6,6 +6,10 @@ import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/u
 
 const avatarImage = require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
+const scanIcon = require('../../../assets/scan.png')
+const sendIcon = require('../../../assets/send.png')
+const boxesIcon = require('../../../assets/boxes.png')
+const settingsIcon = require('../../../assets/settings.png')
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets()
@@ -15,10 +19,10 @@ export default function HomeScreen() {
   const avatarSize = Math.round(width * 0.3)
 
   const quickActions = [
-    { icon: '📱', label: 'Scan', onPress: () => router.push('/scan') },
-    { icon: '📤', label: 'Send', onPress: () => {} },
-    { icon: '🎁', label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
-    { icon: '⚙️', label: 'Settings', onPress: () => {} },
+    { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
+    { icon: sendIcon, label: 'Send', onPress: () => {} },
+    { icon: boxesIcon, label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
+    { icon: settingsIcon, label: 'Settings', onPress: () => {} },
   ]
 
   // Mock rewards data
@@ -75,7 +79,7 @@ export default function HomeScreen() {
           {quickActions.map((action) => (
             <IconButton
               key={action.label}
-              icon={<Text className="text-2xl">{action.icon}</Text>}
+              icon={<Image source={action.icon} style={{ width: 24, height: 24 }} resizeMode="contain" />}
               label={action.label}
               onPress={action.onPress}
             />

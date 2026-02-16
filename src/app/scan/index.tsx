@@ -85,11 +85,11 @@ export default function ScanScreen() {
           </View>
         </View>
 
-        <View className="flex-1 items-center justify-center px-6">
-          <Card className="w-full items-center py-8" padding="lg">
-            <Text className="text-green-500 text-6xl mb-4">✓</Text>
-            <Text className="text-gray-900 text-xl font-bold mb-2">Code Scanned!</Text>
-            <Text className="text-gray-500 text-center mb-6">
+        <View className="flex-1 items-center justify-center px-6" style={{ marginTop: -80 }}>
+          <View className="w-full items-center py-8" style={{ padding: 24 }}>
+            <Text className="text-green-500 mb-4" style={{ fontSize: 120 }}>✓</Text>
+            <Text className="text-gray-900 font-bold mb-2" style={{ fontSize: 40 }}>Code Scanned!</Text>
+            <Text className="text-gray-500 text-center mb-6" style={{ fontSize: 28 }}>
               You&apos;ve successfully scanned a Bondum product code.
             </Text>
             <View className="flex-row gap-4">
@@ -100,13 +100,13 @@ export default function ScanScreen() {
                   setScanResult(null)
                 }}
               >
-                Scan Another
+                <Text style={{ fontSize: 32 }}>Scan Another</Text>
               </Button>
               <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')}>
-                View Rewards
+                <Text style={{ fontSize: 32, color: '#FFFFFF' }}>View Rewards</Text>
               </Button>
             </View>
-          </Card>
+          </View>
         </View>
       </View>
     )
@@ -141,13 +141,13 @@ export default function ScanScreen() {
 
       {/* Scanner Area */}
       <View className="flex-1 px-4 pt-6">
-        <Card padding="lg" className="flex-1">
-          <Text className="text-center mb-4">
-            <Text className="text-violet-500 text-xl font-bold italic">SCAN </Text>
-            <Text className="text-gray-900 text-xl font-extrabold">YOUR CODE</Text>
+        <View className="flex-1" style={{ padding: 24 }}>
+          <Text className="text-center mb-4" style={{ marginTop: 72 }}>
+            <Text className="text-violet-500 font-bold italic" style={{ fontSize: 40 }}>SCAN </Text>
+            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 40 }}>YOUR CODE</Text>
           </Text>
 
-          <View className="flex-1 rounded-2xl overflow-hidden bg-gray-100 relative">
+          <View className="rounded-2xl overflow-hidden bg-gray-100 relative" style={{ width: '100%', aspectRatio: 1 }}>
             <CameraView
               style={StyleSheet.absoluteFillObject}
               facing="back"
@@ -169,10 +169,10 @@ export default function ScanScreen() {
             </View>
           </View>
 
-          <Text className="text-gray-500 text-center mt-4 text-sm">
+          <Text className="text-gray-500 text-center" style={{ fontSize: 22.4, marginTop: 32 }}>
             Each scanned product brings you closer to amazing rewards: experiences, exclusive discounts, NFTs, and more.
           </Text>
-        </Card>
+        </View>
       </View>
 
       <View style={{ paddingBottom: insets.bottom + 16 }} />

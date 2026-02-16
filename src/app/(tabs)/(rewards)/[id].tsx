@@ -104,41 +104,38 @@ export default function RewardDetailScreen() {
         </View>
 
         {/* Celebration View */}
-        <View className="flex-1 items-center justify-center px-6">
-          <Card className="w-full items-center py-8" padding="lg">
-            <Text className="text-gray-500 text-lg mb-2">You&apos;ve Won</Text>
+        <View className="flex-1 items-center px-6" style={{ paddingTop: 50 }}>
+          <View className="items-center bg-white rounded-2xl shadow-sm" style={{ paddingVertical: 60, paddingHorizontal: 24, width: '100%', height: 550 }}>
+            <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>You&apos;ve Won</Text>
             <Text className="text-center mb-6">
-              <Text className="text-gray-900 text-2xl font-bold">A </Text>
-              <Text className="text-violet-500 text-2xl font-extrabold">
+              <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>A </Text>
+              <Text className="text-violet-500 font-extrabold" style={{ fontSize: 48 }}>
                 {reward.type === 'nft' ? 'ULTRA RARE ' : ''}
               </Text>
-              <Text className="text-gray-900 text-2xl font-bold">{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
+              <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
             </Text>
 
             {reward.type === 'token' ? (
               <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
-                <Text className="text-white text-3xl font-extrabold">{reward.value}</Text>
+                <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
               </View>
             ) : reward.type === 'nft' ? (
               <View className="bg-violet-100 rounded-2xl p-6 mb-6 border-4 border-violet-500">
                 <View className="w-48 h-48 bg-violet-400 rounded-xl items-center justify-center">
-                  <Text className="text-white text-4xl font-extrabold">🎁</Text>
-                  <Text className="text-white font-bold mt-2">BONDUM</Text>
+                  <Text className="text-white font-extrabold" style={{ fontSize: 80 }}>🎁</Text>
+                  <Text className="text-white font-bold mt-2" style={{ fontSize: 32 }}>BONDUM</Text>
                 </View>
               </View>
             ) : (
               <View className="bg-red-600 rounded-2xl px-12 py-8 mb-6">
-                <Text className="text-white text-3xl font-extrabold">{reward.value}</Text>
+                <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
               </View>
             )}
 
-            <Button variant="primary" size="lg" onPress={() => router.back()}>
-              <Text className="text-white font-bold text-lg">Claim reward</Text>
+            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.back()}>
+              <Text className="text-white font-bold" style={{ fontSize: 36 }}>Claim reward</Text>
             </Button>
-          </Card>
-
-          {/* Confetti effect placeholder */}
-          <View className="absolute inset-0 pointer-events-none">{/* In a real app, use a confetti library */}</View>
+          </View>
         </View>
       </View>
     )
