@@ -6,12 +6,14 @@ import { Card, Button, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
+const swapArrows = require('../../../assets/swap_arrows.png')
+const usdcCoin = require('../../../assets/usd-coin.png')
 
 export default function TradeScreen() {
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
-  const [fromAmount, setFromAmount] = useState('')
-  const [toAmount, setToAmount] = useState('')
+  const [fromAmount, setFromAmount] = useState('0')
+  const [toAmount, setToAmount] = useState('0.00')
 
   return (
     <View className="flex-1 bg-violet-50">
@@ -38,38 +40,48 @@ export default function TradeScreen() {
       </View>
 
       {/* Swap Card */}
-      <View className="flex-1 px-4 pt-6">
-        <Card className="mb-4" padding="lg">
+      <View className="flex-1 px-4" style={{ paddingTop: 33.6 }}>
+        <View className="mb-4">
           <Text className="text-center mb-6">
-            <Text className="text-violet-500 text-xl font-bold italic">SWAP </Text>
-            <Text className="text-gray-900 text-xl font-extrabold">YOUR TOKENS</Text>
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 43.2 }}>SWAP </Text>
+            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 43.2 }}>YOUR TOKENS</Text>
           </Text>
 
           {/* From Token */}
-          <View className="bg-gray-50 rounded-2xl p-4 mb-2">
+          <View className="bg-white rounded-2xl mb-2 self-center" style={{ width: '95%', paddingTop: 0, paddingBottom: 5.184, paddingHorizontal: 16, borderWidth: 1, borderColor: '#9b9db5' }}>
             <TextInput
-              className="text-4xl font-bold text-center text-gray-900"
+              style={{ 
+                fontSize: 100, 
+                color: '#000000', 
+                fontWeight: 'bold', 
+                textAlign: 'center',
+                backgroundColor: 'transparent',
+                width: '100%',
+                minHeight: 27,
+                marginTop: -15,
+                marginBottom: -20
+              }}
               placeholder="0"
               placeholderTextColor="#A3A3A3"
               value={fromAmount}
               onChangeText={setFromAmount}
               keyboardType="numeric"
             />
-            <Text className="text-violet-500 text-center font-semibold mt-1">$BONDUM</Text>
+            <Text className="text-center font-semibold" style={{ color: '#cbc2e2', fontSize: 24, marginTop: -10, marginBottom: 5 }}>$BONDUM</Text>
           </View>
 
           {/* Swap Arrow */}
           <View className="items-center my-2">
             <View className="bg-violet-100 w-10 h-10 rounded-full items-center justify-center">
-              <Text className="text-violet-500 text-xl">↕️</Text>
+              <Image source={swapArrows} style={{ width: 24, height: 24 }} resizeMode="contain" />
             </View>
           </View>
 
           {/* To Token */}
-          <View className="bg-gray-50 rounded-2xl p-4 flex-row items-center">
-            <View className="flex-row items-center flex-1">
-              <View className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center mr-3">
-                <Text className="text-white font-bold">$</Text>
+          <View className="bg-white rounded-2xl self-center relative" style={{ width: '95%', paddingVertical: 5.12, paddingHorizontal: 16, borderWidth: 1, borderColor: '#9b9db5', justifyContent: 'center' }}>
+            <View className="absolute left-4 flex-row items-center" style={{ top: '50%', marginTop: -15 }}>
+              <View className="w-10 h-10 rounded-full mr-3 overflow-hidden">
+                <Image source={usdcCoin} style={{ width: 40, height: 40 }} resizeMode="contain" />
               </View>
               <View>
                 <Text className="text-gray-900 font-bold">USD Coin</Text>
@@ -77,20 +89,32 @@ export default function TradeScreen() {
               </View>
             </View>
             <TextInput
-              className="text-3xl font-bold text-gray-900 text-right flex-1"
-              placeholder="0,00"
+              style={{ 
+                fontSize: 69.12, 
+                fontWeight: 'bold', 
+                textAlign: 'center', 
+                width: '100%',
+                color: '#000000',
+                backgroundColor: 'transparent'
+              }}
+              placeholder="0.00"
               placeholderTextColor="#A3A3A3"
               value={toAmount}
-              onChangeText={setToAmount}
+              onChangeText={(text) => {
+                const formatted = text.replace(/[^0-9.]/g, '')
+                setToAmount(formatted)
+              }}
               keyboardType="numeric"
             />
           </View>
 
           {/* Swap Button */}
-          <Button variant="primary" size="lg" fullWidth className="mt-6">
-            Swap
-          </Button>
-        </Card>
+          <View className="items-center mt-6">
+            <Button variant="primary" size="lg" style={{ paddingVertical: 10.752, borderRadius: 20.25, width: '75%' }}>
+              <Text style={{ color: '#FFFFFF', fontSize: 40.96 }}>Swap</Text>
+            </Button>
+          </View>
+        </View>
       </View>
     </View>
   )
