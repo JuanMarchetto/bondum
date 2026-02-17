@@ -2,9 +2,10 @@ import { View, Text, ScrollView, Pressable, useWindowDimensions, Image } from 'r
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
-const avatarImage = require('../../../assets/avatar.png')
+const avatarImage = undefined // require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const scanIcon = require('../../../assets/scan.png')
 const sendIcon = require('../../../assets/send.png')
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
+  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const { width } = useWindowDimensions()
   const avatarSize = Math.round(width * 0.3)
 
@@ -22,7 +24,7 @@ export default function HomeScreen() {
     { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
     { icon: sendIcon, label: 'Send', onPress: () => {} },
     { icon: boxesIcon, label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
-    { icon: settingsIcon, label: 'Settings', onPress: () => {} },
+    { icon: settingsIcon, label: 'Settings', onPress: () => router.push('/(tabs)/(home)/settings') },
   ]
 
   // Mock rewards data
@@ -55,7 +57,9 @@ export default function HomeScreen() {
         </View>
 
         {/* Balance */}
-        <Text className="text-gray-900 text-4xl font-extrabold">{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+        <Text className="text-gray-900 text-4xl font-extrabold">
+          {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
+        </Text>
 
         {/* NFT Collection Card */}
         <Pressable className="mt-9 mx-2">

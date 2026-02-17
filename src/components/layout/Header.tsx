@@ -3,7 +3,7 @@ import { Avatar } from '../ui/Avatar'
 import { BellIcon } from '../ui/BellIcon'
 import type { ReactNode } from 'react'
 
-const avatarImage = require('../../assets/avatar.png')
+const avatarImage = undefined // require('../../assets/avatar.png')
 const bondumLogo = require('../../assets/bondum_logo.png')
 
 interface HeaderProps {

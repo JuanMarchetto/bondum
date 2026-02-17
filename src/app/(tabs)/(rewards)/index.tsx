@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
 
-const avatarImage = require('../../../assets/avatar.png')
+const avatarImage = undefined // require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
 
 interface Reward {

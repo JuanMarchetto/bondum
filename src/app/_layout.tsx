@@ -22,9 +22,10 @@ const queryClient = new QueryClient({
   },
 })
 
-// Privy App ID - replace with your actual Privy App ID
+// Privy App ID & Client ID - configure in Privy dashboard
 // Get one at https://dashboard.privy.io
 const PRIVY_APP_ID = process.env.EXPO_PUBLIC_PRIVY_APP_ID || 'your-privy-app-id'
+const PRIVY_CLIENT_ID = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID
 
 function RootLayoutNav() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -51,7 +52,7 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider appId={PRIVY_APP_ID}>
+      <PrivyProvider appId={PRIVY_APP_ID} clientId={PRIVY_CLIENT_ID}>
         <MobileWalletProvider cluster={cluster} identity={identity}>
           <AuthContextProvider>
             <RootLayoutNav />

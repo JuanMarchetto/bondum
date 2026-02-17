@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { Card, Badge, Button, Avatar, BellIcon } from '../../../components/ui'
 
-const avatarImage = require('../../../assets/avatar.png')
+const avatarImage = undefined // require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
 
 // Mock reward data - in real app, fetch from API

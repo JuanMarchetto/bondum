@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Avatar, Button, Card, BellIcon } from '../../components/ui'
 
-const avatarImage = require('../../assets/avatar.png')
+const avatarImage = undefined // require('../../assets/avatar.png')
 const bondumLogo = require('../../assets/bondum_logo.png')
 
 export default function ScanScreen() {

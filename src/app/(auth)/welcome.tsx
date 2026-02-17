@@ -35,8 +35,10 @@ export default function WelcomeScreen() {
       setError(null)
       await connectPrivy(email)
       setAuthMode('otp')
-    } catch {
-      setError('Failed to send verification code. Please try again.')
+    } catch (err: any) {
+      const message = err?.error || err?.message || 'Unknown error'
+      console.error('Email login error details:', JSON.stringify(err))
+      setError(`Failed to send verification code: ${message}`)
     }
   }
 
