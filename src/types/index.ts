@@ -48,7 +48,7 @@ export interface Transaction {
 }
 
 // Auth types
-export type AuthProvider = 'solana' | 'privy'
+export type AuthProvider = 'solana' | 'privy' | 'guest'
 
 export interface AuthState {
   isAuthenticated: boolean

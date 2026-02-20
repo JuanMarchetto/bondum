@@ -9,6 +9,7 @@ interface AuthContextValue extends AuthState {
   connectSolana: () => Promise<void>
   connectPrivy: (email: string) => Promise<void>
   verifyPrivyOtp: (code: string) => Promise<void>
+  connectAsGuest: () => void
   disconnect: () => Promise<void>
   isLoading: boolean
   pendingPrivyEmail: string | null
@@ -167,6 +168,26 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     [pendingPrivyEmail, loginWithCode],
   )
 
+  const connectAsGuest = useCallback(() => {
+    const user: User = {
+      id: 'guest',
+      username: 'Guest',
+      balance: 0,
+      nftCount: 0,
+      avatarUrl: null,
+    }
+
+    setAuthState({
+      isAuthenticated: true,
+      provider: 'guest',
+      address: null,
+      user,
+    })
+
+    secureStorage.setAuthProvider('guest')
+    secureStorage.setUserData({ address: null, user })
+  }, [])
+
   const disconnect = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -205,6 +226,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         connectSolana,
         connectPrivy,
         verifyPrivyOtp,
+        connectAsGuest,
         disconnect,
         isLoading: isLoading || privyLoginState.status === 'sending-code',
         pendingPrivyEmail,

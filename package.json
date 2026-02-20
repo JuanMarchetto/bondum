@@ -1,5 +1,5 @@
 {
-  "name": "bondum-mobile",
+  "name": "bondum",
   "scripts": {
     "android": "expo run:android",
     "android:build": "expo prebuild -p android",
@@ -15,8 +15,8 @@
     "start": "expo start",
     "web": "expo start --web"
   },
-  "displayName": "Uniwind Mobile Kit Expo example",
-  "description": "A template for building a Solana mobile app with Expo, React Native, Solana Kit, and Uniwind.",
+  "displayName": "Bondum",
+  "description": "Bondum Mobile App",
   "usecase": "Mobile",
   "keywords": [
     "expo",

@@ -11,7 +11,7 @@ type AuthMode = 'select' | 'email' | 'otp'
 
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets()
-  const { connectSolana, connectPrivy, verifyPrivyOtp, isLoading, pendingPrivyEmail } = useAuth()
+  const { connectSolana, connectPrivy, verifyPrivyOtp, connectAsGuest, isLoading, pendingPrivyEmail } = useAuth()
   const [authMode, setAuthMode] = useState<AuthMode>('select')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
@@ -219,7 +219,7 @@ export default function WelcomeScreen() {
 
         {error && <Text className="text-red-200 text-center mt-2">{error}</Text>}
 
-        <Pressable className="py-3 mt-2">
+        <Pressable onPress={connectAsGuest} className="py-3 mt-2">
           <Text className="text-violet-200 text-center font-medium">Continue as Guest</Text>
         </Pressable>
       </View>

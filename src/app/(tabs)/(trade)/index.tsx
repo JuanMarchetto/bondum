@@ -1,4 +1,5 @@
 import { View, Text, TextInput, Pressable, Image, Modal, Alert, ScrollView } from 'react-native'
+import { Image as ExpoImage } from 'expo-image'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -19,20 +20,15 @@ const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const swapArrows = require('../../../assets/swap_arrows.png')
 const usdcCoin = require('../../../assets/usd-coin.png')
+const solLogo = require('../../../assets/sol-logo.png')
+const panicoinSvg = require('../../../assets/panicoin.svg')
 
-// Token icons mapping (using existing assets or emoji fallbacks)
-const TOKEN_ICONS: Record<TokenSymbol, any> = {
-  SOL: null, // Use emoji
-  USDC: usdcCoin,
-  BONDUM: bLogo,
-  PANICAFE: null, // Use emoji
-}
-
-const TOKEN_EMOJIS: Record<TokenSymbol, string> = {
-  SOL: '◎',
-  USDC: '💲',
-  BONDUM: '🅱️',
-  PANICAFE: '☕',
+// Token icons mapping
+const TOKEN_ICONS: Record<TokenSymbol, { source: any; isSvg?: boolean }> = {
+  SOL: { source: solLogo },
+  USDC: { source: usdcCoin },
+  BONDUM: { source: bLogo },
+  PANICAFE: { source: panicoinSvg, isSvg: true },
 }
 
 export default function TradeScreen() {
@@ -228,10 +224,10 @@ export default function TradeScreen() {
                 onPress={() => setShowTokenPicker('from')}
                 className="flex-row items-center gap-2"
               >
-                {TOKEN_ICONS[fromToken] ? (
-                  <Image source={TOKEN_ICONS[fromToken]} style={{ width: 24, height: 24 }} />
+                {TOKEN_ICONS[fromToken].isSvg ? (
+                  <ExpoImage source={TOKEN_ICONS[fromToken].source} style={{ width: 24, height: 24 }} contentFit="contain" />
                 ) : (
-                  <Text style={{ fontSize: 20 }}>{TOKEN_EMOJIS[fromToken]}</Text>
+                  <Image source={TOKEN_ICONS[fromToken].source} style={{ width: 24, height: 24 }} />
                 )}
                 <Text className="font-semibold" style={{ color: '#cbc2e2', fontSize: 18 }}>
                   {fromTokenInfo.symbol}
@@ -293,10 +289,10 @@ export default function TradeScreen() {
                 onPress={() => setShowTokenPicker('to')}
                 className="flex-row items-center gap-2"
               >
-                {TOKEN_ICONS[toToken] ? (
-                  <Image source={TOKEN_ICONS[toToken]} style={{ width: 40, height: 40 }} resizeMode="contain" />
+                {TOKEN_ICONS[toToken].isSvg ? (
+                  <ExpoImage source={TOKEN_ICONS[toToken].source} style={{ width: 40, height: 40 }} contentFit="contain" />
                 ) : (
-                  <Text style={{ fontSize: 32 }}>{TOKEN_EMOJIS[toToken]}</Text>
+                  <Image source={TOKEN_ICONS[toToken].source} style={{ width: 40, height: 40 }} resizeMode="contain" />
                 )}
                 <View className="ml-2">
                   <Text className="text-gray-900 font-bold">{toTokenInfo.name}</Text>
@@ -373,10 +369,10 @@ export default function TradeScreen() {
                       isDisabled ? 'opacity-50' : 'bg-violet-50'
                     }`}
                   >
-                    {TOKEN_ICONS[symbol] ? (
-                      <Image source={TOKEN_ICONS[symbol]} style={{ width: 40, height: 40 }} />
+                    {TOKEN_ICONS[symbol].isSvg ? (
+                      <ExpoImage source={TOKEN_ICONS[symbol].source} style={{ width: 40, height: 40 }} contentFit="contain" />
                     ) : (
-                      <Text style={{ fontSize: 32 }}>{TOKEN_EMOJIS[symbol]}</Text>
+                      <Image source={TOKEN_ICONS[symbol].source} style={{ width: 40, height: 40 }} />
                     )}
                     <View className="ml-3 flex-1">
                       <Text className="font-bold text-lg">{token.name}</Text>
