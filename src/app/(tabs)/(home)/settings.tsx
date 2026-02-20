@@ -92,8 +92,9 @@ export default function SettingsScreen() {
           fullWidth
           onPress={handleLogout}
           loading={isLoading}
+          style={{ paddingVertical: 12 }}
         >
-          Log Out
+          <Text style={{ fontSize: 32.4, color: '#FFFFFF' }}>Log Out</Text>
         </Button>
       </View>
     </View>

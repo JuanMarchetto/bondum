@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Button, Card } from '../../components/ui'
 
 const bondumLogo = require('../../assets/bondum_logo.png')
+const bLogo = require('../../assets/b-logo.png')
 
 type AuthMode = 'select' | 'email' | 'otp'
 
@@ -61,7 +62,7 @@ export default function WelcomeScreen() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
-          <View className="flex-1 items-center justify-center">
+          <View className="flex-1 items-center" style={{ paddingTop: 60, justifyContent: 'flex-start' }}>
             <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-6">
               <Text className="text-violet-500 text-3xl">📧</Text>
             </View>
@@ -94,8 +95,9 @@ export default function WelcomeScreen() {
               onPress={handleOtpSubmit}
               loading={isLoading}
               className="bg-white"
+              style={{ paddingVertical: 16, marginTop: 48 }}
             >
-              <Text className="text-violet-500 font-bold text-lg">Verify Code</Text>
+              <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>Verify Code</Text>
             </Button>
 
             <Pressable
@@ -119,7 +121,7 @@ export default function WelcomeScreen() {
     return (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
-          <View className="flex-1 items-center justify-center">
+          <View className="flex-1 items-center" style={{ paddingTop: 60, justifyContent: 'flex-start' }}>
             <View className="w-20 h-20 bg-white rounded-full items-center justify-center mb-6">
               <Text className="text-violet-500 text-3xl">✉️</Text>
             </View>
@@ -150,8 +152,9 @@ export default function WelcomeScreen() {
               onPress={handleEmailSubmit}
               loading={isLoading}
               className="bg-white"
+              style={{ paddingVertical: 16, marginTop: 48 }}
             >
-              <Text className="text-violet-500 font-bold text-lg">Continue</Text>
+              <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>Continue</Text>
             </Button>
 
             <Pressable
@@ -176,17 +179,17 @@ export default function WelcomeScreen() {
       {/* Logo Section */}
       <View className="flex-1 items-center justify-center">
         <View className="w-32 h-32 bg-white rounded-full items-center justify-center mb-8 shadow-lg">
-          <Text className="text-violet-500 text-4xl font-extrabold">B</Text>
+          <Image source={bLogo} style={{ width: 96, height: 96, resizeMode: 'contain' }} />
         </View>
 
         <View className="mb-2">
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
         </View>
 
-        <Text className="text-violet-200 text-lg text-center mb-4">Scan. Earn. Enjoy.</Text>
+        <Text className="text-violet-200 text-lg text-center mb-4">Pay. Earn. Enjoy.</Text>
 
         <Text className="text-violet-100 text-base text-center max-w-xs opacity-80">
-          Earn $BONDUM tokens and exclusive NFTs by scanning products and engaging with your favorite brands.
+          Earn $BONDUM and loyalty tokens by engaging with your favorite brands
         </Text>
       </View>
 
@@ -199,8 +202,9 @@ export default function WelcomeScreen() {
           onPress={handleSolanaConnect}
           loading={isLoading}
           className="bg-white"
+          style={{ paddingVertical: 21.6 }}
         >
-          <Text className="text-violet-500 font-bold text-lg">Connect Solana Wallet</Text>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Connect Solana Wallet</Text>
         </Button>
 
         <View className="flex-row items-center gap-4 my-2">
@@ -209,8 +213,8 @@ export default function WelcomeScreen() {
           <View className="flex-1 h-px bg-violet-400" />
         </View>
 
-        <Button variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white">
-          <Text className="text-violet-500 font-bold text-lg">Continue with Email</Text>
+        <Button variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white" style={{ paddingVertical: 21.6 }}>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Continue with Email</Text>
         </Button>
 
         {error && <Text className="text-red-200 text-center mt-2">{error}</Text>}

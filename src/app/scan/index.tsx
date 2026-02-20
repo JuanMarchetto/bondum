@@ -170,7 +170,10 @@ export default function ScanScreen() {
           </View>
 
           <Text className="text-gray-500 text-center" style={{ fontSize: 22.4, marginTop: 32 }}>
-            Each scanned product brings you closer to amazing rewards: experiences, exclusive discounts, NFTs, and more.
+            Pay. Earn. Enjoy.{'\n\n'}
+            Earn $BONDUM and loyalty{'\n'}
+            tokens by engaging with your{'\n'}
+            favorite brands.
           </Text>
         </View>
       </View>

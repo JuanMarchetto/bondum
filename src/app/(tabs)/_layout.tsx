@@ -5,7 +5,9 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const icons: Record<string, string> = {
     home: '🏠',
     trade: '🔄',
+    assets: '💰',
     rewards: '🎁',
+    profile: '👤',
   }
 
   return (
@@ -51,10 +53,24 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="(assets)"
+        options={{
+          title: 'Assets',
+          tabBarIcon: ({ focused }) => <TabIcon name="assets" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="(rewards)"
         options={{
           title: 'Rewards',
           tabBarIcon: ({ focused }) => <TabIcon name="rewards" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="(profile)"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />
     </Tabs>

@@ -19,8 +19,10 @@ export function useBondumBalance() {
     queryKey: ['bondumBalance', address],
     queryFn: () => getTokenBalance(address!),
     enabled: isAuthenticated && !!address,
-    staleTime: 30_000, // 30 seconds
-    refetchInterval: 60_000, // auto-refetch every 60 seconds
+    staleTime: 0, // always treat as stale so every mount triggers a refetch
+    gcTime: 5 * 60_000, // keep in cache for 5 min (garbage collection)
+    refetchOnMount: 'always', // always refetch when the component mounts
+    refetchInterval: 30_000, // auto-refetch every 30 seconds in background
   })
 
   return {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { usePrivy, useLoginWithEmail, useEmbeddedSolanaWallet } from '@privy-io/expo'
+import { useQueryClient } from '@tanstack/react-query'
 import { secureStorage } from '../services/storage'
 import type { AuthState, AuthProvider as AuthProviderType, User } from '../types'
 
@@ -29,6 +30,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [pendingPrivyEmail, setPendingPrivyEmail] = useState<string | null>(null)
 
+  const queryClient = useQueryClient()
   const solanaWallet = useMobileWallet()
   const { isReady: isPrivyReady, user: privyUser, logout: privyLogout } = usePrivy()
   const { sendCode, loginWithCode, state: privyLoginState } = useLoginWithEmail()
@@ -176,6 +178,12 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
 
       await secureStorage.clearAuth()
 
+      // Wipe every query from the cache so stale balances from
+      // the previous wallet are never shown on the next login
+      queryClient.removeQueries()
+      queryClient.clear()
+      console.log('[Auth] Query cache cleared on disconnect')
+
       setAuthState({
         isAuthenticated: false,
         provider: null,
@@ -188,7 +196,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [authState.provider, solanaWallet, privyLogout])
+  }, [authState.provider, solanaWallet, privyLogout, queryClient])
 
   return (
     <AuthContext.Provider

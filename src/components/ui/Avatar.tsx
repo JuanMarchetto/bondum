@@ -1,4 +1,4 @@
-import { View, type ViewStyle, type ImageStyle } from 'react-native'
+import { View, Text, type ViewStyle, type ImageStyle } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl' | 'custom'
@@ -36,7 +36,9 @@ export function Avatar({ source, size = 'md', customSize, className = '', style 
           },
           style,
         ]}
-      />
+      >
+        <Text style={{ fontSize: s * 0.5, color: '#8b66df' }}>👤</Text>
+      </View>
     )
   }
 
