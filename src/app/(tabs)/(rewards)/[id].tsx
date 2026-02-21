@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Image } from 'react-native'
+import { View, Text, Pressable, Image, Alert } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
@@ -73,11 +73,7 @@ export default function RewardDetailScreen() {
   const reward = getReward(id || '1')
 
   const handleClaim = async () => {
-    setIsClaiming(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsClaiming(false)
-    setClaimed(true)
+    Alert.alert('Feature not enabled yet', 'This feature is coming soon!')
   }
 
   if (claimed) {
@@ -132,7 +128,7 @@ export default function RewardDetailScreen() {
               </View>
             )}
 
-            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.back()}>
+            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => Alert.alert('Feature not enabled yet', 'This feature is coming soon!')}>
               <Text className="text-white font-bold" style={{ fontSize: 36 }}>Claim reward</Text>
             </Button>
           </View>

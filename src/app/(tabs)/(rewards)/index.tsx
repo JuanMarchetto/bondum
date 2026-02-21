@@ -1,11 +1,16 @@
 import { View, Text, ScrollView, Pressable, Image } from 'react-native'
+import { Image as ExpoImage } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined // require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
+const bLogo = require('../../../assets/b-logo.png')
+const panicoinSvg = require('../../../assets/panicoin.svg')
 
 interface Reward {
   id: string
@@ -55,6 +60,8 @@ export default function RewardsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
+  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
+  const [viewMode, setViewMode] = useState<'brands' | 'rewards'>('brands')
 
   return (
     <View className="flex-1 bg-violet-50">
@@ -67,7 +74,9 @@ export default function RewardsScreen() {
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+            <Text className="text-violet-200" style={{ fontSize: 19 }}>
+              {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
+            </Text>
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
@@ -78,30 +87,73 @@ export default function RewardsScreen() {
         </View>
       </View>
 
-      {/* Rewards List */}
+      {/* Content */}
       <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
-        <Text className="text-gray-900 text-xl font-bold mb-4">Available Rewards</Text>
+        {viewMode === 'brands' ? (
+          // Brands View
+          <View className="flex-1">
+            <Text className="text-gray-900 font-bold mb-8 text-center" style={{ fontSize: 40 }}>
+              Affiliated Brands
+            </Text>
 
-        {mockRewards.map((reward) => (
-          <Pressable key={reward.id} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
-            <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
-              <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
-                <Text className="text-violet-500 text-lg font-bold">Reward</Text>
-                <Badge variant="outline">{reward.available} available</Badge>
-              </View>
+            {/* Bondum Row */}
+            <Pressable
+              onPress={() => setViewMode('rewards')}
+              className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
+              style={{ borderWidth: 1, borderColor: '#9b9db5' }}
+            >
+              <Image source={bLogo} style={{ width: 48, height: 48 }} resizeMode="contain" />
+              <Text className="text-gray-900 font-bold text-lg ml-4">Bondum Rewards</Text>
+            </Pressable>
 
-              <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
+            {/* PaniCafe Row */}
+            <Pressable
+              onPress={() => {
+                // Placeholder for future PaniCafe rewards
+              }}
+              className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
+              style={{ borderWidth: 1, borderColor: '#9b9db5' }}
+            >
+              <ExpoImage source={panicoinSvg} style={{ width: 48, height: 48 }} contentFit="contain" />
+              <Text className="text-gray-900 font-bold text-lg ml-4">Panicafe Rewards</Text>
+            </Pressable>
 
-              <View
-                className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
-              >
-                <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
-              </View>
-            </View>
-          </Pressable>
-        ))}
+            {/* Footer */}
+            <Text className="text-gray-500 text-center text-sm mt-4">More brands Coming Soon..</Text>
+            <View className="h-8" />
+          </View>
+        ) : (
+          // Rewards View
+          <View>
+            {/* Back Button */}
+            <Pressable onPress={() => setViewMode('brands')} className="mb-4">
+              <Text className="text-violet-500 font-semibold">← Back to Brands</Text>
+            </Pressable>
 
-        <View className="h-8" />
+            <Text className="text-gray-900 text-xl font-bold mb-4">Available Rewards</Text>
+
+            {mockRewards.map((reward) => (
+              <Pressable key={reward.id} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
+                <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
+                  <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
+                    <Text className="text-violet-500 text-lg font-bold">Reward</Text>
+                    <Badge variant="outline">{reward.available} available</Badge>
+                  </View>
+
+                  <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
+
+                  <View
+                    className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+                  >
+                    <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
+                  </View>
+                </View>
+              </Pressable>
+            ))}
+
+            <View className="h-8" />
+          </View>
+        )}
       </ScrollView>
     </View>
   )
