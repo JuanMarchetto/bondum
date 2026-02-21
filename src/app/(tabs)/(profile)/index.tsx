@@ -35,7 +35,7 @@ export default function ProfileScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header — same as Home */}
-      <View className="px-5 pb-10 rounded-b-3xl min-h-[50vh]" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
+      <View className="px-5 pb-2.5 rounded-b-3xl" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
         {/* Logo */}
         <View className="flex-row items-center justify-between" style={{ marginBottom: 36 }}>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
