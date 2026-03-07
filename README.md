@@ -1,6 +1,6 @@
 # Bondum Mobile
 
-> Built for the **MONOLITH Solana Mobile Hackathon** | [bondum.xyz](https://bondum.xyz)
+> [bondum.xyz](https://bondum.xyz)
 
 A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM** tokens and brand-specific loyalty tokens, swap them via Jupiter, and redeem exclusive rewards and NFTs -- all from your phone.
 
