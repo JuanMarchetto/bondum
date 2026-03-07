@@ -41,3 +41,6 @@ yarn-error.*
 
 app-example
 .claude/
+
+# Misc documents
+*.docx
