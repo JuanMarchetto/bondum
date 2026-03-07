@@ -3,7 +3,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { Card, Badge, Button, Avatar, BellIcon } from '../../../components/ui'
+import { useBondumBalance } from '../../../hooks/useBondumBalance'
+import { addClaimedReward } from '../../../services/rewardStorage'
+import { Button, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined // require('../../../assets/avatar.png')
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -67,13 +69,36 @@ export default function RewardDetailScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
+  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const [isClaiming, setIsClaiming] = useState(false)
   const [claimed, setClaimed] = useState(false)
 
   const reward = getReward(id || '1')
 
   const handleClaim = async () => {
-    Alert.alert('Feature not enabled yet', 'This feature is coming soon!')
+    if (!user) {
+      Alert.alert('Error', 'Please connect a wallet first.')
+      return
+    }
+    if (bondumBalance < reward.cost) {
+      Alert.alert('Insufficient Balance', `You need ${reward.cost - bondumBalance} more $BONDUM.`)
+      return
+    }
+    setIsClaiming(true)
+    try {
+      await addClaimedReward({
+        id: `reward-${reward.id}-${Date.now()}`,
+        brand: 'Bondum',
+        type: reward.type,
+        value: reward.value,
+        claimedAt: new Date().toISOString(),
+      })
+      setClaimed(true)
+    } catch (error) {
+      Alert.alert('Error', 'Failed to claim reward. Please try again.')
+    } finally {
+      setIsClaiming(false)
+    }
   }
 
   if (claimed) {
@@ -88,7 +113,7 @@ export default function RewardDetailScreen() {
           <View className="flex-row items-center justify-between">
             <View>
               <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-              <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+              <Text className="text-violet-200" style={{ fontSize: 19 }}>{bondumBalance.toLocaleString()} $BONDUM</Text>
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
@@ -128,8 +153,8 @@ export default function RewardDetailScreen() {
               </View>
             )}
 
-            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => Alert.alert('Feature not enabled yet', 'This feature is coming soon!')}>
-              <Text className="text-white font-bold" style={{ fontSize: 36 }}>Claim reward</Text>
+            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.replace('/(tabs)/(rewards)')}>
+              <Text className="text-white font-bold" style={{ fontSize: 36 }}>Back to Rewards</Text>
             </Button>
           </View>
         </View>
@@ -153,7 +178,7 @@ export default function RewardDetailScreen() {
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200">~ {(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+            <Text className="text-violet-200">~ {bondumBalance.toLocaleString()} $BONDUM</Text>
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">
@@ -193,15 +218,15 @@ export default function RewardDetailScreen() {
               style={{ paddingVertical: 20, borderRadius: 20 }}
               onPress={handleClaim}
               loading={isClaiming}
-              disabled={(user?.balance || 0) < reward.cost}
+              disabled={bondumBalance < reward.cost}
             >
               <Text className="text-white font-bold text-4xl">Claim reward</Text>
             </Button>
           </View>
 
-          {(user?.balance || 0) < reward.cost && (
+          {bondumBalance < reward.cost && (
             <Text className="text-red-500 text-center mt-3 text-sm">
-              Not enough $BONDUM tokens. You need {reward.cost - (user?.balance || 0)} more.
+              Not enough $BONDUM tokens. You need {reward.cost - bondumBalance} more.
             </Text>
           )}
         </View>
