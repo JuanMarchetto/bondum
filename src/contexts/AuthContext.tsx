@@ -69,8 +69,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
       const user: User = {
         id: address,
         username: 'User',
-        balance: 15000,
-        nftCount: 7,
         avatarUrl: null,
       }
 
@@ -101,8 +99,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
       const user: User = {
         id: privyUser.id,
         username: 'User',
-        balance: 15000,
-        nftCount: 7,
         avatarUrl: null,
       }
 
@@ -172,8 +168,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     const user: User = {
       id: 'guest',
       username: 'Guest',
-      balance: 0,
-      nftCount: 0,
       avatarUrl: null,
     }
 
