@@ -1,5 +1,12 @@
 import { address, getProgramDerivedAddress, getAddressEncoder } from '@solana/kit'
 import { Buffer } from 'buffer'
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  TransactionInstruction,
+} from '@solana/web3.js'
 
 // Token mint addresses
 export const BONDUM_MINT = '84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump'
@@ -421,4 +428,96 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
     console.error('Error fetching NFTs:', error)
     return []
   }
+}
+
+// ─── Transfer Transaction Builder ────────────────────────────────────────────
+
+const SPL_TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ID)
+const SPL_TOKEN_2022_PROGRAM = new PublicKey(TOKEN_2022_PROGRAM_ID)
+const ASSOCIATED_TOKEN_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL')
+
+function findAssociatedTokenAddress(wallet: PublicKey, mint: PublicKey, programId: PublicKey): PublicKey {
+  const [ata] = PublicKey.findProgramAddressSync(
+    [wallet.toBuffer(), programId.toBuffer(), mint.toBuffer()],
+    ASSOCIATED_TOKEN_PROGRAM,
+  )
+  return ata
+}
+
+/**
+ * Builds a base64-encoded transaction for transferring SOL or SPL tokens.
+ * For SOL: uses SystemProgram.transfer
+ * For SPL: uses raw Token Program transfer instruction
+ */
+export async function buildTransferTransaction(
+  from: string,
+  to: string,
+  mint: string | null,
+  amount: number,
+  decimals: number,
+): Promise<string> {
+  const connection = new Connection(RPC_URL, 'confirmed')
+  const fromPubkey = new PublicKey(from)
+  const toPubkey = new PublicKey(to)
+  const transaction = new Transaction()
+
+  if (!mint) {
+    // SOL transfer
+    transaction.add(
+      SystemProgram.transfer({
+        fromPubkey,
+        toPubkey,
+        lamports: Math.floor(amount * 1e9),
+      }),
+    )
+  } else {
+    // SPL token transfer
+    const mintPubkey = new PublicKey(mint)
+    const tokenProgramId = SPL_TOKEN_PROGRAM // default to standard program
+    const fromAta = findAssociatedTokenAddress(fromPubkey, mintPubkey, tokenProgramId)
+    const toAta = findAssociatedTokenAddress(toPubkey, mintPubkey, tokenProgramId)
+
+    // Check if destination ATA exists; if not, create it
+    const toAtaInfo = await connection.getAccountInfo(toAta)
+    if (!toAtaInfo) {
+      transaction.add(
+        new TransactionInstruction({
+          keys: [
+            { pubkey: fromPubkey, isSigner: true, isWritable: true },
+            { pubkey: toAta, isSigner: false, isWritable: true },
+            { pubkey: toPubkey, isSigner: false, isWritable: false },
+            { pubkey: mintPubkey, isSigner: false, isWritable: false },
+            { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+            { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+          ],
+          programId: ASSOCIATED_TOKEN_PROGRAM,
+          data: Buffer.alloc(0),
+        }),
+      )
+    }
+
+    // SPL Token transfer instruction (instruction index 3)
+    const rawAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)))
+    const data = Buffer.alloc(9)
+    data.writeUInt8(3, 0) // Transfer instruction
+    data.writeBigUInt64LE(rawAmount, 1)
+
+    transaction.add(
+      new TransactionInstruction({
+        keys: [
+          { pubkey: fromAta, isSigner: false, isWritable: true },
+          { pubkey: toAta, isSigner: false, isWritable: true },
+          { pubkey: fromPubkey, isSigner: true, isWritable: false },
+        ],
+        programId: tokenProgramId,
+        data,
+      }),
+    )
+  }
+
+  const { blockhash } = await connection.getLatestBlockhash()
+  transaction.recentBlockhash = blockhash
+  transaction.feePayer = fromPubkey
+
+  return transaction.serialize({ requireAllSignatures: false }).toString('base64')
 }

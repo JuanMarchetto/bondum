@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Pressable, useWindowDimensions, Image } from 'react-native'
+import { View, Text, ScrollView, Pressable, useWindowDimensions, Image, RefreshControl } from 'react-native'
 import { Image as ExpoImage } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
@@ -21,15 +22,21 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
-  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
-  const { nfts, nftCount, isLoading: isNftsLoading } = useWalletNfts()
-  const { tokens, isLoading: isTokensLoading } = useTokenBalances()
+  const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
+  const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
+  const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
   const { width } = useWindowDimensions()
   const avatarSize = Math.round(width * 0.24)
+  const [refreshing, setRefreshing] = useState(false)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
+    setRefreshing(false)
+  }, [refetchBalance, refetchTokens, refetchNfts])
 
   const quickActions = [
     { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
-    { icon: sendIcon, label: 'Send', onPress: () => {} },
+    { icon: sendIcon, label: 'Send', onPress: () => router.push('/(tabs)/(home)/send') },
     { icon: boxesIcon, label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
     { icon: settingsIcon, label: 'Settings', onPress: () => router.push('/(tabs)/(home)/settings') },
   ]
@@ -123,7 +130,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
         {/* Quick Actions */}
         <View className="flex-row justify-around mb-4">
           {quickActions.map((action) => (
