@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, Pressable, Image } from 'react-native'
+import { View, Text, ScrollView, Pressable, Image, RefreshControl } from 'react-native'
 import { Image as ExpoImage } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
@@ -60,8 +60,21 @@ export default function RewardsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
-  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
-  const [viewMode, setViewMode] = useState<'brands' | 'rewards'>('brands')
+  const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
+  const [refreshing, setRefreshing] = useState(false)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await refetchBalance()
+    setRefreshing(false)
+  }, [refetchBalance])
+  const [viewMode, setViewMode] = useState<'brands' | 'bondum' | 'panicafe'>('brands')
+
+  const panicafeRewards: Reward[] = [
+    { id: 'pc-1', type: 'discount', title: 'Free Coffee with any pastry purchase', value: 'FREE COFFEE', cost: 1000, available: 5 },
+    { id: 'pc-2', type: 'discount', title: '25% off any drink', value: '25% OFF', cost: 2000, available: 3 },
+    { id: 'pc-3', type: 'token', title: 'Bonus PaniCafe tokens', value: '200 PANICAFE', cost: 500, available: 10 },
+    { id: 'pc-4', type: 'discount', title: '50% off pastry of the day', value: '50% OFF', cost: 3000, available: 2 },
+  ]
 
   return (
     <View className="flex-1 bg-violet-50">
@@ -88,7 +101,7 @@ export default function RewardsScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
         {viewMode === 'brands' ? (
           // Brands View
           <View className="flex-1">
@@ -98,7 +111,7 @@ export default function RewardsScreen() {
 
             {/* Bondum Row */}
             <Pressable
-              onPress={() => setViewMode('rewards')}
+              onPress={() => setViewMode('bondum')}
               className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
               style={{ borderWidth: 1, borderColor: '#9b9db5' }}
             >
@@ -108,9 +121,7 @@ export default function RewardsScreen() {
 
             {/* PaniCafe Row */}
             <Pressable
-              onPress={() => {
-                // Placeholder for future PaniCafe rewards
-              }}
+              onPress={() => setViewMode('panicafe')}
               className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
               style={{ borderWidth: 1, borderColor: '#9b9db5' }}
             >
@@ -123,16 +134,17 @@ export default function RewardsScreen() {
             <View className="h-8" />
           </View>
         ) : (
-          // Rewards View
+          // Rewards View (Bondum or PaniCafe)
           <View>
-            {/* Back Button */}
             <Pressable onPress={() => setViewMode('brands')} className="mb-4">
               <Text className="text-violet-500 font-semibold">← Back to Brands</Text>
             </Pressable>
 
-            <Text className="text-gray-900 text-xl font-bold mb-4">Available Rewards</Text>
+            <Text className="text-gray-900 text-xl font-bold mb-4">
+              {viewMode === 'panicafe' ? 'PaniCafe Rewards' : 'Bondum Rewards'}
+            </Text>
 
-            {mockRewards.map((reward) => (
+            {(viewMode === 'panicafe' ? panicafeRewards : mockRewards).map((reward) => (
               <Pressable key={reward.id} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
                 <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
                   <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
@@ -143,7 +155,7 @@ export default function RewardsScreen() {
                   <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
 
                   <View
-                    className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+                    className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : viewMode === 'panicafe' ? 'bg-amber-600' : 'bg-red-600'}`}
                   >
                     <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
                   </View>

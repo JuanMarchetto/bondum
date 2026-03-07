@@ -71,15 +71,15 @@ export default function SettingsScreen() {
 
         {/* Settings Options */}
         <View className="bg-gray-100 rounded-2xl mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Pressable className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+          <Pressable onPress={() => Alert.alert('Notifications', 'Push notifications coming in the next update.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
             <Text className="text-gray-900 text-base">Notifications</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
-          <Pressable className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+          <Pressable onPress={() => Alert.alert('Security', 'Biometric authentication and Seed Vault integration coming soon.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
             <Text className="text-gray-900 text-base">Security</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
-          <Pressable className="flex-row items-center justify-between p-4">
+          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 1.0.0\n\nBondum - On-Chain Loyalty Wallet\nbondum.xyz')} className="flex-row items-center justify-between p-4">
             <Text className="text-gray-900 text-base">About</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
