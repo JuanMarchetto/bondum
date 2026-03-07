@@ -1,10 +1,13 @@
-import { View, Text, Pressable, StyleSheet, Image } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Avatar, Button, Card, BellIcon } from '../../components/ui'
+import { useBondumBalance } from '../../hooks/useBondumBalance'
+import { Avatar, Button, BellIcon } from '../../components/ui'
+import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
+import { addClaimedReward } from '../../services/rewardStorage'
 
 const avatarImage = undefined // require('../../assets/avatar.png')
 const bondumLogo = require('../../assets/bondum_logo.png')
@@ -13,14 +16,40 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
+  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanned, setScanned] = useState(false)
-  const [scanResult, setScanResult] = useState<string | null>(null)
+  const [parsedReward, setParsedReward] = useState<ParsedQrReward | null>(null)
+  const [rewardClaimed, setRewardClaimed] = useState(false)
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return
     setScanned(true)
-    setScanResult(data)
+    const parsed = parseQrCode(data)
+    if (parsed) {
+      setParsedReward(parsed)
+    } else {
+      Alert.alert('Invalid QR Code', 'This QR code does not contain a valid reward.')
+      setScanned(false)
+    }
+  }
+
+  const handleClaimReward = async () => {
+    if (!parsedReward) return
+    await addClaimedReward({
+      id: Date.now().toString(),
+      brand: parsedReward.brand,
+      type: parsedReward.type,
+      value: parsedReward.value,
+      claimedAt: new Date().toISOString(),
+    })
+    setRewardClaimed(true)
+  }
+
+  const resetScanner = () => {
+    setScanned(false)
+    setParsedReward(null)
+    setRewardClaimed(false)
   }
 
   if (!permission) {
@@ -58,7 +87,7 @@ export default function ScanScreen() {
     )
   }
 
-  if (scanResult) {
+  if (parsedReward) {
     return (
       <View className="flex-1 bg-violet-50">
         <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
@@ -74,7 +103,7 @@ export default function ScanScreen() {
           <View className="flex-row items-center justify-between">
             <View>
               <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-              <Text className="text-violet-200" style={{ fontSize: 19 }}>{(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+              <Text className="text-violet-200" style={{ fontSize: 19 }}>{isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM</Text>
             </View>
             <View className="flex-row items-center gap-3">
               <Pressable className="p-2">
@@ -86,25 +115,40 @@ export default function ScanScreen() {
         </View>
 
         <View className="flex-1 items-center justify-center px-6" style={{ marginTop: -80 }}>
-          <View className="w-full items-center py-8" style={{ padding: 24 }}>
-            <Text className="text-green-500 mb-4" style={{ fontSize: 120 }}>✓</Text>
-            <Text className="text-gray-900 font-bold mb-2" style={{ fontSize: 40 }}>Code Scanned!</Text>
-            <Text className="text-gray-500 text-center mb-6" style={{ fontSize: 28 }}>
-              You&apos;ve successfully scanned a Bondum product code.
-            </Text>
+          <View className="w-full items-center py-8 bg-white rounded-3xl" style={{ padding: 24 }}>
+            {rewardClaimed ? (
+              <>
+                <Text className="text-green-500 mb-4" style={{ fontSize: 100 }}>✓</Text>
+                <Text className="text-gray-900 font-bold mb-2" style={{ fontSize: 36 }}>Reward Claimed!</Text>
+                <Text className="text-gray-500 text-center mb-6" style={{ fontSize: 22 }}>
+                  Your {parsedReward.value} reward from {parsedReward.brand} has been saved.
+                </Text>
+              </>
+            ) : (
+              <>
+                <View className="bg-violet-100 rounded-2xl px-8 py-4 mb-4">
+                  <Text className="text-violet-600 font-bold text-center" style={{ fontSize: 16 }}>{parsedReward.brand}</Text>
+                </View>
+                <Text className="text-gray-900 font-bold mb-2 text-center" style={{ fontSize: 32 }}>{parsedReward.title}</Text>
+                <View className={`rounded-xl px-10 py-6 mb-4 ${parsedReward.type === 'nft' ? 'bg-gray-900' : parsedReward.type === 'token' ? 'bg-violet-600' : 'bg-red-600'}`}>
+                  <Text className="text-white font-extrabold text-center" style={{ fontSize: 36 }}>{parsedReward.value}</Text>
+                </View>
+                <Text className="text-gray-400 text-sm mb-4 uppercase">{parsedReward.type} reward</Text>
+              </>
+            )}
             <View className="flex-row gap-4">
-              <Button
-                variant="outline"
-                onPress={() => {
-                  setScanned(false)
-                  setScanResult(null)
-                }}
-              >
-                <Text style={{ fontSize: 32 }}>Scan Another</Text>
+              <Button variant="outline" onPress={resetScanner}>
+                <Text style={{ fontSize: 28 }}>Scan Another</Text>
               </Button>
-              <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')}>
-                <Text style={{ fontSize: 32, color: '#FFFFFF' }}>View Rewards</Text>
-              </Button>
+              {rewardClaimed ? (
+                <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')}>
+                  <Text style={{ fontSize: 28, color: '#FFFFFF' }}>View Rewards</Text>
+                </Button>
+              ) : (
+                <Button variant="primary" onPress={handleClaimReward}>
+                  <Text style={{ fontSize: 28, color: '#FFFFFF' }}>Claim Reward</Text>
+                </Button>
+              )}
             </View>
           </View>
         </View>
@@ -128,7 +172,7 @@ export default function ScanScreen() {
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200">~ {(user?.balance || 0).toLocaleString()} $BONDUM</Text>
+            <Text className="text-violet-200">~ {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM</Text>
           </View>
           <View className="flex-row items-center gap-3">
             <Pressable className="p-2">

@@ -3,8 +3,6 @@ export interface User {
   id: string
   username: string
   avatarUrl?: string | null
-  balance: number
-  nftCount: number
 }
 
 // Reward types
