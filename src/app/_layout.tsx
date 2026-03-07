@@ -1,13 +1,13 @@
 import '../global.css'
 
 import { Slot, useRouter, useSegments } from 'expo-router'
-import { MobileWalletProvider, createSolanaDevnet } from '@wallet-ui/react-native-kit'
+import { MobileWalletProvider, createSolanaMainnet } from '@wallet-ui/react-native-kit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PrivyProvider } from '@privy-io/expo'
 import { useEffect } from 'react'
 import { AuthContextProvider, useAuth } from '../contexts/AuthContext'
 
-const cluster = createSolanaDevnet()
+const cluster = createSolanaMainnet(process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
 const identity = {
   name: 'Bondum',
   uri: 'https://bondum.xyz',
