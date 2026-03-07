@@ -411,6 +411,9 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
 // ─── Transfer Transaction Builder ────────────────────────────────────────────
 
 const SPL_TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ID)
+
+const SPL_TOKEN_2022_PROGRAM = new PublicKey(TOKEN_2022_PROGRAM_ID)
+
 const ASSOCIATED_TOKEN_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL')
 
 function findAssociatedTokenAddress(wallet: PublicKey, mint: PublicKey, programId: PublicKey): PublicKey {
