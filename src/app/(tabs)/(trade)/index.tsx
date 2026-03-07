@@ -15,7 +15,7 @@ import { Buffer } from 'buffer'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 
-const avatarImage = undefined // require('../../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const swapArrows = require('../../../assets/swap_arrows.png')
@@ -119,7 +119,6 @@ export default function TradeScreen() {
         const decoder = getTransactionDecoder()
         const transaction = decoder.decode(txBytes)
 
-        console.log('[Swap] Signing via MWA...')
         // signAndSendTransaction returns SignatureBytes[]
         const signatures = await mobileWallet.signAndSendTransaction(
           transaction,
@@ -143,7 +142,6 @@ export default function TradeScreen() {
         // Get the Privy provider and request signing + sending
         const privyProvider = await embeddedSolanaWallet.getProvider()
 
-        console.log('[Swap] Signing via Privy...')
         const result = await privyProvider.request({
           method: 'signAndSendTransaction',
           params: {
@@ -171,7 +169,6 @@ export default function TradeScreen() {
         queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
       }, 2000)
     } catch (error: any) {
-      console.error('[Swap] Error:', error)
       const errorMessage = error?.message || 'Failed to execute swap. Please try again.'
       Alert.alert('Swap Failed', errorMessage)
     } finally {

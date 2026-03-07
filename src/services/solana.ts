@@ -68,7 +68,6 @@ async function rpcCall(method: string, params: unknown[]): Promise<any> {
 
   const json = await response.json()
   if (json.error) {
-    console.error(`RPC error [${method}]:`, json.error)
     return null
   }
   return json.result
@@ -93,7 +92,6 @@ async function dasCall(method: string, params: Record<string, unknown>): Promise
 
   const json = await response.json()
   if (json.error) {
-    console.log(`[DAS] ${method} error:`, json.error?.message || json.error)
     return null
   }
   return json.result
@@ -178,23 +176,18 @@ export async function getTokenBalance(
     const balance = await getBalanceByMint(walletAddress, mintAddress)
 
     if (balance > 0) {
-      console.log(`[Balance] ${mintAddress.slice(0, 8)}...: ${balance} (via mint filter)`)
       return balance
     }
 
     // Fallback: explicitly query Token-2022 program
     const t22Balance = await getBalanceByProgram(walletAddress, mintAddress, TOKEN_2022_PROGRAM_ID)
     if (t22Balance > 0) {
-      console.log(`[Balance] ${mintAddress.slice(0, 8)}...: ${t22Balance} (via Token-2022 programId)`)
       return t22Balance
     }
 
     // Final fallback: explicitly query standard Token program
-    const stdBalance = await getBalanceByProgram(walletAddress, mintAddress, TOKEN_PROGRAM_ID)
-    console.log(`[Balance] ${mintAddress.slice(0, 8)}...: ${stdBalance} (via Token programId)`)
-    return stdBalance
-  } catch (error) {
-    console.error('Error fetching token balance:', error)
+    return await getBalanceByProgram(walletAddress, mintAddress, TOKEN_PROGRAM_ID)
+  } catch {
     return 0
   }
 }
@@ -207,8 +200,7 @@ export async function getSolBalance(walletAddress: string): Promise<number> {
     const result = await rpcCall('getBalance', [walletAddress])
     if (result?.value == null) return 0
     return Number(result.value) / 1e9
-  } catch (error) {
-    console.error('Error fetching SOL balance:', error)
+  } catch {
     return 0
   }
 }
@@ -273,7 +265,6 @@ async function enrichNftsWithMetadata(nfts: NftAsset[], maxEnrich: number): Prom
         const metadata = parseMetaplexMetadata(base64Str)
 
         nfts[i].name = metadata.name || 'NFT'
-        console.log(`[NFT Enrich] ${nft.id.slice(0, 8)}... name="${metadata.name}" uri="${metadata.uri?.slice(0, 80)}"`)
 
         if (metadata.uri) {
           const httpUri = resolveMediaUrl(metadata.uri)
@@ -284,16 +275,15 @@ async function enrichNftsWithMetadata(nfts: NftAsset[], maxEnrich: number): Prom
                 const offChainData = await offChainRes.json()
                 const rawImage = offChainData.image || offChainData.image_uri || null
                 nfts[i].imageUrl = resolveMediaUrl(rawImage)
-                console.log(`[NFT Image] ${nft.id.slice(0, 8)}... image=${nfts[i].imageUrl ? 'YES' : 'null'}`)
               }
-            } catch (err) {
-              console.warn(`[NFT Image] Failed to fetch off-chain metadata:`, err)
+            } catch {
+              // Off-chain metadata fetch failed; image stays null
             }
           }
         }
       }
-    } catch (error) {
-      console.error(`[NFT Enrich] Error for ${nft.id.slice(0, 8)}...:`, error)
+    } catch {
+      // Enrichment failed for this NFT; skip
     }
   })
 
@@ -320,10 +310,8 @@ async function getNftMintsFromProgram(ownerAddress: string, programId: string): 
       }
     }
 
-    console.log(`[NFT Scan] ${programId.slice(0, 8)}... found ${mints.length} NFTs`)
     return mints
-  } catch (error) {
-    console.error(`[NFT Scan] Error:`, error)
+  } catch {
     return []
   }
 }
@@ -347,7 +335,6 @@ async function getDasNfts(walletAddress: string): Promise<NftAsset[]> {
     })
 
     if (!result?.items) {
-      console.log('[DAS] No items returned, DAS may not be supported')
       return []
     }
 
@@ -372,13 +359,8 @@ async function getDasNfts(walletAddress: string): Promise<NftAsset[]> {
       })
     }
 
-    console.log(`[DAS] Found ${assets.length} NFTs, ${assets.filter((a) => a.imageUrl).length} with images`)
-    if (assets.length > 0) {
-      console.log('[DAS] Sample:', JSON.stringify(assets[0]).slice(0, 200))
-    }
     return assets
-  } catch (error) {
-    console.log('[DAS] Failed:', error)
+  } catch {
     return []
   }
 }
@@ -405,8 +387,6 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
     const dasIds = new Set(dasNfts.map((n) => n.id))
     const nftsNeedingEnrichment = onChainNfts.filter((n) => !dasIds.has(n.id))
 
-    console.log(`[NFTs] DAS: ${dasNfts.length}, On-chain: ${onChainNfts.length}, Need enrichment: ${nftsNeedingEnrichment.length}`)
-
     if (nftsNeedingEnrichment.length > 0) {
       await enrichNftsWithMetadata(nftsNeedingEnrichment, 6)
     }
@@ -422,10 +402,8 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
       }
     }
 
-    console.log(`[NFTs] Final: ${deduped.length} total, ${deduped.filter((n) => n.imageUrl).length} with images`)
     return deduped
-  } catch (error) {
-    console.error('Error fetching NFTs:', error)
+  } catch {
     return []
   }
 }
@@ -433,7 +411,6 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
 // ─── Transfer Transaction Builder ────────────────────────────────────────────
 
 const SPL_TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ID)
-const SPL_TOKEN_2022_PROGRAM = new PublicKey(TOKEN_2022_PROGRAM_ID)
 const ASSOCIATED_TOKEN_PROGRAM = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL')
 
 function findAssociatedTokenAddress(wallet: PublicKey, mint: PublicKey, programId: PublicKey): PublicKey {

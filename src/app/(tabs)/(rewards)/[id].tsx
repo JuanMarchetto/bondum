@@ -7,7 +7,7 @@ import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { addClaimedReward } from '../../../services/rewardStorage'
 import { Button, Avatar, BellIcon } from '../../../components/ui'
 
-const avatarImage = undefined // require('../../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 
 // Mock reward data - in real app, fetch from API

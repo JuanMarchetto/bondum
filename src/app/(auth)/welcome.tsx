@@ -38,7 +38,6 @@ export default function WelcomeScreen() {
       setAuthMode('otp')
     } catch (err: any) {
       const message = err?.error || err?.message || 'Unknown error'
-      console.error('Email login error details:', JSON.stringify(err))
       setError(`Failed to send verification code: ${message}`)
     }
   }
