@@ -2,6 +2,8 @@
 
 > [bondum.xyz](https://bondum.xyz)
 
+![Bondum - Simply scan your everyday products and get the rewards](banner.jpeg)
+
 A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM** tokens and brand-specific loyalty tokens, swap them via Jupiter, and redeem exclusive rewards and NFTs -- all from your phone.
 
 ## How It Works
