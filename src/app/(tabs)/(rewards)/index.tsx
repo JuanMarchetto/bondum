@@ -7,7 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
 
-const avatarImage = undefined // require('../../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const panicoinSvg = require('../../../assets/panicoin.svg')
@@ -130,7 +130,7 @@ export default function RewardsScreen() {
             </Pressable>
 
             {/* Footer */}
-            <Text className="text-gray-500 text-center text-sm mt-4">More brands Coming Soon..</Text>
+            <Text className="text-gray-500 text-center text-sm mt-4">More brands joining soon</Text>
             <View className="h-8" />
           </View>
         ) : (

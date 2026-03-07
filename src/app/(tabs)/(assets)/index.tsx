@@ -9,7 +9,7 @@ import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { Avatar, BellIcon, Card } from '../../../components/ui'
 
-const avatarImage = undefined // require('../../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const solLogo = require('../../../assets/sol-logo.png')
 const bLogo = require('../../../assets/b-logo.png')
@@ -196,4 +196,3 @@ export default function AssetsScreen() {
     </View>
   )
 }
-

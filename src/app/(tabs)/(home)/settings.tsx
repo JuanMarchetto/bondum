@@ -28,8 +28,7 @@ export default function SettingsScreen() {
         onPress: async () => {
           try {
             await disconnect()
-          } catch (error) {
-            console.error('Logout error:', error)
+          } catch {
             Alert.alert('Error', 'Failed to log out. Please try again.')
           }
         },
