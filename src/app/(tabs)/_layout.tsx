@@ -1,19 +1,22 @@
 import { Tabs } from 'expo-router'
-import { View, Text } from 'react-native'
+import Ionicons from '@expo/vector-icons/Ionicons'
+
+const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; unfocused: keyof typeof Ionicons.glyphMap }> = {
+  home: { focused: 'home', unfocused: 'home-outline' },
+  trade: { focused: 'swap-horizontal', unfocused: 'swap-horizontal-outline' },
+  assets: { focused: 'wallet', unfocused: 'wallet-outline' },
+  rewards: { focused: 'gift', unfocused: 'gift-outline' },
+  profile: { focused: 'person', unfocused: 'person-outline' },
+}
 
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    home: '🏠',
-    trade: '🔄',
-    assets: '💰',
-    rewards: '🎁',
-    profile: '👤',
-  }
-
+  const icon = TAB_ICONS[name] || TAB_ICONS.home
   return (
-    <View className={`items-center justify-center ${focused ? 'opacity-100' : 'opacity-50'}`}>
-      <Text className="text-2xl">{icons[name] || '📱'}</Text>
-    </View>
+    <Ionicons
+      name={focused ? icon.focused : icon.unfocused}
+      size={24}
+      color={focused ? '#8B5CF6' : '#A3A3A3'}
+    />
   )
 }
 
