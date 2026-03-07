@@ -1,7 +1,8 @@
-import { View, Text, ScrollView, Pressable, Image } from 'react-native'
+import { View, Text, ScrollView, Pressable, Image, RefreshControl } from 'react-native'
 import { Image as ExpoImage } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useState, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
@@ -19,9 +20,15 @@ export default function AssetsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
-  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
-  const { nfts, nftCount, isLoading: isNftsLoading } = useWalletNfts()
-  const { tokens, isLoading: isTokensLoading } = useTokenBalances()
+  const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
+  const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
+  const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
+  const [refreshing, setRefreshing] = useState(false)
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
+    setRefreshing(false)
+  }, [refetchBalance, refetchTokens, refetchNfts])
 
   return (
     <View className="flex-1 bg-violet-50">
@@ -50,7 +57,7 @@ export default function AssetsScreen() {
       </View>
 
       {/* Content */}
-      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
         {/* Title */}
         <Text className="text-center mb-6">
           <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>YOUR </Text>
