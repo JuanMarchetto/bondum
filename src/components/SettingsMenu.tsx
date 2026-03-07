@@ -20,8 +20,7 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
   const handleLogout = async () => {
     try {
       await disconnect()
-    } catch (error) {
-      console.error('Logout error:', error)
+    } catch {
       Alert.alert('Error', 'Failed to disconnect. Please try again.')
     }
   }

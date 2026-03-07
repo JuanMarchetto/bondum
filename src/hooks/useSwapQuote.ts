@@ -130,15 +130,6 @@ export function useSwapQuote(
           return
         }
 
-        console.log('[useSwapQuote] Fetching quote:', {
-          from: fromToken,
-          to: toToken,
-          amount: fromAmount,
-          amountRaw: amountInSmallestUnit,
-          inputMint: fromTokenInfo.mint,
-          outputMint: toTokenInfo.mint,
-        })
-
         const result = await getSwapQuote(
           fromTokenInfo.mint,
           toTokenInfo.mint,
@@ -149,7 +140,6 @@ export function useSwapQuote(
         setQuote(result)
         setError(null)
       } catch (err: any) {
-        console.error('[useSwapQuote] Error:', err)
         const message = err?.message || 'Failed to get quote. Please try again.'
         setError(message)
         setQuote(null)
@@ -174,4 +164,3 @@ export function useSwapQuote(
     error,
   }
 }
-

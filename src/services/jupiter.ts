@@ -47,12 +47,9 @@ export async function getSwapQuote(
   ].join('&')
 
   const url = `https://lite-api.jup.ag/swap/v1/quote?${params}`
-  console.log('[Jupiter] Fetching quote:', url)
 
   const response = await fetch(url)
   const responseText = await response.text()
-  console.log('[Jupiter] Quote status:', response.status)
-  console.log('[Jupiter] Quote body:', responseText.slice(0, 500))
 
   if (!response.ok) {
     try {
@@ -95,8 +92,6 @@ export async function getSwapTransaction(
     dynamicSlippage: true,
   }
 
-  console.log('[Jupiter] Swap request for user:', userPublicKey)
-
   const response = await fetch('https://lite-api.jup.ag/swap/v1/swap', {
     method: 'POST',
     headers: {
@@ -106,8 +101,6 @@ export async function getSwapTransaction(
   })
 
   const responseText = await response.text()
-  console.log('[Jupiter] Swap status:', response.status)
-  console.log('[Jupiter] Swap body:', responseText.slice(0, 500))
 
   if (!response.ok) {
     try {

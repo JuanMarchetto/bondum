@@ -52,8 +52,8 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
             user: userData.user || null,
           })
         }
-      } catch (error) {
-        console.error('Error checking auth:', error)
+      } catch {
+        // Failed to restore auth; user will see the login screen
       } finally {
         setIsLoading(false)
       }
@@ -120,7 +120,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
     try {
       await solanaWallet.connect()
     } catch (error) {
-      console.error('Solana connect error:', error)
       throw error
     } finally {
       setIsLoading(false)
@@ -134,7 +133,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         setPendingPrivyEmail(email)
         await sendCode({ email })
       } catch (error) {
-        console.error('Privy connect error:', error)
         setPendingPrivyEmail(null)
         throw error
       } finally {
@@ -155,7 +153,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         await loginWithCode({ code, email: pendingPrivyEmail })
         setPendingPrivyEmail(null)
       } catch (error) {
-        console.error('Privy OTP verification error:', error)
         throw error
       } finally {
         setIsLoading(false)
@@ -197,7 +194,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
       // the previous wallet are never shown on the next login
       queryClient.removeQueries()
       queryClient.clear()
-      console.log('[Auth] Query cache cleared on disconnect')
 
       setAuthState({
         isAuthenticated: false,
@@ -206,7 +202,6 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         user: null,
       })
     } catch (error) {
-      console.error('Disconnect error:', error)
       throw error
     } finally {
       setIsLoading(false)

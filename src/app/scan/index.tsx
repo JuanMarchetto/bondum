@@ -9,7 +9,7 @@ import { Avatar, Button, BellIcon } from '../../components/ui'
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
 
-const avatarImage = undefined // require('../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../assets/bondum_logo.png')
 
 export default function ScanScreen() {
