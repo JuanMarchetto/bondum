@@ -252,7 +252,7 @@ export async function fetchAiRecommendation(params: {
   balance: number
 }): Promise<AiRecommendation> {
   try {
-    const response = await fetch(`${REWARD_API_URL}/ai/recommend`, {
+    const response = await fetch(`${REWARD_API_URL}/recommend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),

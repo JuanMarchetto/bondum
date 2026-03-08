@@ -5,7 +5,7 @@
  * distributes SPL tokens from a funded treasury wallet,
  * supports 2-step redemption with user wallet signing,
  * streak tracking with multipliers, daily challenges,
- * and AI-powered recommendations.
+ * and smart reward recommendations.
  *
  * Environment variables:
  *   TREASURY_KEYPAIR  - Base64-encoded Solana keypair for the treasury wallet
@@ -56,9 +56,10 @@ function toBase58(buffer: Buffer | Uint8Array): string {
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const PORT = parseInt(process.env.PORT || '3001')
-const RPC_URL =
-  process.env.SOLANA_RPC_URL ||
-  'https://mainnet.helius-rpc.com/?api-key=1d8740dc-e5f4-421d-b665-d67d0da819d0'
+const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+if (!process.env.SOLANA_RPC_URL) {
+  console.warn('[WARN] SOLANA_RPC_URL not set — using public RPC. Set a Helius endpoint for production.')
+}
 
 // Token mints
 const BONDUM_MINT = new PublicKey('84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump')
@@ -778,8 +779,8 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
-    // ─── POST /ai/recommend ───
-    if (req.method === 'POST' && url.pathname === '/ai/recommend') {
+    // ─── POST /recommend ───
+    if (req.method === 'POST' && (url.pathname === '/recommend' || url.pathname === '/ai/recommend')) {
       const body = await parseBody(req)
       const { walletAddress, streak, balance } = body
 
@@ -796,34 +797,6 @@ const server = http.createServer(async (req, res) => {
       })
 
       sendJson(res, 200, result)
-      return
-    }
-
-    // ─── POST /referral ───
-    if (req.method === 'POST' && url.pathname === '/referral') {
-      const body = await parseBody(req)
-      const { walletAddress, referralCode } = body as { walletAddress: string; referralCode: string }
-
-      if (!walletAddress || !referralCode) {
-        sendJson(res, 400, { message: 'Missing walletAddress or referralCode' })
-        return
-      }
-
-      sendJson(res, 200, {
-        success: true,
-        message: 'Referral registered. Both you and your friend will receive bonus tokens on their first scan.',
-      })
-      return
-    }
-
-    // ─── GET /referral/:address ───
-    if (req.method === 'GET' && url.pathname.startsWith('/referral/')) {
-      const walletAddress = url.pathname.split('/')[2]
-      sendJson(res, 200, {
-        referralCode: walletAddress.slice(0, 8),
-        referralCount: 0,
-        totalEarned: 0,
-      })
       return
     }
 
@@ -845,7 +818,5 @@ server.listen(PORT, () => {
   console.log(`  POST /redeem           - Step 2: Submit signed tx (or legacy redeem)`)
   console.log(`  GET  /streak/:address  - Get streak & multiplier data`)
   console.log(`  GET  /daily-challenge  - Get today's challenge`)
-  console.log(`  POST /ai/recommend     - AI-powered reward recommendation`)
-  console.log(`  POST /referral         - Register referral`)
-  console.log(`  GET  /referral/:id     - Get referral stats`)
+  console.log(`  POST /recommend        - Smart reward recommendation`)
 })

@@ -29,8 +29,8 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 ### Consumer Engagement Mechanics
 - **Streak system with multipliers** -- Daily scans build streaks that multiply token earnings from 1.0x to 2.0x. Missing a day resets the streak.
 - **Milestone bonuses** -- Automatic bonus tokens at streak milestones: +50 at 3 days, +200 at 7 days, +500 at 14 days, +2000 at 30 days.
-- **Daily challenges** -- Rotating daily objectives that reward engagement (e.g. "Scan 2 QR codes today", "Share your referral code").
-- **AI-powered recommendations** -- Context-aware insights on the home screen: suggests rewards based on balance, encourages streak maintenance, highlights limited-stock items.
+- **Daily challenges** -- Rotating daily objectives that reward engagement (e.g. "Scan 2 QR codes today", "Check your rewards").
+- **Smart recommendations** -- Context-aware insights on the home screen: suggests rewards based on balance, encourages streak maintenance, highlights limited-stock items.
 
 ### Solana Mobile Native
 - **Seed Vault SDK** -- Automatic detection and integration on Solana Mobile Seeker devices for hardware-level key security.
@@ -40,8 +40,6 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 ### Real-World Integration
 - **PaniCafe partnership** -- 16 real product rewards including Cafe, Medialuna, Croissant, Jugo Natural, Desayuno Tradicional, and Helado, ported from PaniCafe's production reward system.
 - **Multi-brand architecture** -- Support for multiple brand mints (BONDUM, PANICAFE) with per-brand reward catalogs and token economies.
-- **Referral system** -- On-chain referral tracking with bonus tokens for both referrer and referee.
-
 ## Architecture
 
 ```
@@ -82,7 +80,7 @@ Reward Server (Node.js + Helius RPC)
   |
   |-- GET /streak/:address --> Streak data + multiplier + next milestone
   |-- GET /daily-challenge --> Deterministic rotating challenge
-  |-- POST /ai/recommend ---> Context-aware reward recommendation
+  |-- POST /recommend -------> Context-aware reward recommendation
   |
   |-- Rate limiting ---------> 30 req/min per IP
   |-- Input validation ------> Base58 address format check
@@ -209,9 +207,7 @@ npm run build
 | POST | `/redeem` | Submit user-signed tx to network |
 | GET | `/streak/:address` | Get streak, multiplier, next milestone |
 | GET | `/daily-challenge` | Get today's rotating challenge |
-| POST | `/ai/recommend` | AI-powered reward recommendation |
-| POST | `/referral` | Register referral code |
-| GET | `/referral/:address` | Get referral stats |
+| POST | `/recommend` | Smart reward recommendation |
 
 ## License
 

@@ -206,7 +206,7 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* AI Insight Card */}
+        {/* Smart Insight Card */}
         {aiRecommendation && (
           <Pressable
             className="mx-2 mb-4 rounded-2xl overflow-hidden"
