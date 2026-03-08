@@ -11,12 +11,8 @@ interface TransactionConfirmationProps {
   onScanAnother?: () => void
 }
 
-const SOLSCAN_BASE = 'https://solscan.io/tx'
+const EXPLORER_BASE = 'https://orb.helius.dev/tx'
 
-/**
- * Returns true if the signature looks like a real on-chain transaction
- * (base58, 64+ chars). Fake signatures like "redemption-..." are filtered out.
- */
 function isOnChainSignature(sig: string): boolean {
   return /^[1-9A-HJ-NP-Za-km-z]{64,}$/.test(sig)
 }
@@ -30,10 +26,10 @@ export function TransactionConfirmation({
 }: TransactionConfirmationProps) {
   const [copiedSig, setCopiedSig] = useState(false)
   const isRealTx = isOnChainSignature(signature)
-  const truncatedSig = `${signature.slice(0, 12)}...${signature.slice(-8)}`
+  const truncatedSig = `${signature.slice(0, 14)}...${signature.slice(-6)}`
 
-  const openSolscan = () => {
-    Linking.openURL(`${SOLSCAN_BASE}/${signature}`)
+  const openExplorer = () => {
+    Linking.openURL(`${EXPLORER_BASE}/${signature}`)
   }
 
   const copySignature = async () => {
@@ -43,46 +39,101 @@ export function TransactionConfirmation({
   }
 
   return (
-    <View className="items-center py-8 px-6">
-      <Text className="text-green-500 mb-4" style={{ fontSize: 80 }}>
-        {'\u2713'}
-      </Text>
-      <Text className="text-gray-900 font-bold mb-2 text-center" style={{ fontSize: 28 }}>
+    <View className="items-center px-4" style={{ paddingVertical: 24 }}>
+      {/* Success icon */}
+      <View
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 36,
+          backgroundColor: '#ecfdf5',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 16,
+        }}
+      >
+        <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
+      </View>
+
+      {/* Title */}
+      <Text className="text-gray-900 font-bold mb-1 text-center" style={{ fontSize: 24 }}>
         {title}
       </Text>
+
+      {/* Message */}
       {message && (
-        <Text className="text-gray-500 text-center mb-4" style={{ fontSize: 16 }}>
+        <Text className="text-gray-500 text-center" style={{ fontSize: 15, marginBottom: 20 }}>
           {message}
         </Text>
       )}
 
+      {/* Transaction signature card */}
       {isRealTx && (
-        <Pressable onPress={copySignature} className="w-full mb-4">
-          <View className="bg-gray-100 rounded-xl px-4 py-3 w-full">
-            <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-gray-400 text-xs">Transaction Signature</Text>
-              <Text className="text-violet-500 text-xs font-semibold">{copiedSig ? 'Copied!' : 'Tap to copy'}</Text>
+        <Pressable onPress={copySignature} className="w-full" style={{ marginBottom: 12 }}>
+          <View
+            style={{
+              backgroundColor: '#f9fafb',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#e5e7eb',
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+            }}
+          >
+            <Text className="text-gray-400" style={{ fontSize: 11, marginBottom: 4 }}>
+              Transaction Signature
+            </Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-gray-700" style={{ fontSize: 13, fontFamily: 'monospace', flex: 1 }}>
+                {truncatedSig}
+              </Text>
+              <View
+                style={{
+                  backgroundColor: copiedSig ? '#ecfdf5' : '#ede9fe',
+                  paddingHorizontal: 10,
+                  paddingVertical: 4,
+                  borderRadius: 6,
+                  marginLeft: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: '600',
+                    color: copiedSig ? '#10b981' : '#7c3aed',
+                  }}
+                >
+                  {copiedSig ? 'Copied!' : 'Copy'}
+                </Text>
+              </View>
             </View>
-            <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
           </View>
         </Pressable>
       )}
 
+      {/* Explorer link */}
       {isRealTx && (
-        <Pressable onPress={openSolscan} className="mb-6">
-          <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
+        <Pressable onPress={openExplorer} style={{ marginBottom: 20, paddingVertical: 6 }}>
+          <Text style={{ color: '#7c3aed', fontWeight: '600', fontSize: 14 }}>
+            View on Orb Explorer {'\u2192'}
+          </Text>
         </Pressable>
       )}
 
-      <View className="flex-row gap-3">
+      {/* Action buttons */}
+      <View className="flex-row gap-3" style={{ width: '100%' }}>
         {onScanAnother && (
-          <Button variant="outline" onPress={onScanAnother}>
-            <Text style={{ fontSize: 18 }}>Scan Another</Text>
-          </Button>
+          <View style={{ flex: 1 }}>
+            <Button variant="outline" onPress={onScanAnother} style={{ width: '100%', minHeight: 48 }}>
+              <Text style={{ fontSize: 16 }}>Scan Another</Text>
+            </Button>
+          </View>
         )}
-        <Button variant="primary" onPress={onDone}>
-          <Text style={{ fontSize: 18, color: '#FFFFFF' }}>Done</Text>
-        </Button>
+        <View style={{ flex: 1 }}>
+          <Button variant="primary" onPress={onDone} style={{ width: '100%', minHeight: 48 }}>
+            <Text style={{ fontSize: 16, color: '#FFFFFF' }}>Done</Text>
+          </Button>
+        </View>
       </View>
     </View>
   )
