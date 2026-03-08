@@ -51,14 +51,13 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(trade)"
         options={{
-          title: 'Swap',
-          tabBarIcon: ({ focused }) => <TabIcon name="trade" focused={focused} />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="(assets)"
         options={{
-          title: 'Assets',
+          title: 'Wallet',
           tabBarIcon: ({ focused }) => <TabIcon name="assets" focused={focused} />,
         }}
       />
@@ -72,8 +71,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(profile)"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
+          href: null,
         }}
       />
     </Tabs>

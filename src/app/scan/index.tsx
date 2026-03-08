@@ -3,11 +3,15 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../contexts/AuthContext'
 import { useBondumBalance } from '../../hooks/useBondumBalance'
 import { Avatar, Button, BellIcon } from '../../components/ui'
+import { TransactionConfirmation } from '../../components/TransactionConfirmation'
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
+import { claimScanReward } from '../../services/rewardApi'
+import { useStreak } from '../../hooks/useStreak'
 
 const avatarImage = undefined
 const bondumLogo = require('../../assets/bondum_logo.png')
@@ -15,12 +19,17 @@ const bondumLogo = require('../../assets/bondum_logo.png')
 export default function ScanScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const { user, address, provider } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanned, setScanned] = useState(false)
   const [parsedReward, setParsedReward] = useState<ParsedQrReward | null>(null)
   const [rewardClaimed, setRewardClaimed] = useState(false)
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [txSignature, setTxSignature] = useState<string | null>(null)
+  const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
+  const { logScan } = useStreak()
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return
@@ -29,27 +38,72 @@ export default function ScanScreen() {
     if (parsed) {
       setParsedReward(parsed)
     } else {
-      Alert.alert('Invalid QR Code', 'This QR code does not contain a valid reward.')
+      Alert.alert('Invalid QR Code', 'This QR code is expired or does not contain a valid reward.')
       setScanned(false)
     }
   }
 
   const handleClaimReward = async () => {
     if (!parsedReward) return
-    await addClaimedReward({
-      id: Date.now().toString(),
-      brand: parsedReward.brand,
-      type: parsedReward.type,
-      value: parsedReward.value,
-      claimedAt: new Date().toISOString(),
-    })
-    setRewardClaimed(true)
+    setIsClaiming(true)
+
+    try {
+      // Attempt on-chain claim via reward API
+      if (address && parsedReward.tokenAmount) {
+        const result = await claimScanReward({
+          walletAddress: address,
+          brand: parsedReward.brand,
+          type: parsedReward.type,
+          value: parsedReward.value,
+          tokenAmount: parsedReward.tokenAmount,
+          nonce: parsedReward.nonce,
+          signature: parsedReward.sig,
+        })
+        setTxSignature(result.txSignature)
+
+        // Capture streak info from server response
+        const r = result as any
+        if (r.multiplier) {
+          setStreakInfo({
+            multiplier: r.multiplier,
+            streakBonus: r.streakBonus || 0,
+            currentStreak: r.currentStreak || 0,
+            milestoneReached: r.milestoneReached || null,
+            milestoneBonus: r.milestoneBonus || 0,
+          })
+        }
+
+        // Invalidate balance caches so they refresh
+        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+        queryClient.invalidateQueries({ queryKey: ['serverStreak'] })
+      }
+
+      // Record scan for streak tracking
+      await logScan()
+
+      // Also store locally for history
+      await addClaimedReward({
+        id: Date.now().toString(),
+        brand: parsedReward.brand,
+        type: parsedReward.type,
+        value: parsedReward.value,
+        claimedAt: new Date().toISOString(),
+        txSignature: txSignature || undefined,
+      })
+      setRewardClaimed(true)
+    } catch (error: any) {
+      Alert.alert('Claim Failed', error?.message || 'Failed to claim reward. Please try again.')
+    } finally {
+      setIsClaiming(false)
+    }
   }
 
   const resetScanner = () => {
     setScanned(false)
     setParsedReward(null)
     setRewardClaimed(false)
+    setTxSignature(null)
   }
 
   if (!permission) {
@@ -117,13 +171,44 @@ export default function ScanScreen() {
         <View className="flex-1 items-center justify-center px-6" style={{ marginTop: -80 }}>
           <View className="w-full items-center py-8 bg-white rounded-3xl" style={{ padding: 24 }}>
             {rewardClaimed ? (
-              <>
-                <Text className="text-green-500 mb-4" style={{ fontSize: 100 }}>✓</Text>
-                <Text className="text-gray-900 font-bold mb-2" style={{ fontSize: 36 }}>Reward Claimed!</Text>
-                <Text className="text-gray-500 text-center mb-6" style={{ fontSize: 22 }}>
-                  Your {parsedReward.value} reward from {parsedReward.brand} has been saved.
-                </Text>
-              </>
+              txSignature ? (
+                <>
+                  <TransactionConfirmation
+                    signature={txSignature}
+                    title="Reward Claimed On-Chain!"
+                    message={`${parsedReward.value} from ${parsedReward.brand} has been sent to your wallet.`}
+                    onDone={() => router.replace('/(tabs)/(rewards)')}
+                    onScanAnother={resetScanner}
+                    simplified={provider === 'privy'}
+                  />
+                  {streakInfo && (
+                    <View className="w-full mt-4">
+                      {streakInfo.streakBonus > 0 && (
+                        <View className="bg-violet-50 rounded-xl px-4 py-3 mb-2" style={{ borderWidth: 1, borderColor: '#ddd6fe' }}>
+                          <Text className="text-violet-700 font-bold text-center" style={{ fontSize: 14 }}>
+                            🔥 Streak Bonus: +{streakInfo.streakBonus} tokens ({streakInfo.multiplier.toFixed(1)}x multiplier!)
+                          </Text>
+                        </View>
+                      )}
+                      {streakInfo.milestoneReached && (
+                        <View className="bg-amber-50 rounded-xl px-4 py-3" style={{ borderWidth: 1, borderColor: '#fde68a' }}>
+                          <Text className="text-amber-700 font-bold text-center" style={{ fontSize: 14 }}>
+                            🎉 {streakInfo.milestoneReached}! +{streakInfo.milestoneBonus} bonus tokens!
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Text className="text-green-500 mb-4" style={{ fontSize: 100 }}>{'\u2713'}</Text>
+                  <Text className="text-gray-900 font-bold mb-2" style={{ fontSize: 36 }}>Reward Claimed!</Text>
+                  <Text className="text-gray-500 text-center mb-6" style={{ fontSize: 22 }}>
+                    Your {parsedReward.value} reward from {parsedReward.brand} has been saved.
+                  </Text>
+                </>
+              )
             ) : (
               <>
                 <View className="bg-violet-100 rounded-2xl px-8 py-4 mb-4">
@@ -140,15 +225,15 @@ export default function ScanScreen() {
               <Button variant="outline" onPress={resetScanner}>
                 <Text style={{ fontSize: 28 }}>Scan Another</Text>
               </Button>
-              {rewardClaimed ? (
+              {rewardClaimed && !txSignature ? (
                 <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')}>
                   <Text style={{ fontSize: 28, color: '#FFFFFF' }}>View Rewards</Text>
                 </Button>
-              ) : (
-                <Button variant="primary" onPress={handleClaimReward}>
+              ) : !rewardClaimed ? (
+                <Button variant="primary" onPress={handleClaimReward} loading={isClaiming}>
                   <Text style={{ fontSize: 28, color: '#FFFFFF' }}>Claim Reward</Text>
                 </Button>
-              )}
+              ) : null}
             </View>
           </View>
         </View>

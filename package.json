@@ -16,12 +16,25 @@
     "web": "expo start --web"
   },
   "displayName": "Bondum",
-  "description": "Bondum Mobile App",
+  "description": "Mobile-first loyalty rewards platform on Solana — scan products, earn tokens, redeem rewards on-chain",
+  "homepage": "https://bondum.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bondum/bondum-mobile"
+  },
+  "author": "Bondum Team",
   "usecase": "Mobile",
   "keywords": [
     "expo",
     "mobile-wallet-adapter",
     "react-native",
+    "solana",
+    "solana-mobile",
+    "seed-vault",
+    "loyalty-rewards",
+    "spl-tokens",
+    "helius",
+    "priority-fees",
     "solana-kit",
     "uniwind",
     "tailwind"

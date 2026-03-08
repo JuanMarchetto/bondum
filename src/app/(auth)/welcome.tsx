@@ -2,6 +2,7 @@ import { View, Text, Pressable, TextInput, KeyboardAvoidingView, Platform, Image
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useSeekerDevice } from '../../hooks/useSeekerDevice'
 import { Button, Card } from '../../components/ui'
 
 const bondumLogo = require('../../assets/bondum_logo.png')
@@ -12,6 +13,7 @@ type AuthMode = 'select' | 'email' | 'otp'
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets()
   const { connectSolana, connectPrivy, verifyPrivyOtp, connectAsGuest, isLoading, pendingPrivyEmail } = useAuth()
+  const { isSeeker, hasSeedVault } = useSeekerDevice()
   const [authMode, setAuthMode] = useState<AuthMode>('select')
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
@@ -126,7 +128,7 @@ export default function WelcomeScreen() {
             </View>
 
             <Text className="text-white text-2xl font-bold mb-2">Enter your email</Text>
-            <Text className="text-violet-200 text-center mb-8">We&apos;ll send you a verification code</Text>
+            <Text className="text-violet-200 text-center mb-8">{"We'll send you a verification code"}</Text>
 
             <Card className="w-full mb-4">
               <TextInput
@@ -194,17 +196,35 @@ export default function WelcomeScreen() {
 
       {/* Auth Buttons */}
       <View className="pb-8 gap-4">
-        <Button
-          variant="outline"
-          size="lg"
-          fullWidth
-          onPress={handleSolanaConnect}
-          loading={isLoading}
-          className="bg-white"
-          style={{ paddingVertical: 21.6 }}
-        >
-          <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Connect Solana Wallet</Text>
-        </Button>
+        {hasSeedVault ? (
+          <Button
+            variant="outline"
+            size="lg"
+            fullWidth
+            onPress={handleSolanaConnect}
+            loading={isLoading}
+            className="bg-white"
+            style={{ paddingVertical: 21.6, borderWidth: 2, borderColor: '#22c55e' }}
+          >
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Connect with Seed Vault</Text>
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="lg"
+            fullWidth
+            onPress={handleSolanaConnect}
+            loading={isLoading}
+            className="bg-white"
+            style={{ paddingVertical: 21.6 }}
+          >
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Connect Solana Wallet</Text>
+          </Button>
+        )}
+
+        {isSeeker && (
+          <Text className="text-green-300 text-center text-xs">Seeker device detected</Text>
+        )}
 
         <View className="flex-row items-center gap-4 my-2">
           <View className="flex-1 h-px bg-violet-400" />
@@ -213,7 +233,7 @@ export default function WelcomeScreen() {
         </View>
 
         <Button variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white" style={{ paddingVertical: 21.6 }}>
-          <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Continue with Email</Text>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Continue with Email</Text>
         </Button>
 
         {error && <Text className="text-red-200 text-center mt-2">{error}</Text>}

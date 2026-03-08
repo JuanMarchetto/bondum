@@ -44,3 +44,6 @@ app-example
 
 # Misc documents
 *.docx
+
+# Server runtime data
+server/streaks.json

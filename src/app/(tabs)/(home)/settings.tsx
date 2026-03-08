@@ -2,6 +2,8 @@ import { View, Text, Pressable, Alert, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useSeekerDevice } from '../../../hooks/useSeekerDevice'
+import { useStreak } from '../../../hooks/useStreak'
 import * as Clipboard from 'expo-clipboard'
 import { Button } from '../../../components/ui'
 
@@ -10,7 +12,9 @@ const bondumLogo = require('../../../assets/bondum_logo.png')
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { user, address, disconnect, isLoading } = useAuth()
+  const { user, address, provider, disconnect, isLoading } = useAuth()
+  const { isSeeker, hasSeedVault } = useSeekerDevice()
+  const { currentStreak, totalScans, multiplier } = useStreak()
 
   const handleCopyAddress = async () => {
     if (address) {
@@ -57,7 +61,7 @@ export default function SettingsScreen() {
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
           <Text className="text-gray-500 text-sm mb-1">Account</Text>
           <Text className="text-gray-900 font-bold text-lg">{user?.username || 'User'}</Text>
-          {address && (
+          {address && provider !== 'privy' && (
             <Pressable onPress={handleCopyAddress} className="mt-2">
               <Text className="text-gray-500 text-sm mb-1">Wallet Address</Text>
               <Text className="text-violet-500 text-sm" numberOfLines={1}>
@@ -68,17 +72,55 @@ export default function SettingsScreen() {
           )}
         </View>
 
+        {/* Wallet & Device Info */}
+        <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
+          <Text className="text-gray-500 text-sm mb-2">Connection</Text>
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-gray-900 text-sm">Sign-in Method</Text>
+            <Text className="text-violet-500 text-sm font-bold">{provider === 'solana' ? 'Mobile Wallet' : provider === 'privy' ? 'Email' : 'Guest'}</Text>
+          </View>
+          {isSeeker && (
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-gray-900 text-sm">Device</Text>
+              <Text className="text-green-600 text-sm font-bold">Solana Seeker</Text>
+            </View>
+          )}
+          {hasSeedVault && (
+            <View className="flex-row items-center justify-between">
+              <Text className="text-gray-900 text-sm">Seed Vault</Text>
+              <Text className="text-green-600 text-sm font-bold">Active</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Streak Stats */}
+        <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
+          <Text className="text-gray-500 text-sm mb-2">Streak Stats</Text>
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-gray-900 text-sm">Current Streak</Text>
+            <Text className="text-violet-500 text-sm font-bold">{currentStreak} days</Text>
+          </View>
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-gray-900 text-sm">Multiplier</Text>
+            <Text className="text-violet-500 text-sm font-bold">{multiplier.toFixed(1)}x</Text>
+          </View>
+          <View className="flex-row items-center justify-between">
+            <Text className="text-gray-900 text-sm">Total Scans</Text>
+            <Text className="text-gray-900 text-sm font-bold">{totalScans}</Text>
+          </View>
+        </View>
+
         {/* Settings Options */}
         <View className="bg-gray-100 rounded-2xl mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
           <Pressable onPress={() => Alert.alert('Notifications', 'Push notifications coming in the next update.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
             <Text className="text-gray-900 text-base">Notifications</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
-          <Pressable onPress={() => Alert.alert('Security', 'Biometric authentication and Seed Vault integration coming soon.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+          <Pressable onPress={() => Alert.alert('Security', hasSeedVault ? 'Your keys are secured by the Seed Vault hardware enclave.' : 'Keys are managed by your wallet provider.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
             <Text className="text-gray-900 text-base">Security</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
-          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 1.0.0\n\nBondum - On-Chain Loyalty Wallet\nbondum.xyz')} className="flex-row items-center justify-between p-4">
+          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 2.0.0\n\nBondum - On-Chain Loyalty Wallet\n\nFeatures:\n- Streak multipliers (up to 2x)\n- Smart recommendations\n- Helius RPC with priority fees\n- Seed Vault SDK support\n- Live on Solana dApp Store\n\nbondum.xyz')} className="flex-row items-center justify-between p-4">
             <Text className="text-gray-900 text-base">About</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
@@ -93,7 +135,7 @@ export default function SettingsScreen() {
           loading={isLoading}
           style={{ paddingVertical: 12 }}
         >
-          <Text style={{ fontSize: 32.4, color: '#FFFFFF' }}>Log Out</Text>
+          <Text style={{ fontSize: 30, color: '#FFFFFF' }}>Log Out</Text>
         </Button>
       </View>
     </View>
