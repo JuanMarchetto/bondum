@@ -27,7 +27,7 @@ export default function HomeScreen() {
   const router = useRouter()
   const { user, address } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
-  const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
+  const { nfts, nftCount, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
   const { rewards, refetch: refetchRewards } = useRewards('Bondum')
   const { currentStreak, totalScans, multiplier, nextMilestone } = useStreak()
@@ -51,7 +51,6 @@ export default function HomeScreen() {
     enabled: !!address,
     staleTime: 2 * 60_000,
   })
-  const avatarSize = Math.round(width * 0.24)
   const [refreshing, setRefreshing] = useState(false)
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
@@ -72,84 +71,77 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="px-5 pb-10 rounded-b-3xl min-h-[50vh]" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
-        {/* Logo */}
-        <View className="flex-row items-center justify-between" style={{ marginBottom: 36 }}>
+      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 20, backgroundColor: '#8b66df' }}>
+        {/* Logo + Bell */}
+        <View className="flex-row items-center justify-between" style={{ marginBottom: 20 }}>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-          <View className="flex-row items-center gap-3">
-            <Pressable className="p-2">
-              <BellIcon size={32} color="white" />
-            </Pressable>
-          </View>
+          <Pressable className="p-2">
+            <BellIcon size={32} color="white" />
+          </Pressable>
         </View>
 
         {/* User Info + Avatar */}
-        <View className="flex-row items-center justify-between mb-1">
-          <View className="flex-1">
-            <Text className="text-white text-6xl font-extrabold">{user?.username || 'User'}</Text>
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-1 mr-4">
+            <Text className="text-white font-extrabold" style={{ fontSize: 28 }} numberOfLines={1}>
+              {(user?.username || 'User').length > 20 ? (user?.username || 'User').slice(0, 20) + '...' : user?.username || 'User'}
+            </Text>
           </View>
-          <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
+          <Avatar source={avatarImage} size="custom" customSize={Math.round(width * 0.16)} style={{ borderWidth: 4, borderColor: 'white' }} />
         </View>
 
-        {/* Balance */}
-        <View className="flex-row items-center gap-3 mb-2">
-          <Image source={bLogo} style={{ width: 24, height: 24, resizeMode: 'contain' }} />
-          <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
-            {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
-          </Text>
-        </View>
-        
-        <View className="flex-row items-center gap-3">
-          <Image source={usdcLogo} style={{ width: 24, height: 24, resizeMode: 'contain' }} />
-          <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
-            {isTokensLoading ? '...' : (tokens.find(t => t.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
-          </Text>
-        </View>
-
-        {/* NFT Collection Card */}
-        <Pressable className="mt-9 mx-2">
-          <Card className="flex-row items-center justify-between" padding="none" style={{ padding: 24 }}>
-            <View className="flex-1">
-              <Text className="text-lg leading-tight">
-                <Text className="text-gray-400">View </Text>
-                <Text className="text-violet-500">collection</Text>
+        {/* Balances — compact row */}
+        <View className="flex-row items-center gap-4">
+          <View className="flex-row items-center gap-2">
+            <Image source={bLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
+            <Text className="text-white font-bold" style={{ fontSize: 18 }}>
+              {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
+            </Text>
+          </View>
+          {!isTokensLoading && (tokens.find(t => t.symbol === 'USDC')?.balance || 0) > 0 && (
+            <View className="flex-row items-center gap-2">
+              <Image source={usdcLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
+              <Text className="text-white font-bold" style={{ fontSize: 18 }}>
+                {(tokens.find(t => t.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
               </Text>
-              {isNftsLoading ? (
-                <Text className="text-gray-900 text-4xl font-extrabold leading-tight">Loading...</Text>
-              ) : nftCount === 0 ? (
-                <Text className="text-gray-900 text-2xl font-extrabold leading-tight">You don't have NFTs yet</Text>
-              ) : (
-                <Text className="text-gray-900 text-4xl font-extrabold leading-tight">
-                  You have {nftCount} NFT{nftCount !== 1 ? 's' : ''}
-                </Text>
-              )}
             </View>
-            {nftCount > 0 && (
+          )}
+        </View>
+
+        {/* NFT Collection — only show if user has NFTs */}
+        {nftCount > 0 && (
+          <Pressable className="mt-4">
+            <Card className="flex-row items-center justify-between" padding="none" style={{ padding: 16 }}>
+              <View className="flex-1">
+                <Text className="text-gray-900 text-lg font-bold">
+                  {nftCount} NFT{nftCount !== 1 ? 's' : ''}
+                </Text>
+              </View>
               <View className="flex-row">
                 {nfts.slice(0, 3).map((nft, index) => (
                   <View
                     key={nft.id}
-                    className="w-12 h-12 rounded-lg overflow-hidden bg-violet-100"
+                    className="w-10 h-10 rounded-lg overflow-hidden bg-violet-100"
                     style={{ marginRight: index < Math.min(nfts.length, 3) - 1 ? -8 : 0 }}
                   >
                     {nft.imageUrl ? (
                       <ExpoImage
                         source={{ uri: nft.imageUrl }}
-                        style={{ width: 48, height: 48 }}
+                        style={{ width: 40, height: 40 }}
                         contentFit="cover"
                         cachePolicy="memory-disk"
                       />
                     ) : (
-                      <View className="w-12 h-12 bg-violet-200 items-center justify-center">
+                      <View className="w-10 h-10 bg-violet-200 items-center justify-center">
                         <Text className="text-violet-500 text-xs">NFT</Text>
                       </View>
                     )}
                   </View>
                 ))}
               </View>
-            )}
-          </Card>
-        </Pressable>
+            </Card>
+          </Pressable>
+        )}
       </View>
 
       <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
