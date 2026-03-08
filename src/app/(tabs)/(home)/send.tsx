@@ -136,7 +136,7 @@ export default function SendScreen() {
               title="Transfer Sent!"
               message={`${amount || ''} ${currentToken.symbol} sent successfully.`}
               onDone={() => router.back()}
-              simplified={provider === 'privy'}
+
             />
           </View>
         </View>
