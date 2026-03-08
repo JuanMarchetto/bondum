@@ -2,81 +2,43 @@ import { View, Text, Pressable, Image, Alert } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
+import { useReward } from '../../../hooks/useRewards'
 import { addClaimedReward } from '../../../services/rewardStorage'
+import { redeemReward } from '../../../services/rewardApi'
 import { Button, Avatar, BellIcon } from '../../../components/ui'
+import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
-
-// Mock reward data - in real app, fetch from API
-const getReward = (id: string) => {
-  const rewards: Record<
-    string,
-    {
-      id: string
-      type: 'discount' | 'token' | 'nft'
-      title: string
-      value: string
-      description: string
-      cost: number
-      available: number
-    }
-  > = {
-    '1': {
-      id: '1',
-      type: 'discount',
-      title: '40% discount on your next purchase',
-      value: '40% OFF',
-      description: '40% discount on your next purchase of any product',
-      cost: 5000,
-      available: 3,
-    },
-    '2': {
-      id: '2',
-      type: 'discount',
-      title: '15% discount on your next purchase of the product',
-      value: '15% OFF',
-      description: '15% discount on your next purchase of the product',
-      cost: 10000,
-      available: 3,
-    },
-    '3': {
-      id: '3',
-      type: 'token',
-      title: 'Bonus $BONDUM tokens',
-      value: '500 $BONDUM',
-      description: 'Receive 500 bonus $BONDUM tokens',
-      cost: 2000,
-      available: 10,
-    },
-    '4': {
-      id: '4',
-      type: 'nft',
-      title: 'Exclusive Bondum NFT',
-      value: 'ULTRA RARE NFT',
-      description: 'An exclusive ultra rare Bondum NFT for your collection',
-      cost: 15000,
-      available: 1,
-    },
-  }
-  return rewards[id] || rewards['1']
-}
 
 export default function RewardDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const { user, address } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
+  const { reward: fetchedReward } = useReward(id || '1')
   const [isClaiming, setIsClaiming] = useState(false)
   const [claimed, setClaimed] = useState(false)
+  const [txSignature, setTxSignature] = useState<string | null>(null)
 
-  const reward = getReward(id || '1')
+  const reward = fetchedReward || {
+    id: id || '1',
+    brand: 'Bondum',
+    type: 'discount' as const,
+    title: 'Reward',
+    description: '',
+    value: '',
+    cost: 0,
+    available: 0,
+  }
 
   const handleClaim = async () => {
-    if (!user) {
+    if (!user || !address) {
       Alert.alert('Error', 'Please connect a wallet first.')
       return
     }
@@ -86,16 +48,33 @@ export default function RewardDetailScreen() {
     }
     setIsClaiming(true)
     try {
+      // Redeem on-chain via reward API
+      const result = await redeemReward({
+        walletAddress: address,
+        rewardId: reward.id,
+        brand: reward.brand,
+      })
+      setTxSignature(result.txSignature)
+
+      // Store locally for history
       await addClaimedReward({
         id: `reward-${reward.id}-${Date.now()}`,
-        brand: 'Bondum',
+        brand: reward.brand,
         type: reward.type,
         value: reward.value,
         claimedAt: new Date().toISOString(),
+        txSignature: result.txSignature,
       })
       setClaimed(true)
-    } catch (error) {
-      Alert.alert('Error', 'Failed to claim reward. Please try again.')
+
+      // Refresh balances and reward catalog
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+        queryClient.invalidateQueries({ queryKey: ['rewards'] })
+      }, 2000)
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Failed to claim reward. Please try again.')
     } finally {
       setIsClaiming(false)
     }
@@ -126,36 +105,47 @@ export default function RewardDetailScreen() {
 
         {/* Celebration View */}
         <View className="flex-1 items-center px-6" style={{ paddingTop: 50 }}>
-          <View className="items-center bg-white rounded-2xl shadow-sm" style={{ paddingVertical: 60, paddingHorizontal: 24, width: '100%', height: 550 }}>
-            <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>You&apos;ve Won</Text>
-            <Text className="text-center mb-6">
-              <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>A </Text>
-              <Text className="text-violet-500 font-extrabold" style={{ fontSize: 48 }}>
-                {reward.type === 'nft' ? 'ULTRA RARE ' : ''}
-              </Text>
-              <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
-            </Text>
-
-            {reward.type === 'token' ? (
-              <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
-                <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
-              </View>
-            ) : reward.type === 'nft' ? (
-              <View className="bg-violet-100 rounded-2xl p-6 mb-6 border-4 border-violet-500">
-                <View className="w-48 h-48 bg-violet-400 rounded-xl items-center justify-center">
-                  <Text className="text-white font-extrabold" style={{ fontSize: 80 }}>🎁</Text>
-                  <Text className="text-white font-bold mt-2" style={{ fontSize: 32 }}>BONDUM</Text>
-                </View>
-              </View>
+          <View className="items-center bg-white rounded-2xl shadow-sm" style={{ paddingVertical: 60, paddingHorizontal: 24, width: '100%' }}>
+            {txSignature ? (
+              <TransactionConfirmation
+                signature={txSignature}
+                title="Reward Redeemed!"
+                message={`You've won: ${reward.value}`}
+                onDone={() => router.replace('/(tabs)/(rewards)')}
+              />
             ) : (
-              <View className="bg-red-600 rounded-2xl px-12 py-8 mb-6">
-                <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
-              </View>
-            )}
+              <>
+                <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>You&apos;ve Won</Text>
+                <Text className="text-center mb-6">
+                  <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>A </Text>
+                  <Text className="text-violet-500 font-extrabold" style={{ fontSize: 48 }}>
+                    {reward.type === 'nft' ? 'ULTRA RARE ' : ''}
+                  </Text>
+                  <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
+                </Text>
 
-            <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.replace('/(tabs)/(rewards)')}>
-              <Text className="text-white font-bold" style={{ fontSize: 36 }}>Back to Rewards</Text>
-            </Button>
+                {reward.type === 'token' ? (
+                  <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
+                    <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
+                  </View>
+                ) : reward.type === 'nft' ? (
+                  <View className="bg-violet-100 rounded-2xl p-6 mb-6 border-4 border-violet-500">
+                    <View className="w-48 h-48 bg-violet-400 rounded-xl items-center justify-center">
+                      <Text className="text-white font-extrabold" style={{ fontSize: 80 }}>NFT</Text>
+                      <Text className="text-white font-bold mt-2" style={{ fontSize: 32 }}>BONDUM</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View className="bg-red-600 rounded-2xl px-12 py-8 mb-6">
+                    <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
+                  </View>
+                )}
+
+                <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.replace('/(tabs)/(rewards)')}>
+                  <Text className="text-white font-bold" style={{ fontSize: 36 }}>Back to Rewards</Text>
+                </Button>
+              </>
+            )}
           </View>
         </View>
       </View>

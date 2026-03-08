@@ -7,6 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
+import { useRewards } from '../../../hooks/useRewards'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined
@@ -25,14 +26,15 @@ export default function HomeScreen() {
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
   const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
+  const { rewards, refetch: refetchRewards } = useRewards('Bondum')
   const { width } = useWindowDimensions()
   const avatarSize = Math.round(width * 0.24)
   const [refreshing, setRefreshing] = useState(false)
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
+    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts(), refetchRewards()])
     setRefreshing(false)
-  }, [refetchBalance, refetchTokens, refetchNfts])
+  }, [refetchBalance, refetchTokens, refetchNfts, refetchRewards])
 
   const quickActions = [
     { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
@@ -41,11 +43,8 @@ export default function HomeScreen() {
     { icon: settingsIcon, label: 'Settings', onPress: () => router.push('/(tabs)/(home)/settings') },
   ]
 
-  // Mock rewards data
-  const rewards = [
-    { id: '1', title: '40% discount on your next purchase', value: '40% OFF', available: 3 },
-    { id: '2', title: 'Free shipping on orders over $50', value: 'FREE', available: 1 },
-  ]
+  // Featured rewards from API (show first 2)
+  const featuredRewards = rewards.slice(0, 2)
 
   return (
     <View className="flex-1 bg-white">
@@ -146,7 +145,7 @@ export default function HomeScreen() {
         {/* Rewards Section */}
         <View className="mb-4">
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
-            {rewards.map((reward) => (
+            {featuredRewards.map((reward) => (
               <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
                   <Text className="text-violet-500 text-lg font-bold">Reward</Text>

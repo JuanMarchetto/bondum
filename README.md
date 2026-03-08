@@ -17,7 +17,9 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 ## Features
 
 - **Dual Authentication** -- Solana Mobile Wallet Adapter (Phantom, Solflare) or Privy email-based embedded wallet
-- **QR Code Scanner** -- Scan product codes to claim on-chain rewards
+- **QR Code Scanner** -- Scan product codes to claim on-chain rewards with anti-replay verification
+- **Seed Vault Support** -- Automatic detection and integration on Solana Mobile Seeker devices
+- **Referral System** -- Invite friends and earn bonus $BONDUM tokens on-chain
 - **Token Swap** -- Jupiter aggregator integration with real-time quotes and slippage control
 - **Token Transfers** -- Send SOL or any SPL token to any address
 - **NFT Collection** -- View owned NFTs with images via DAS API + on-chain Metaplex fallback
@@ -29,8 +31,12 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 ```
 Mobile App (Expo / React Native)
   |
-  |-- Auth -------> MWA (native Solana wallet)
+  |-- Auth -------> MWA / Seed Vault (native Solana wallet)
   |                 Privy (email -> embedded wallet)
+  |
+  |-- Rewards ----> Reward API (claim validation, anti-replay)
+  |                 SPL token transfer from treasury on verified scan
+  |                 Nonce-based QR codes with expiry
   |
   |-- Balances ---> Solana RPC (getTokenAccountsByOwner)
   |                 Token Program + Token-2022 fallback
@@ -42,7 +48,19 @@ Mobile App (Expo / React Native)
   |
   |-- Transfers --> Raw SPL Token instructions (SystemProgram / ATA)
   |
-  |-- Persistence -> expo-secure-store (auth state, claimed rewards)
+  |-- Persistence -> expo-secure-store (auth state, claim history)
+
+Reward Server (Node.js)
+  |
+  |-- /claim -----> Validate QR nonce + signature
+  |                 Transfer SPL tokens from treasury wallet
+  |                 Return tx signature to app
+  |
+  |-- /redeem ----> Verify $BONDUM balance
+  |                 Execute reward redemption
+  |
+  |-- /referral --> Track referral codes
+  |                 Distribute bonus tokens to both parties
 ```
 
 ## Tech Stack
@@ -73,11 +91,11 @@ src/
 |   |   |-- (trade)/       # Token swap (Jupiter)
 |   |   |-- (rewards)/     # Rewards list and detail
 |   |   |-- (assets)/      # Token balances + NFT gallery
-|   |   |-- (profile)/     # User profile + wallet address
+|   |   |-- (profile)/     # User profile + wallet address + referral
 |   |-- scan/              # QR code scanner
 |-- components/            # Reusable UI components
 |   |-- ui/               # Base components (Button, Card, Avatar, etc.)
-|   |-- layout/           # Layout components (Header, etc.)
+|   |-- TransactionConfirmation  # Tx result with Solscan link
 |-- contexts/             # React contexts
 |   |-- AuthContext.tsx   # Authentication state (MWA + Privy + Guest)
 |-- hooks/                # Custom React hooks
@@ -85,14 +103,23 @@ src/
 |   |-- useTokenBalances  # SOL, USDC, PANICAFE balances
 |   |-- useWalletNfts     # NFT collection via DAS API
 |   |-- useSwapQuote      # Jupiter swap quotes with debounce
+|   |-- useRewards        # Reward catalog from API
+|   |-- useSeekerDevice   # Seeker / Seed Vault detection
 |-- services/             # API clients and utilities
 |   |-- solana.ts         # RPC calls, DAS, transfers
 |   |-- jupiter.ts        # Jupiter aggregator API
-|   |-- qrParser.ts       # QR code reward parser
+|   |-- rewardApi.ts      # Reward distribution API client
+|   |-- qrParser.ts       # QR code parser with nonce/expiry validation
 |   |-- storage/          # SecureStore persistence
 |-- types/                # TypeScript types
 |-- constants/            # Design tokens (colors, spacing, typography)
 |-- global.css            # Global Tailwind styles
+```
+
+```
+server/                   # Reward distribution API
+|-- index.ts              # HTTP server with claim/redeem/referral endpoints
+|-- package.json          # Server dependencies
 ```
 
 ## Getting Started

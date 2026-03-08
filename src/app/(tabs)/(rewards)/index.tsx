@@ -5,76 +5,30 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
-import { Card, Badge, Avatar, BellIcon } from '../../../components/ui'
+import { useRewards } from '../../../hooks/useRewards'
+import { Badge, Avatar, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const panicoinSvg = require('../../../assets/panicoin.svg')
 
-interface Reward {
-  id: string
-  type: 'discount' | 'token' | 'nft'
-  title: string
-  value: string
-  cost: number
-  available: number
-}
-
-const mockRewards: Reward[] = [
-  {
-    id: '1',
-    type: 'discount',
-    title: '40% discount on your next purchase',
-    value: '40% OFF',
-    cost: 5000,
-    available: 3,
-  },
-  {
-    id: '2',
-    type: 'discount',
-    title: '15% discount on your next purchase of the product',
-    value: '15% OFF',
-    cost: 10000,
-    available: 3,
-  },
-  {
-    id: '3',
-    type: 'token',
-    title: 'Bonus $BONDUM tokens',
-    value: '500 $BONDUM',
-    cost: 2000,
-    available: 10,
-  },
-  {
-    id: '4',
-    type: 'nft',
-    title: 'Exclusive Bondum NFT',
-    value: 'RARE NFT',
-    cost: 15000,
-    available: 1,
-  },
-]
-
 export default function RewardsScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
+  const { rewards: allRewards, refetch: refetchRewards } = useRewards()
   const [refreshing, setRefreshing] = useState(false)
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await refetchBalance()
+    await Promise.all([refetchBalance(), refetchRewards()])
     setRefreshing(false)
-  }, [refetchBalance])
+  }, [refetchBalance, refetchRewards])
   const [viewMode, setViewMode] = useState<'brands' | 'bondum' | 'panicafe'>('brands')
 
-  const panicafeRewards: Reward[] = [
-    { id: 'pc-1', type: 'discount', title: 'Free Coffee with any pastry purchase', value: 'FREE COFFEE', cost: 1000, available: 5 },
-    { id: 'pc-2', type: 'discount', title: '25% off any drink', value: '25% OFF', cost: 2000, available: 3 },
-    { id: 'pc-3', type: 'token', title: 'Bonus PaniCafe tokens', value: '200 PANICAFE', cost: 500, available: 10 },
-    { id: 'pc-4', type: 'discount', title: '50% off pastry of the day', value: '50% OFF', cost: 3000, available: 2 },
-  ]
+  const bondumRewards = allRewards.filter((r) => r.brand === 'Bondum')
+  const panicafeRewards = allRewards.filter((r) => r.brand === 'PaniCafe')
 
   return (
     <View className="flex-1 bg-violet-50">
@@ -144,7 +98,7 @@ export default function RewardsScreen() {
               {viewMode === 'panicafe' ? 'PaniCafe Rewards' : 'Bondum Rewards'}
             </Text>
 
-            {(viewMode === 'panicafe' ? panicafeRewards : mockRewards).map((reward) => (
+            {(viewMode === 'panicafe' ? panicafeRewards : bondumRewards).map((reward) => (
               <Pressable key={reward.id} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
                 <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
                   <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>

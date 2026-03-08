@@ -4,8 +4,21 @@ export interface ParsedQrReward {
   value: string
   title: string
   tokenAmount?: number
+  nonce?: string
+  exp?: number
+  sig?: string
 }
 
+/**
+ * Parses QR code data into a reward object.
+ * Supports three formats:
+ *   1. JSON: { brand, type, value, title?, tokenAmount?, nonce?, exp?, sig? }
+ *   2. Deep link: bondum://?brand=X&type=X&value=X&tokens=X&nonce=X&exp=X&sig=X
+ *   3. Fallback: any scanned data → generic 100 $BONDUM reward
+ *
+ * When nonce/exp/sig are present, the reward server validates them
+ * to prevent replay attacks and expired QR codes.
+ */
 export function parseQrCode(data: string): ParsedQrReward | null {
   if (!data || typeof data !== 'string') return null
 
@@ -13,12 +26,19 @@ export function parseQrCode(data: string): ParsedQrReward | null {
   try {
     const json = JSON.parse(data)
     if (json.brand && json.type && json.value) {
+      // Check expiry if present
+      if (json.exp && Date.now() > json.exp * 1000) {
+        return null // Expired QR code
+      }
       return {
         brand: json.brand,
         type: json.type,
         value: json.value,
         title: json.title || `${json.brand} Reward`,
         tokenAmount: json.tokenAmount,
+        nonce: json.nonce,
+        exp: json.exp,
+        sig: json.sig,
       }
     }
   } catch {
@@ -34,7 +54,16 @@ export function parseQrCode(data: string): ParsedQrReward | null {
       const value = url.searchParams.get('value') || '10% OFF'
       const title = url.searchParams.get('title') || `${brand} Reward`
       const tokenAmount = url.searchParams.get('tokens') ? Number(url.searchParams.get('tokens')) : undefined
-      return { brand, type, value, title, tokenAmount }
+      const nonce = url.searchParams.get('nonce') || undefined
+      const exp = url.searchParams.get('exp') ? Number(url.searchParams.get('exp')) : undefined
+      const sig = url.searchParams.get('sig') || undefined
+
+      // Check expiry if present
+      if (exp && Date.now() > exp * 1000) {
+        return null
+      }
+
+      return { brand, type, value, title, tokenAmount, nonce, exp, sig }
     } catch {
       // Invalid URL, continue
     }
