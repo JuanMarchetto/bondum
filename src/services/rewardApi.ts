@@ -31,6 +31,37 @@ export interface RedeemResult {
   txSignature: string | null
   rewardId: string
   message: string
+  requires2Step?: boolean
+}
+
+export interface RedeemRequestResult {
+  serializedTransaction: string
+  rewardId: string
+  cost: number
+  lastValidBlockHeight: number
+}
+
+export interface StreakInfo {
+  currentStreak: number
+  longestStreak: number
+  totalScans: number
+  multiplier: number
+  nextMilestone: { days: number; bonus: number; label: string } | null
+}
+
+export interface DailyChallenge {
+  type: string
+  description: string
+  reward: number
+  target: number
+  dayOfYear: number
+}
+
+export interface AiRecommendation {
+  recommendation: string
+  reasoning: string
+  suggestedReward: string | null
+  urgency: 'low' | 'medium' | 'high'
 }
 
 /**
@@ -143,6 +174,101 @@ export async function getReferralStats(walletAddress: string): Promise<{
   }
 }
 
+/**
+ * Step 1 of 2-step redemption: request a partially-signed transaction.
+ */
+export async function requestRedemption(params: {
+  walletAddress: string
+  rewardId: string
+  brand: string
+}): Promise<RedeemRequestResult> {
+  const response = await fetch(`${REWARD_API_URL}/redeem/request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(error.message || 'Failed to request redemption')
+  }
+
+  return response.json()
+}
+
+/**
+ * Step 2 of 2-step redemption: submit the user-signed transaction.
+ */
+export async function submitSignedRedemption(params: {
+  signedTransaction: string
+  rewardId: string
+}): Promise<RedeemResult> {
+  const response = await fetch(`${REWARD_API_URL}/redeem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Redemption failed' }))
+    throw new Error(error.message || 'Failed to submit signed redemption')
+  }
+
+  return response.json()
+}
+
+/**
+ * Fetches server-side streak data for a wallet.
+ */
+export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
+  try {
+    const response = await fetch(`${REWARD_API_URL}/streak/${walletAddress}`)
+    if (!response.ok) throw new Error()
+    return response.json()
+  } catch {
+    return { currentStreak: 0, longestStreak: 0, totalScans: 0, multiplier: 1.0, nextMilestone: null }
+  }
+}
+
+/**
+ * Fetches today's daily challenge.
+ */
+export async function fetchDailyChallenge(): Promise<DailyChallenge> {
+  try {
+    const response = await fetch(`${REWARD_API_URL}/daily-challenge`)
+    if (!response.ok) throw new Error()
+    return response.json()
+  } catch {
+    return { type: 'scan', description: 'Scan a QR code today', reward: 100, target: 1, dayOfYear: 0 }
+  }
+}
+
+/**
+ * Fetches an AI-powered reward recommendation.
+ */
+export async function fetchAiRecommendation(params: {
+  walletAddress: string
+  streak: number
+  balance: number
+}): Promise<AiRecommendation> {
+  try {
+    const response = await fetch(`${REWARD_API_URL}/ai/recommend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    })
+    if (!response.ok) throw new Error()
+    return response.json()
+  } catch {
+    return {
+      recommendation: 'Scan a QR code to start earning rewards with streak multipliers!',
+      reasoning: 'Default recommendation',
+      suggestedReward: null,
+      urgency: 'low',
+    }
+  }
+}
+
 // ─── Offline Fallback Catalog ────────────────────────────────────────────────
 
 function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
@@ -191,47 +317,17 @@ function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
   ]
 
   const panicafeRewards: RewardCatalogItem[] = [
-    {
-      id: 'pc-1',
-      brand: 'PaniCafe',
-      type: 'discount',
-      title: 'Free Coffee with any pastry purchase',
-      description: 'Get a free coffee when you buy any pastry',
-      value: 'FREE COFFEE',
-      cost: 1000,
-      available: 5,
-    },
-    {
-      id: 'pc-2',
-      brand: 'PaniCafe',
-      type: 'discount',
-      title: '25% off any drink',
-      description: '25% discount on any drink at PaniCafe',
-      value: '25% OFF',
-      cost: 2000,
-      available: 3,
-    },
-    {
-      id: 'pc-3',
-      brand: 'PaniCafe',
-      type: 'token',
-      title: 'Bonus PaniCafe tokens',
-      description: 'Receive 200 bonus PANICAFE tokens',
-      value: '200 PANICAFE',
-      cost: 500,
-      available: 10,
-      tokenAmount: 200,
-    },
-    {
-      id: 'pc-4',
-      brand: 'PaniCafe',
-      type: 'discount',
-      title: '50% off pastry of the day',
-      description: '50% discount on the pastry of the day',
-      value: '50% OFF',
-      cost: 3000,
-      available: 2,
-    },
+    { id: 'pc-1', brand: 'PaniCafe', type: 'discount', title: 'Free Coffee with any pastry purchase', description: 'Get a free coffee when you buy any pastry at PaniCafe', value: 'FREE COFFEE', cost: 1000, available: 5 },
+    { id: 'pc-2', brand: 'PaniCafe', type: 'discount', title: '25% off any drink', description: '25% discount on any drink at PaniCafe', value: '25% OFF', cost: 2000, available: 3 },
+    { id: 'pc-3', brand: 'PaniCafe', type: 'token', title: 'Bonus PaniCafe tokens', description: 'Receive 200 bonus PANICAFE tokens', value: '200 PANICAFE', cost: 500, available: 10, tokenAmount: 200 },
+    { id: 'pc-4', brand: 'PaniCafe', type: 'discount', title: '50% off pastry of the day', description: '50% discount on the pastry of the day', value: '50% OFF', cost: 3000, available: 2 },
+    { id: 'pc-5', brand: 'PaniCafe', type: 'discount', title: 'Free Café', description: 'Redeem for a free Café at any PaniCafe location', value: 'FREE CAFÉ', cost: 30000, available: 5 },
+    { id: 'pc-6', brand: 'PaniCafe', type: 'discount', title: 'Free Medialuna or Factura', description: 'Redeem for a free Medialuna or Factura pastry', value: 'MEDIALUNA', cost: 20000, available: 8 },
+    { id: 'pc-7', brand: 'PaniCafe', type: 'discount', title: 'Free Croissant', description: 'Redeem for a free Croissant at PaniCafe', value: 'CROISSANT', cost: 40000, available: 4 },
+    { id: 'pc-8', brand: 'PaniCafe', type: 'discount', title: 'Free Jugo Natural', description: 'Redeem for a fresh natural juice at PaniCafe', value: 'JUGO NATURAL', cost: 40000, available: 4 },
+    { id: 'pc-9', brand: 'PaniCafe', type: 'discount', title: 'Desayuno Tradicional', description: 'Redeem for a full traditional breakfast at PaniCafe', value: 'DESAYUNO', cost: 70000, available: 2 },
+    { id: 'pc-10', brand: 'PaniCafe', type: 'discount', title: 'Helado Dos Bochas', description: 'Redeem for a two-scoop ice cream at PaniCafe', value: 'HELADO', cost: 50000, available: 3 },
+    { id: 'pc-11', brand: 'PaniCafe', type: 'discount', title: '1/4 Kilo de Helado', description: 'Redeem for a quarter kilo of ice cream', value: '1/4 KG HELADO', cost: 80000, available: 2 },
   ]
 
   const all = [...bondumRewards, ...panicafeRewards]

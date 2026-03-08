@@ -7,9 +7,14 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useReward } from '../../../hooks/useRewards'
 import { addClaimedReward } from '../../../services/rewardStorage'
-import { redeemReward } from '../../../services/rewardApi'
+import { requestRedemption, redeemReward } from '../../../services/rewardApi'
 import { Button, Avatar, BellIcon } from '../../../components/ui'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
+import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useEmbeddedSolanaWallet } from '@privy-io/expo'
+import { VersionedTransaction, Connection } from '@solana/web3.js'
+import { getTransactionDecoder } from '@solana/kit'
+import { Buffer } from 'buffer'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -19,7 +24,7 @@ export default function RewardDetailScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { user, address } = useAuth()
+  const { user, address, provider } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const { reward: fetchedReward } = useReward(id || '1')
   const [isClaiming, setIsClaiming] = useState(false)
@@ -37,6 +42,9 @@ export default function RewardDetailScreen() {
     available: 0,
   }
 
+  const mobileWallet = useMobileWallet()
+  const embeddedSolanaWallet = useEmbeddedSolanaWallet()
+
   const handleClaim = async () => {
     if (!user || !address) {
       Alert.alert('Error', 'Please connect a wallet first.')
@@ -48,7 +56,70 @@ export default function RewardDetailScreen() {
     }
     setIsClaiming(true)
     try {
-      // Redeem on-chain via reward API
+      // Step 1: Request partially-signed transaction from server
+      const redemptionRequest = await requestRedemption({
+        walletAddress: address,
+        rewardId: reward.id,
+        brand: reward.brand,
+      })
+
+      // Step 2: Sign with user's wallet
+      const txBytes = Buffer.from(redemptionRequest.serializedTransaction, 'base64')
+
+      if (provider === 'solana' && mobileWallet.account) {
+        // MWA signing
+        const decoder = getTransactionDecoder()
+        const decodedTx = decoder.decode(txBytes)
+        const signatures = await mobileWallet.signAndSendTransaction(decodedTx, BigInt(0))
+        if (!signatures || signatures.length === 0) throw new Error('Wallet did not return a signature')
+        const sigArray = Array.from(signatures[0] as Uint8Array)
+        const sig = sigArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+        setTxSignature(sig)
+
+        // Store locally for history
+        await addClaimedReward({
+          id: `reward-${reward.id}-${Date.now()}`,
+          brand: reward.brand,
+          type: reward.type,
+          value: reward.value,
+          claimedAt: new Date().toISOString(),
+          txSignature: sig,
+        })
+        setClaimed(true)
+
+        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+        queryClient.invalidateQueries({ queryKey: ['rewards'] })
+        return
+      } else if (provider === 'privy' && embeddedSolanaWallet.status === 'connected') {
+        // Privy signing
+        const transaction = VersionedTransaction.deserialize(txBytes)
+        const RPC_URL = process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+        const conn = new Connection(RPC_URL, 'confirmed')
+        const privyProvider = await embeddedSolanaWallet.getProvider()
+        const result = await privyProvider.request({
+          method: 'signAndSendTransaction',
+          params: { transaction, connection: conn },
+        })
+        setTxSignature(result.signature)
+
+        await addClaimedReward({
+          id: `reward-${reward.id}-${Date.now()}`,
+          brand: reward.brand,
+          type: reward.type,
+          value: reward.value,
+          claimedAt: new Date().toISOString(),
+          txSignature: result.signature,
+        })
+        setClaimed(true)
+
+        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+        queryClient.invalidateQueries({ queryKey: ['rewards'] })
+        return
+      }
+
+      // Fallback: legacy server-side redemption
       const result = await redeemReward({
         walletAddress: address,
         rewardId: reward.id,
@@ -56,7 +127,6 @@ export default function RewardDetailScreen() {
       })
       setTxSignature(result.txSignature)
 
-      // Store locally for history
       await addClaimedReward({
         id: `reward-${reward.id}-${Date.now()}`,
         brand: reward.brand,
@@ -67,7 +137,6 @@ export default function RewardDetailScreen() {
       })
       setClaimed(true)
 
-      // Refresh balances and reward catalog
       queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
       queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
       queryClient.invalidateQueries({ queryKey: ['rewards'] })

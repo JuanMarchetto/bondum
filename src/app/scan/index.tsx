@@ -28,6 +28,7 @@ export default function ScanScreen() {
   const [rewardClaimed, setRewardClaimed] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
   const { logScan } = useStreak()
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
@@ -60,9 +61,22 @@ export default function ScanScreen() {
         })
         setTxSignature(result.txSignature)
 
+        // Capture streak info from server response
+        const r = result as any
+        if (r.multiplier) {
+          setStreakInfo({
+            multiplier: r.multiplier,
+            streakBonus: r.streakBonus || 0,
+            currentStreak: r.currentStreak || 0,
+            milestoneReached: r.milestoneReached || null,
+            milestoneBonus: r.milestoneBonus || 0,
+          })
+        }
+
         // Invalidate balance caches so they refresh
         queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
         queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+        queryClient.invalidateQueries({ queryKey: ['serverStreak'] })
       }
 
       // Record scan for streak tracking
@@ -79,15 +93,7 @@ export default function ScanScreen() {
       })
       setRewardClaimed(true)
     } catch (error: any) {
-      // If API fails, still save locally
-      await addClaimedReward({
-        id: Date.now().toString(),
-        brand: parsedReward.brand,
-        type: parsedReward.type,
-        value: parsedReward.value,
-        claimedAt: new Date().toISOString(),
-      })
-      setRewardClaimed(true)
+      Alert.alert('Claim Failed', error?.message || 'Failed to claim reward. Please try again.')
     } finally {
       setIsClaiming(false)
     }
@@ -166,13 +172,33 @@ export default function ScanScreen() {
           <View className="w-full items-center py-8 bg-white rounded-3xl" style={{ padding: 24 }}>
             {rewardClaimed ? (
               txSignature ? (
-                <TransactionConfirmation
-                  signature={txSignature}
-                  title="Reward Claimed On-Chain!"
-                  message={`${parsedReward.value} from ${parsedReward.brand} has been sent to your wallet.`}
-                  onDone={() => router.replace('/(tabs)/(rewards)')}
-                  onScanAnother={resetScanner}
-                />
+                <>
+                  <TransactionConfirmation
+                    signature={txSignature}
+                    title="Reward Claimed On-Chain!"
+                    message={`${parsedReward.value} from ${parsedReward.brand} has been sent to your wallet.`}
+                    onDone={() => router.replace('/(tabs)/(rewards)')}
+                    onScanAnother={resetScanner}
+                  />
+                  {streakInfo && (
+                    <View className="w-full mt-4">
+                      {streakInfo.streakBonus > 0 && (
+                        <View className="bg-violet-50 rounded-xl px-4 py-3 mb-2" style={{ borderWidth: 1, borderColor: '#ddd6fe' }}>
+                          <Text className="text-violet-700 font-bold text-center" style={{ fontSize: 14 }}>
+                            🔥 Streak Bonus: +{streakInfo.streakBonus} tokens ({streakInfo.multiplier.toFixed(1)}x multiplier!)
+                          </Text>
+                        </View>
+                      )}
+                      {streakInfo.milestoneReached && (
+                        <View className="bg-amber-50 rounded-xl px-4 py-3" style={{ borderWidth: 1, borderColor: '#fde68a' }}>
+                          <Text className="text-amber-700 font-bold text-center" style={{ fontSize: 14 }}>
+                            🎉 {streakInfo.milestoneReached}! +{streakInfo.milestoneBonus} bonus tokens!
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </>
               ) : (
                 <>
                   <Text className="text-green-500 mb-4" style={{ fontSize: 100 }}>{'\u2713'}</Text>
