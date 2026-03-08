@@ -6,6 +6,7 @@ import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { Button } from '../../../components/ui'
+import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { TOKENS, type TokenSymbol } from '../../../hooks/useSwapQuote'
 import { buildTransferTransaction } from '../../../services/solana'
 import { getTransactionDecoder } from '@solana/kit'
@@ -37,6 +38,7 @@ export default function SendScreen() {
   const [amount, setAmount] = useState('')
   const [selectedToken, setSelectedToken] = useState(0)
   const [isSending, setIsSending] = useState(false)
+  const [completedTx, setCompletedTx] = useState<string | null>(null)
 
   const currentToken = TOKEN_LIST[selectedToken]
   const tokenBalance = tokens.find((t) => t.symbol === currentToken.symbol)?.balance || 0
@@ -105,7 +107,7 @@ export default function SendScreen() {
 
       setAmount('')
       setRecipient('')
-      Alert.alert('Transfer Successful!', `Signature: ${signature.slice(0, 20)}...`)
+      setCompletedTx(signature)
 
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
@@ -118,13 +120,37 @@ export default function SendScreen() {
     }
   }
 
+  if (completedTx) {
+    return (
+      <View className="flex-1 bg-violet-50">
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+          <View className="flex-row items-center justify-between">
+            <View className="w-10" />
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+            <View className="w-10" />
+          </View>
+        </View>
+        <View className="flex-1 justify-center px-4">
+          <View className="bg-white rounded-3xl">
+            <TransactionConfirmation
+              signature={completedTx}
+              title="Transfer Sent!"
+              message={`${amount || ''} ${currentToken.symbol} sent successfully.`}
+              onDone={() => router.back()}
+            />
+          </View>
+        </View>
+      </View>
+    )
+  }
+
   return (
     <View className="flex-1 bg-violet-50">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="flex-row items-center justify-between">
           <Pressable onPress={() => router.back()} className="p-2 -ml-2">
-            <Text className="text-white text-3xl">←</Text>
+            <Text className="text-white text-3xl">{'\u2190'}</Text>
           </Pressable>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
           <View className="w-10" />

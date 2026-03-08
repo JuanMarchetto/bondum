@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { Button, Avatar, BellIcon } from '../../../components/ui'
+import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { useSwapQuote, type TokenSymbol, TOKENS } from '../../../hooks/useSwapQuote'
 import { getSwapTransaction } from '../../../services/jupiter'
 import { getTransactionDecoder } from '@solana/kit'
@@ -45,6 +46,7 @@ export default function TradeScreen() {
   const [fromAmount, setFromAmount] = useState('')
   const [showTokenPicker, setShowTokenPicker] = useState<'from' | 'to' | null>(null)
   const [isSwapping, setIsSwapping] = useState(false)
+  const [completedSwapTx, setCompletedSwapTx] = useState<string | null>(null)
 
   const { quote, toAmount, priceImpact, isLoading: isQuoteLoading, error: quoteError } = useSwapQuote(
     fromToken,
@@ -155,12 +157,9 @@ export default function TradeScreen() {
         throw new Error('No wallet connected. Please reconnect your wallet.')
       }
 
-      // Success — refresh balances after a short delay for on-chain finality
+      // Success — show transaction confirmation
       setFromAmount('')
-      Alert.alert(
-        'Swap Successful!',
-        `Transaction signature:\n${signature.slice(0, 20)}...`,
-      )
+      setCompletedSwapTx(signature)
 
       // Wait 2s for the transaction to finalize, then invalidate all balance caches
       // This forces a fresh refetch on every screen that uses these queries
@@ -179,6 +178,28 @@ export default function TradeScreen() {
   const fromTokenInfo = TOKENS[fromToken]
   const toTokenInfo = TOKENS[toToken]
   const fromBalance = getTokenBalance(fromToken)
+
+  if (completedSwapTx) {
+    return (
+      <View className="flex-1 bg-violet-50">
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+          <View className="items-center mb-4">
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+          </View>
+        </View>
+        <View className="flex-1 justify-center px-4">
+          <View className="bg-white rounded-3xl">
+            <TransactionConfirmation
+              signature={completedSwapTx}
+              title="Swap Successful!"
+              message={`Swapped ${fromToken} for ${toToken}`}
+              onDone={() => setCompletedSwapTx(null)}
+            />
+          </View>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View className="flex-1 bg-violet-50">

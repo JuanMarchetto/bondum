@@ -1,5 +1,6 @@
 import { View, Text, Pressable, useWindowDimensions, Image, Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -14,6 +15,7 @@ const usdcLogo = require('../../../assets/usdc-logo.png')
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
+  const router = useRouter()
   const { user, address } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const { tokens, isLoading: isTokensLoading } = useTokenBalances()
@@ -88,6 +90,19 @@ export default function ProfileScreen() {
           <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
             <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
           </View>
+        </Pressable>
+
+        {/* Referral Section */}
+        <Pressable
+          onPress={() => router.push('/(tabs)/(profile)/referral')}
+          className="bg-violet-500 rounded-2xl mt-6 flex-row items-center justify-between"
+          style={{ padding: 18 }}
+        >
+          <View className="flex-1">
+            <Text className="text-white font-bold text-lg">Invite Friends</Text>
+            <Text className="text-violet-200 text-sm">Earn bonus $BONDUM for each referral</Text>
+          </View>
+          <Text className="text-white text-2xl">{'>'}</Text>
         </Pressable>
       </View>
     </View>
