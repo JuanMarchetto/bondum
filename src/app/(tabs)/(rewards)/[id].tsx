@@ -10,6 +10,8 @@ import { requestRedemption, redeemReward } from '../../../services/rewardApi'
 import { Button } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
+import { PanicafeCouponCard } from '../../../components/PanicafeCouponCard'
+import { isPanicafeReward } from '../../../utils/panicafeCoupons'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
@@ -160,7 +162,7 @@ export default function RewardDetailScreen() {
                 title="Reward Redeemed!"
                 message={`You've won: ${reward.value}`}
                 onDone={() => router.replace('/(tabs)/(rewards)')}
-                simplified={provider === 'privy'}
+
               />
             ) : (
               <>
@@ -173,7 +175,9 @@ export default function RewardDetailScreen() {
                   <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
                 </Text>
 
-                {reward.type === 'token' ? (
+                {isPanicafeReward(reward.brand) ? (
+                  <PanicafeCouponCard value={reward.value} cost={reward.cost} size="lg" style={{ marginBottom: 24 }} />
+                ) : reward.type === 'token' ? (
                   <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
                     <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
                   </View>
@@ -215,7 +219,9 @@ export default function RewardDetailScreen() {
           <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
             <Text className="text-4xl font-extrabold">
               <Text className="text-gray-900">{reward.cost.toLocaleString()} </Text>
-              <Text style={{ color: '#8b5cf6' }}>$BONDUM</Text>
+              <Text style={{ color: isPanicafeReward(reward.brand) ? '#d97706' : '#8b5cf6' }}>
+                {isPanicafeReward(reward.brand) ? '$PANICAFE' : '$BONDUM'}
+              </Text>
             </Text>
             <View style={{ borderWidth: 4, borderColor: '#8b5cf6', borderRadius: 12, backgroundColor: 'white', paddingHorizontal: 12, paddingVertical: 4 }}>
               <Text className="text-2xl font-extrabold" style={{ color: '#8b5cf6' }}>{reward.available} available</Text>
@@ -224,11 +230,15 @@ export default function RewardDetailScreen() {
 
           <Text className="text-gray-900 font-semibold text-3xl" style={{ marginTop: 12, marginBottom: 48 }}>{reward.description}</Text>
 
-          <View
-            className={`rounded-xl py-32 items-center mb-6 ${reward.type === 'nft' ? 'bg-gray-1000' : 'bg-red-600'}`}
-          >
-            <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
-          </View>
+          {isPanicafeReward(reward.brand) ? (
+            <PanicafeCouponCard value={reward.value} cost={reward.cost} size="lg" style={{ marginBottom: 24 }} />
+          ) : (
+            <View
+              className={`rounded-xl py-32 items-center mb-6 ${reward.type === 'nft' ? 'bg-gray-1000' : 'bg-red-600'}`}
+            >
+              <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
+            </View>
+          )}
 
           <View className="items-center">
             <Button

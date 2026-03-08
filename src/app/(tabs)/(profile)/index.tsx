@@ -1,4 +1,4 @@
-import { View, Text, Pressable, useWindowDimensions, Image } from 'react-native'
+import { View, Text, Pressable, useWindowDimensions, Image, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
@@ -49,7 +49,7 @@ export default function ProfileScreen() {
         {/* User Info + Avatar */}
         <View className="flex-row items-center justify-between mb-1">
           <View className="flex-1">
-            <Text className="text-white text-6xl font-extrabold">{user?.username || 'User'}</Text>
+            <Text className="text-white text-6xl font-extrabold" numberOfLines={1}>{(user?.username || 'User').length > 16 ? (user?.username || 'User').slice(0, 16) + '...' : user?.username || 'User'}</Text>
           </View>
           <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
         </View>
@@ -71,35 +71,58 @@ export default function ProfileScreen() {
       </View>
 
       {/* White content area */}
-      <View className="flex-1 px-5 pt-6">
-        {provider !== 'privy' && (
-          <>
-            <Text className="text-gray-500 text-sm font-semibold mb-2">WALLET ADDRESS</Text>
-            <Pressable
-              onPress={handleCopyAddress}
-              className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
-              style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}
-            >
-              <View className="flex-1 mr-3">
-                <Text className="text-gray-900 font-bold text-lg mb-1">{truncatedAddress}</Text>
-                <Text className="text-gray-400 text-xs" numberOfLines={1} ellipsizeMode="middle">
-                  {address || ''}
-                </Text>
-              </View>
-              <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
-                <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
-              </View>
-            </Pressable>
-          </>
-        )}
+      <ScrollView className="flex-1 px-5 pt-6" contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Wallet Address — visible for all users */}
+        <Text className="text-gray-500 text-sm font-semibold mb-2">WALLET ADDRESS</Text>
+        <Pressable
+          onPress={handleCopyAddress}
+          className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
+          style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}
+        >
+          <View className="flex-1 mr-3">
+            <Text className="text-gray-900 font-bold text-lg mb-1">{truncatedAddress}</Text>
+            <Text className="text-gray-400 text-xs" numberOfLines={1} ellipsizeMode="middle">
+              {address || ''}
+            </Text>
+          </View>
+          <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
+            <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
+          </View>
+        </Pressable>
 
-        {provider === 'privy' && (
+        {/* Wallet Recovery / Security */}
+        <Text className="text-gray-500 text-sm font-semibold mb-2 mt-6">WALLET SECURITY</Text>
+        {provider === 'privy' ? (
           <View className="bg-green-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#bbf7d0' }}>
-            <Text className="text-green-700 font-bold text-lg mb-1">Wallet Connected</Text>
-            <Text className="text-green-600 text-sm">Your wallet is managed securely. All transactions are verified on the Solana blockchain.</Text>
+            <Text className="text-green-700 font-bold text-lg mb-2">Embedded Wallet (Privy)</Text>
+            <Text className="text-green-600 text-sm mb-3">
+              Your wallet is managed securely by Privy. You can recover it by logging in with your email on any device.
+            </Text>
+            <View className="bg-white rounded-xl" style={{ padding: 14, borderWidth: 1, borderColor: '#d1fae5' }}>
+              <Text className="text-gray-700 text-sm font-semibold mb-1">Recovery method</Text>
+              <Text className="text-gray-500 text-sm">Log in with your email ({user?.username}) to recover your wallet on a new device. No seed phrase needed.</Text>
+            </View>
+          </View>
+        ) : provider === 'solana' ? (
+          <View className="bg-amber-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#fde68a' }}>
+            <Text className="text-amber-700 font-bold text-lg mb-2">External Wallet</Text>
+            <Text className="text-amber-600 text-sm mb-3">
+              Your wallet is managed by your wallet app (Phantom, Solflare, or Seed Vault).
+            </Text>
+            <View className="bg-white rounded-xl" style={{ padding: 14, borderWidth: 1, borderColor: '#fef3c7' }}>
+              <Text className="text-gray-700 text-sm font-semibold mb-1">Seed Phrase Recovery</Text>
+              <Text className="text-gray-500 text-sm">
+                Open your wallet app to view and back up your seed phrase. Never share it with anyone. Store it offline in a safe place.
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <View className="bg-gray-100 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}>
+            <Text className="text-gray-700 font-bold text-lg mb-1">Guest Mode</Text>
+            <Text className="text-gray-500 text-sm">Connect a wallet to access on-chain features and secure your account.</Text>
           </View>
         )}
-      </View>
+      </ScrollView>
     </View>
   )
 }

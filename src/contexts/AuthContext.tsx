@@ -11,6 +11,7 @@ interface AuthContextValue extends AuthState {
   verifyPrivyOtp: (code: string) => Promise<void>
   connectAsGuest: () => void
   disconnect: () => Promise<void>
+  getPrivyAccessToken: () => Promise<string | null>
   isLoading: boolean
   pendingPrivyEmail: string | null
 }
@@ -33,7 +34,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
 
   const queryClient = useQueryClient()
   const solanaWallet = useMobileWallet()
-  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout } = usePrivy()
+  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout, getAccessToken } = usePrivy()
   const { sendCode, loginWithCode, state: privyLoginState } = useLoginWithEmail()
   const embeddedWallet = useEmbeddedSolanaWallet()
 
@@ -217,6 +218,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
         verifyPrivyOtp,
         connectAsGuest,
         disconnect,
+        getPrivyAccessToken: getAccessToken,
         isLoading: isLoading || privyLoginState.status === 'sending-code',
         pendingPrivyEmail,
       }}
