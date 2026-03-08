@@ -11,7 +11,6 @@ import { TransactionConfirmation } from '../../components/TransactionConfirmatio
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
 import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
-import { PanicafeCouponCard } from '../../components/PanicafeCouponCard'
 import { isPanicafeReward } from '../../utils/panicafeCoupons'
 import { useStreak } from '../../hooks/useStreak'
 
@@ -177,9 +176,6 @@ export default function ScanScreen() {
               <View className="bg-white rounded-3xl flex-1" style={{ padding: 24, maxHeight: 520 }}>
                 {txSignature ? (
                   <>
-                    {isPanicafeReward(parsedReward.brand) && (
-                      <PanicafeCouponCard value={parsedReward.value} size="sm" style={{ marginBottom: 12 }} />
-                    )}
                     <TransactionConfirmation
                       signature={txSignature}
                       title="Reward Claimed!"
@@ -240,27 +236,23 @@ export default function ScanScreen() {
                 </Text>
 
                 {/* Value display */}
-                {isPanicafeReward(parsedReward.brand) ? (
-                  <PanicafeCouponCard value={parsedReward.value} size="md" style={{ width: '100%', marginBottom: 8 }} />
-                ) : (
-                  <View
-                    className="rounded-2xl items-center justify-center w-full mb-2"
-                    style={{
-                      paddingVertical: 32,
-                      paddingHorizontal: 24,
-                      backgroundColor: parsedReward.type === 'nft' ? '#111827' : '#7c3aed',
-                    }}
-                  >
-                    <Text className="text-white font-extrabold text-center" style={{ fontSize: 32 }}>
-                      {parsedReward.tokenAmount ? `${parsedReward.tokenAmount} TOKENS` : parsedReward.value}
+                <View
+                  className="rounded-2xl items-center justify-center w-full mb-2"
+                  style={{
+                    paddingVertical: 32,
+                    paddingHorizontal: 24,
+                    backgroundColor: isPanicafeReward(parsedReward.brand) ? '#d97706' : parsedReward.type === 'nft' ? '#111827' : '#7c3aed',
+                  }}
+                >
+                  <Text className="text-white font-extrabold text-center" style={{ fontSize: 32 }}>
+                    {parsedReward.tokenAmount ? `${parsedReward.tokenAmount} TOKENS` : parsedReward.value}
+                  </Text>
+                  {parsedReward.brand !== 'Bondum' && (
+                    <Text className="text-white/70 font-medium mt-1" style={{ fontSize: 14 }}>
+                      ${parsedReward.brand === 'PaniCafe' ? 'PANICAFE' : parsedReward.brand}
                     </Text>
-                    {parsedReward.brand !== 'Bondum' && (
-                      <Text className="text-violet-200 font-medium mt-1" style={{ fontSize: 14 }}>
-                        {parsedReward.brand}
-                      </Text>
-                    )}
-                  </View>
-                )}
+                  )}
+                </View>
 
                 {/* Token type label */}
                 <Text className="text-gray-400 text-xs uppercase mb-6">{parsedReward.type} reward</Text>

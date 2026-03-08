@@ -11,7 +11,7 @@ interface TransactionConfirmationProps {
   onScanAnother?: () => void
 }
 
-const SOLSCAN_BASE = 'https://solscan.io/tx'
+const EXPLORER_BASE = 'https://orb.helius.dev/tx'
 
 /**
  * Returns true if the signature looks like a real on-chain transaction
@@ -32,8 +32,8 @@ export function TransactionConfirmation({
   const isRealTx = isOnChainSignature(signature)
   const truncatedSig = `${signature.slice(0, 12)}...${signature.slice(-8)}`
 
-  const openSolscan = () => {
-    Linking.openURL(`${SOLSCAN_BASE}/${signature}`)
+  const openExplorer = () => {
+    Linking.openURL(`${EXPLORER_BASE}/${signature}`)
   }
 
   const copySignature = async () => {
@@ -69,8 +69,8 @@ export function TransactionConfirmation({
       )}
 
       {isRealTx && (
-        <Pressable onPress={openSolscan} className="mb-6">
-          <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
+        <Pressable onPress={openExplorer} className="mb-6">
+          <Text className="text-violet-500 font-semibold">View on Orb {'>'}</Text>
         </Pressable>
       )}
 

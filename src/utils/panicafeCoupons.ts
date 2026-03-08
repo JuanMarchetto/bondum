@@ -55,6 +55,24 @@ export function getPanicafeCouponImage(value?: string, cost?: number): ImageSour
   return COUPON_IMAGES.cafe
 }
 
+// Map reward value → PaniCafe API rewardKind (for coupon redemption)
+const VALUE_TO_REWARD_KIND: Record<string, string> = {
+  'FREE COFFEE': 'coupon_cafe',
+  'FREE CAFÉ': 'coupon_cafe',
+  'FREE CAFE': 'coupon_cafe',
+  'MEDIALUNA': 'coupon_medialuna',
+  'CROISSANT': 'coupon_croissant',
+  'JUGO NATURAL': 'coupon_jugos',
+  'DESAYUNO': 'coupon_desayunotradi',
+  'HELADO': 'coupon_helado_dos',
+  '1/4 KG HELADO': 'coupon_helado_cuarto',
+  '200 PANICAFE': 'coupon_bolsa',
+}
+
+export function getPanicafeRewardKind(value: string): string | null {
+  return VALUE_TO_REWARD_KIND[value.toUpperCase()] || null
+}
+
 export function isPanicafeReward(brand?: string): boolean {
   return brand === 'PaniCafe'
 }
