@@ -221,7 +221,7 @@ npm run build
 
 | Program | Address | Description |
 |---------|---------|-------------|
-| scan_guard | `9mPFAEyMGV3BD7CusGhvPRo1zxm3PsBMX71JiHyG4Zu1` | On-chain nonce replay guard — prevents double-claiming of QR scan rewards using PDA-based nonce records |
+| scan_guard | TBA | On-chain nonce replay guard — prevents double-claiming of QR scan rewards using PDA-based nonce records |
 
 Built with [Anchor](https://www.anchor-lang.com/) 0.32.1. Source: [`programs/scan_guard/src/lib.rs`](programs/scan_guard/src/lib.rs)
 
