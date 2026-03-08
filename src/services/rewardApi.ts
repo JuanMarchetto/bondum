@@ -119,15 +119,14 @@ export async function claimPanicafeBox(params: {
   userWallet: string
   privyToken?: string | null
 }): Promise<ClaimResult> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (params.privyToken) {
-    headers['Cookie'] = `privy-token=${params.privyToken}`
-  }
-
   const response = await fetch(`${PANICAFE_API_URL}/api/open-box`, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({ boxToken: params.boxToken, userWallet: params.userWallet }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      boxToken: params.boxToken,
+      userWallet: params.userWallet,
+      privyToken: params.privyToken,
+    }),
   })
 
   if (!response.ok) {
