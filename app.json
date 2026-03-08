@@ -33,7 +33,8 @@
         }
       ],
       "expo-web-browser",
-      "./plugins/withRemoveSystemAlertWindow.js"
+      "./plugins/withRemoveSystemAlertWindow.js",
+      "expo-localization"
     ],
     "extra": {
       "eas": {

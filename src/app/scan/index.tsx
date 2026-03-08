@@ -1,4 +1,5 @@
 import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
@@ -13,6 +14,7 @@ import { addClaimedReward } from '../../services/rewardStorage'
 import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
 import { isPanicafeReward } from '../../utils/panicafeCoupons'
 import { useStreak } from '../../hooks/useStreak'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 const bondumLogo = require('../../assets/bondum_logo.png')
 
@@ -35,6 +37,7 @@ export default function ScanScreen() {
   const [claimedAmount, setClaimedAmount] = useState<number | null>(null)
   const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
   const { logScan } = useStreak()
+  const { t } = useLanguage()
 
   const displayName = truncateUsername(user?.username || 'User')
 
@@ -43,9 +46,10 @@ export default function ScanScreen() {
     setScanned(true)
     const parsed = parseQrCode(data)
     if (parsed) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setParsedReward(parsed)
     } else {
-      Alert.alert('Invalid QR Code', 'This QR code is expired or does not contain a valid reward.')
+      Alert.alert(t('scan.invalidQr'), t('scan.invalidQrMessage'))
       setScanned(false)
     }
   }
@@ -104,9 +108,10 @@ export default function ScanScreen() {
         claimedAt: new Date().toISOString(),
         txSignature: txSignature || undefined,
       })
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setRewardClaimed(true)
     } catch (error: any) {
-      Alert.alert('Claim Failed', error?.message || 'Failed to claim reward. Please try again.')
+      Alert.alert(t('scan.claimFailed'), error?.message || t('scan.claimFailedMessage'))
     } finally {
       setIsClaiming(false)
     }
@@ -126,7 +131,7 @@ export default function ScanScreen() {
     <View className="px-5 pb-4 rounded-b-3xl" style={{ paddingTop: insets.top + 12, backgroundColor: '#8b66df' }}>
       <View className="flex-row items-center justify-between">
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text className="text-white font-bold" style={{ fontSize: 28 }}>{'<'} Back</Text>
+          <Text className="text-white font-bold" style={{ fontSize: 28 }}>{'<'} {t('common.back')}</Text>
         </Pressable>
         <Image source={bondumLogo} style={{ width: 100, height: 40, resizeMode: 'contain' }} />
         <View style={{ width: 70 }}>
@@ -143,7 +148,7 @@ export default function ScanScreen() {
   if (!permission) {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center">
-        <Text className="text-gray-500">Requesting camera permission...</Text>
+        <Text className="text-gray-500">{t('scan.cameraRequesting')}</Text>
       </View>
     )
   }
@@ -153,13 +158,13 @@ export default function ScanScreen() {
       <View className="flex-1 bg-gray-50">
         <ScanHeader />
         <View className="flex-1 items-center justify-center px-8">
-          <Text style={{ fontSize: 48, marginBottom: 16 }}>📷</Text>
-          <Text className="text-gray-900 text-xl font-bold text-center mb-3">Camera Permission Required</Text>
+          <Text style={{ fontSize: 48, marginBottom: 16 }}>{'\uD83D\uDCF7'}</Text>
+          <Text className="text-gray-900 text-xl font-bold text-center mb-3">{t('scan.cameraRequired')}</Text>
           <Text className="text-gray-500 text-center mb-6">
-            We need camera access to scan QR codes and unlock rewards.
+            {t('scan.cameraDescription')}
           </Text>
           <Button variant="primary" size="lg" onPress={requestPermission}>
-            Grant Permission
+            {t('scan.grantPermission')}
           </Button>
         </View>
       </View>
@@ -184,8 +189,8 @@ export default function ScanScreen() {
                   <>
                     <TransactionConfirmation
                       signature={txSignature}
-                      title="Reward Claimed!"
-                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} $${isPanicafeReward(parsedReward.brand) ? 'PANICAFE' : 'BONDUM'} tokens`}
+                      title={t('scan.rewardClaimed')}
+                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} ${isPanicafeReward(parsedReward.brand) ? 'PaniCafe' : 'Bondum'} ${t('scan.points', { brand: '' }).trim()}`}
                       onDone={() => router.replace('/(tabs)/(rewards)')}
                       onScanAnother={resetScanner}
                     />
@@ -194,14 +199,14 @@ export default function ScanScreen() {
                         {streakInfo.streakBonus > 0 && (
                           <View style={{ backgroundColor: '#f5f3ff', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 8, borderWidth: 1, borderColor: '#ddd6fe' }}>
                             <Text style={{ color: '#6d28d9', fontWeight: '700', textAlign: 'center', fontSize: 13 }}>
-                              +{streakInfo.streakBonus} streak bonus ({streakInfo.multiplier.toFixed(1)}x)
+                              {t('scan.streakBonusMessage', { bonus: streakInfo.streakBonus, multiplier: streakInfo.multiplier.toFixed(1) })}
                             </Text>
                           </View>
                         )}
                         {streakInfo.milestoneReached && (
                           <View style={{ backgroundColor: '#fffbeb', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: '#fde68a' }}>
                             <Text style={{ color: '#b45309', fontWeight: '700', textAlign: 'center', fontSize: 13 }}>
-                              {streakInfo.milestoneReached}! +{streakInfo.milestoneBonus} bonus
+                              {t('scan.milestoneBonusMessage', { milestone: streakInfo.milestoneReached || '', bonus: streakInfo.milestoneBonus })}
                             </Text>
                           </View>
                         )}
@@ -213,19 +218,19 @@ export default function ScanScreen() {
                     <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                       <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
                     </View>
-                    <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 6 }}>Reward Claimed!</Text>
+                    <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 6 }}>{t('scan.rewardClaimed')}</Text>
                     <Text className="text-gray-500 text-center" style={{ fontSize: 15, marginBottom: 28 }}>
-                      {parsedReward.value} from {parsedReward.brand}
+                      {t('scan.valueFromBrand', { value: parsedReward.value, brand: parsedReward.brand })}
                     </Text>
                     <View className="flex-row gap-3" style={{ width: '100%', paddingHorizontal: 8 }}>
                       <View style={{ flex: 1 }}>
                         <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
-                          <Text style={{ fontSize: 16 }}>Scan Another</Text>
+                          <Text style={{ fontSize: 16 }}>{t('scan.scanAnother')}</Text>
                         </Button>
                       </View>
                       <View style={{ flex: 1 }}>
                         <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')} style={{ width: '100%', minHeight: 48 }}>
-                          <Text style={{ fontSize: 16, color: '#FFFFFF' }}>View Rewards</Text>
+                          <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('scan.viewRewards')}</Text>
                         </Button>
                       </View>
                     </View>
@@ -279,13 +284,13 @@ export default function ScanScreen() {
                   }}
                 >
                   <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
-                    You will receive
+                    {t('scan.youWillReceive')}
                   </Text>
                   <Text className="text-white font-extrabold text-center" style={{ fontSize: 36 }}>
                     {parsedReward.tokenAmount ? `${parsedReward.tokenAmount.toLocaleString()}` : parsedReward.value}
                   </Text>
                   <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '600', marginTop: 2 }}>
-                    {isPanicafeReward(parsedReward.brand) ? '$PANICAFE' : parsedReward.brand !== 'Bondum' ? parsedReward.brand : '$BONDUM'} tokens
+                    {t('scan.points', { brand: isPanicafeReward(parsedReward.brand) ? 'PaniCafe' : parsedReward.brand !== 'Bondum' ? parsedReward.brand : 'Bondum' })}
                   </Text>
                 </View>
 
@@ -293,12 +298,12 @@ export default function ScanScreen() {
                 <View className="flex-row gap-3" style={{ width: '100%' }}>
                   <View style={{ flex: 1 }}>
                     <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
-                      <Text style={{ fontSize: 16 }}>Cancel</Text>
+                      <Text style={{ fontSize: 16 }}>{t('common.cancel')}</Text>
                     </Button>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Button variant="primary" onPress={handleClaimReward} loading={isClaiming} style={{ width: '100%', minHeight: 48 }}>
-                      <Text style={{ fontSize: 16, color: '#FFFFFF' }}>Claim</Text>
+                      <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('common.claim')}</Text>
                     </Button>
                   </View>
                 </View>
@@ -319,8 +324,8 @@ export default function ScanScreen() {
 
       <View className="flex-1 px-5 pt-4">
         <Text className="text-center mb-4">
-          <Text className="text-violet-500 font-bold italic" style={{ fontSize: 28 }}>SCAN </Text>
-          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 28 }}>YOUR CODE</Text>
+          <Text className="text-violet-500 font-bold italic" style={{ fontSize: 28 }}>{t('scan.title')} </Text>
+          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 28 }}>{t('scan.titleSuffix')}</Text>
         </Text>
 
         <View className="rounded-2xl overflow-hidden bg-gray-200 relative" style={{ width: '100%', aspectRatio: 1 }}>
@@ -345,7 +350,7 @@ export default function ScanScreen() {
         </View>
 
         <Text className="text-gray-400 text-center mt-6" style={{ fontSize: 15, lineHeight: 22 }}>
-          Scan a QR code to earn $BONDUM{'\n'}and loyalty tokens from your favorite brands.
+          {t('scan.scanDescription')}
         </Text>
       </View>
 

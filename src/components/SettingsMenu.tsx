@@ -2,6 +2,7 @@ import { Text, Pressable, Alert } from 'react-native'
 import * as DropdownMenu from 'zeego/dropdown-menu'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface SettingsMenuProps {
   trigger?: React.ReactNode
@@ -9,11 +10,12 @@ interface SettingsMenuProps {
 
 export function SettingsMenu({ trigger }: SettingsMenuProps) {
   const { address, disconnect, isLoading } = useAuth()
+  const { t } = useLanguage()
 
   const handleCopyAddress = async () => {
     if (address) {
       await Clipboard.setStringAsync(address)
-      Alert.alert('Copied', 'Wallet address copied to clipboard')
+      Alert.alert(t('settingsMenu.copied'), t('settingsMenu.copiedMessage'))
     }
   }
 
@@ -21,7 +23,7 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
     try {
       await disconnect()
     } catch {
-      Alert.alert('Error', 'Failed to disconnect. Please try again.')
+      Alert.alert(t('common.error'), t('settingsMenu.disconnectFailed'))
     }
   }
 
@@ -30,7 +32,7 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
       <DropdownMenu.Trigger>
         {trigger || (
           <Pressable className="p-2">
-            <Text className="text-2xl">⚙️</Text>
+            <Text className="text-2xl">{'\u2699\uFE0F'}</Text>
           </Pressable>
         )}
       </DropdownMenu.Trigger>
@@ -39,7 +41,7 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
         {address ? (
           <DropdownMenu.Item key="copy-address" onSelect={handleCopyAddress}>
             <DropdownMenu.ItemIcon ios={{ name: 'doc.on.doc' }} />
-            <DropdownMenu.ItemTitle>Copy Wallet Address</DropdownMenu.ItemTitle>
+            <DropdownMenu.ItemTitle>{t('settingsMenu.copyAddress')}</DropdownMenu.ItemTitle>
           </DropdownMenu.Item>
         ) : null}
 
@@ -47,10 +49,9 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
 
         <DropdownMenu.Item key="logout" onSelect={handleLogout} destructive disabled={isLoading}>
           <DropdownMenu.ItemIcon ios={{ name: 'rectangle.portrait.and.arrow.right' }} />
-          <DropdownMenu.ItemTitle>{isLoading ? 'Disconnecting...' : 'Logout'}</DropdownMenu.ItemTitle>
+          <DropdownMenu.ItemTitle>{isLoading ? t('settingsMenu.disconnecting') : t('settingsMenu.logout')}</DropdownMenu.ItemTitle>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   )
 }
-

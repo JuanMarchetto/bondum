@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getSwapQuote, type SwapQuote, SOL_MINT } from '../services/jupiter'
-import { BONDUM_MINT, USDC_MINT, PANICAFE_MINT } from '../services/solana'
+import { BONDUM_MINT, USDC_MINT, PANICAFE_MINT, SKR_MINT } from '../services/solana'
 
-export type TokenSymbol = 'SOL' | 'USDC' | 'BONDUM' | 'PANICAFE'
+export type TokenSymbol = 'SOL' | 'USDC' | 'BONDUM' | 'PANICAFE' | 'SKR'
 
 export interface TokenInfo {
   symbol: TokenSymbol
@@ -34,6 +34,12 @@ export const TOKENS: Record<TokenSymbol, TokenInfo> = {
     symbol: 'PANICAFE',
     name: 'PaniCafe',
     mint: PANICAFE_MINT,
+    decimals: 6,
+  },
+  SKR: {
+    symbol: 'SKR',
+    name: 'Seeker',
+    mint: SKR_MINT,
     decimals: 6,
   },
 }

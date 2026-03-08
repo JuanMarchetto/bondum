@@ -1,4 +1,5 @@
 import { View, Text, Alert } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -19,6 +20,7 @@ import { VersionedTransaction, Transaction, Connection } from '@solana/web3.js'
 import { getTransactionDecoder } from '@solana/kit'
 import { Buffer } from 'buffer'
 import bs58 from 'bs58'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 export default function RewardDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -32,6 +34,7 @@ export default function RewardDetailScreen() {
   const [isClaiming, setIsClaiming] = useState(false)
   const [claimed, setClaimed] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const { t } = useLanguage()
 
   const reward = fetchedReward || {
     id: id || '1',
@@ -62,14 +65,12 @@ export default function RewardDetailScreen() {
 
     const privyToken = await getPrivyAccessToken()
 
-    // Step 1: Request partially-signed tx from PaniCafe API
     const claimRequest = await requestPanicafeRewardClaim({
       rewardKind,
       userWalletAddress: address,
       privyToken,
     })
 
-    // Step 2: Decode base58 legacy Transaction and sign with Privy
     const transaction = Transaction.from(bs58.decode(claimRequest.serializedTransaction))
     const privyProvider = await embeddedSolanaWallet.getProvider()
     const result = await privyProvider.request({
@@ -77,13 +78,11 @@ export default function RewardDetailScreen() {
       params: { transaction },
     })
 
-    // Step 3: Extract user's signature (index 1, vault is index 0)
     const signedTx = (result as any).signedTransaction ?? result
     const userSig = (signedTx as Transaction).signatures[1]?.signature
     if (!userSig) throw new Error('Wallet did not produce a signature')
     const sigBase64 = Buffer.from(userSig).toString('base64')
 
-    // Step 4: Submit signature to PaniCafe server (server submits on-chain)
     const claimResult = await submitPanicafeRewardClaim({
       signature: sigBase64,
       rewardId: claimRequest.id,
@@ -96,14 +95,12 @@ export default function RewardDetailScreen() {
   const handleClaimBondum = async () => {
     if (!address) throw new Error('No wallet connected')
 
-    // Step 1: Request partially-signed transaction from Bondum server
     const redemptionRequest = await requestRedemption({
       walletAddress: address,
       rewardId: reward.id,
       brand: reward.brand,
     })
 
-    // Step 2: Sign with user's wallet
     const txBytes = Buffer.from(redemptionRequest.serializedTransaction, 'base64')
 
     if (provider === 'solana' && mobileWallet.account) {
@@ -125,7 +122,6 @@ export default function RewardDetailScreen() {
       return result.signature
     }
 
-    // Fallback: legacy server-side redemption
     const result = await redeemReward({
       walletAddress: address,
       rewardId: reward.id,
@@ -136,11 +132,11 @@ export default function RewardDetailScreen() {
 
   const handleClaim = async () => {
     if (!user || !address) {
-      Alert.alert('Error', 'Please connect a wallet first.')
+      Alert.alert(t('common.error'), t('rewardDetail.connectWallet'))
       return
     }
     if (activeBalance < reward.cost) {
-      Alert.alert('Insufficient Balance', `You need ${reward.cost - activeBalance} more ${tokenSymbol}.`)
+      Alert.alert(t('rewardDetail.insufficientBalance'), t('rewardDetail.needMore', { amount: reward.cost - activeBalance, symbol: tokenSymbol }))
       return
     }
     setIsClaiming(true)
@@ -156,13 +152,14 @@ export default function RewardDetailScreen() {
         claimedAt: new Date().toISOString(),
         txSignature: sig || undefined,
       })
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setClaimed(true)
 
       queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
       queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
       queryClient.invalidateQueries({ queryKey: ['rewards'] })
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Failed to claim reward. Please try again.')
+      Alert.alert(t('common.error'), error?.message || t('rewardDetail.claimFailed'))
     } finally {
       setIsClaiming(false)
     }
@@ -189,8 +186,8 @@ export default function RewardDetailScreen() {
                 )}
                 <TransactionConfirmation
                   signature={txSignature}
-                  title="Reward Redeemed!"
-                  message={isPanicafe ? `Coupon: ${reward.value}` : `You've won: ${reward.value}`}
+                  title={t('rewardDetail.rewardRedeemed')}
+                  message={isPanicafe ? t('rewardDetail.couponLabel', { value: reward.value }) : t('rewardDetail.wonLabel', { value: reward.value })}
                   onDone={() => router.replace('/(tabs)/(rewards)')}
                 />
               </>
@@ -201,7 +198,7 @@ export default function RewardDetailScreen() {
                 </View>
 
                 <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 8 }}>
-                  {"You've Won a Reward!"}
+                  {t('rewardDetail.wonReward')}
                 </Text>
 
                 {isPanicafe ? (
@@ -227,7 +224,7 @@ export default function RewardDetailScreen() {
                 )}
 
                 <Button variant="primary" size="lg" style={{ paddingVertical: 18, borderRadius: 14, width: '100%' }} onPress={() => router.replace('/(tabs)/(rewards)')}>
-                  <Text className="text-white font-bold" style={{ fontSize: 18 }}>Back to Rewards</Text>
+                  <Text className="text-white font-bold" style={{ fontSize: 18 }}>{t('rewardDetail.backToRewards')}</Text>
                 </Button>
               </View>
             )}
@@ -256,7 +253,7 @@ export default function RewardDetailScreen() {
               </Text>
             </Text>
             <View style={{ borderWidth: 4, borderColor: '#8b5cf6', borderRadius: 12, backgroundColor: 'white', paddingHorizontal: 12, paddingVertical: 4 }}>
-              <Text className="text-2xl font-extrabold" style={{ color: '#8b5cf6' }}>{reward.available} available</Text>
+              <Text className="text-2xl font-extrabold" style={{ color: '#8b5cf6' }}>{t('common.available', { count: reward.available })}</Text>
             </View>
           </View>
 
@@ -282,13 +279,13 @@ export default function RewardDetailScreen() {
               loading={isClaiming}
               disabled={activeBalance < reward.cost}
             >
-              <Text className="text-white font-bold text-4xl">Claim reward</Text>
+              <Text className="text-white font-bold text-4xl">{t('rewardDetail.claimReward')}</Text>
             </Button>
           </View>
 
           {activeBalance < reward.cost && (
             <Text className="text-red-500 text-center mt-3 text-sm">
-              Not enough {tokenSymbol} tokens. You need {reward.cost - activeBalance} more.
+              {t('rewardDetail.notEnoughTokens', { symbol: tokenSymbol, amount: reward.cost - activeBalance })}
             </Text>
           )}
         </View>

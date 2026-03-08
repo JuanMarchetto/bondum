@@ -24,6 +24,8 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 
 > **Solana dApp Store**: Bondum is published and listed on the official Solana dApp Store, available to all Saga and Seeker device users. This is the recommended install method for Solana Mobile devices.
 
+**Featured by [Privy](https://x.com/privy_io/status/2021426997189280010)** | [$PANICAFE on CoinMarketCap](https://coinmarketcap.com/currencies/panicafe/) ($446K+ market cap) | [Press coverage](https://derechadiario.com.ar/us/argentina/panicafe-launches-its-digital-currency-and-bets-on-an-innovative-loyalty-model)
+
 ## How It Works
 
 1. **Scan** a product QR code at a partner brand (e.g. PaniCafe)
@@ -37,10 +39,10 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 ## Key Features
 
 ### On-Chain Reward System
-- **2-step redemption with wallet signing** -- Server builds the transaction, user signs with their wallet (MWA or Privy), server submits to network. Every redemption has a verifiable Solscan signature.
+- **2-step redemption with wallet signing** -- Server builds the transaction, user signs with their wallet (MWA or Privy), server submits to network. Every redemption has a verifiable Orb Explorer signature.
 - **Priority fees via Helius** -- Dynamic fee estimation with compute unit simulation and a 0.001 SOL cap, ensuring transactions land reliably during network congestion.
 - **Send-and-confirm with retry** -- Production-grade transaction delivery that retries until block height expiry, ported from PaniCafe's battle-tested patterns.
-- **Anti-replay QR validation** -- Nonce-based QR codes with expiry timestamps prevent double-claiming.
+- **Anti-replay QR validation** -- Nonce-based QR codes with expiry timestamps prevent double-claiming, backed by an on-chain Anchor program (`scan_guard`) that records nonces in PDAs.
 
 ### Consumer Engagement Mechanics
 - **Streak system with multipliers** -- Daily scans build streaks that multiply token earnings from 1.0x to 2.0x. Missing a day resets the streak.
@@ -85,6 +87,11 @@ Mobile App (Expo / React Native)
   |-- Swaps ------> Jupiter Aggregator API (quote + swap)
   |
   |-- Transfers --> Raw SPL Token instructions (SystemProgram / ATA)
+
+On-Chain Program (Anchor / Solana)
+  |
+  |-- record_scan(nonce) -----> Create PDA [b"scan", nonce] if not exists
+  |                             Replay attempt → tx fails (PDA already init)
 
 Reward Server (Node.js + Helius RPC)
   |
@@ -134,7 +141,7 @@ src/
 |   |-- scan/              # QR code scanner + streak feedback
 |-- components/            # Reusable UI components
 |   |-- ui/               # Base components (Button, Card, Avatar, etc.)
-|   |-- TransactionConfirmation  # Tx result with Solscan link
+|   |-- TransactionConfirmation  # Tx result with Orb Explorer link
 |-- contexts/             # React contexts
 |   |-- AuthContext.tsx   # Auth state (MWA + Privy + Seed Vault + Guest)
 |-- hooks/                # Custom React hooks
@@ -151,6 +158,10 @@ src/
 |   |-- rewardApi.ts      # Reward API client (claim, redeem, streak, recommendations)
 |   |-- qrParser.ts       # QR code parser with nonce/expiry validation
 |   |-- streakStorage.ts  # Local streak persistence (offline fallback)
+
+programs/                 # On-chain Solana programs
+|-- scan_guard/           # Anchor program for nonce replay protection
+    |-- src/lib.rs        # record_scan instruction with PDA nonce guard
 
 server/                   # Reward distribution API
 |-- index.ts              # HTTP server with all endpoints
@@ -206,12 +217,21 @@ cd server && npm test
 npm run build
 ```
 
+## On-Chain Program
+
+| Program | Address | Description |
+|---------|---------|-------------|
+| scan_guard | `9mPFAEyMGV3BD7CusGhvPRo1zxm3PsBMX71JiHyG4Zu1` | On-chain nonce replay guard — prevents double-claiming of QR scan rewards using PDA-based nonce records |
+
+Built with [Anchor](https://www.anchor-lang.com/) 0.32.1. Source: [`programs/scan_guard/src/lib.rs`](programs/scan_guard/src/lib.rs)
+
 ## Token Mints
 
 | Token | Mint Address | Decimals | Explorer |
 |-------|-------------|----------|----------|
-| $BONDUM | `84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump` | 6 | [Solscan](https://solscan.io/token/84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump) |
-| $PANICAFE | `H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1` | 6 | [Solscan](https://solscan.io/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1) \| [5,006 holders](https://solscan.io/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1#holders) |
+| $BONDUM | `84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump` | 6 | [Orb Explorer](https://orb.helius.dev/token/84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump) |
+| $PANICAFE | `H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1` | 6 | [Orb Explorer](https://orb.helius.dev/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1) \| [5,006 holders](https://orb.helius.dev/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1#holders) |
+| $SKR | `SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3` | 6 | [Orb Explorer](https://orb.helius.dev/token/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3) — Solana Mobile ecosystem token |
 
 ## API Endpoints
 
