@@ -83,7 +83,7 @@ export function parseQrCode(data: string): ParsedQrReward | null {
           type: 'token',
           value: 'PANICAFE REWARD',
           title: 'PaniCafe Box Reward',
-          tokenAmount: 100,
+          tokenAmount: 10000,
           nonce: token,
         }
       }

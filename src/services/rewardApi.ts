@@ -145,6 +145,61 @@ export async function claimPanicafeBox(params: {
 }
 
 /**
+ * Step 1 of PaniCafe coupon redemption: request a partially-signed transaction.
+ * Calls the PaniCafe production API (same as the webapp).
+ * Returns a base58-encoded legacy Transaction that the user must sign.
+ */
+export async function requestPanicafeRewardClaim(params: {
+  rewardKind: string
+  userWalletAddress: string
+  privyToken?: string | null
+}): Promise<{ id: number; serializedTransaction: string }> {
+  const response = await fetch(`${PANICAFE_API_URL}/api/request-reward-claim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      rewardKind: params.rewardKind,
+      userWalletAddress: params.userWalletAddress,
+      privyToken: params.privyToken,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Request failed' }))
+    throw new Error(error.message || 'Failed to request PaniCafe reward')
+  }
+
+  return response.json()
+}
+
+/**
+ * Step 2 of PaniCafe coupon redemption: submit the user's signature.
+ * The server adds the signature to the stored transaction and submits on-chain.
+ */
+export async function submitPanicafeRewardClaim(params: {
+  signature: string
+  rewardId: number
+  privyToken?: string | null
+}): Promise<{ signature: string }> {
+  const response = await fetch(`${PANICAFE_API_URL}/api/claim-reward`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      signature: params.signature,
+      rewardId: params.rewardId,
+      privyToken: params.privyToken,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Claim failed' }))
+    throw new Error(error.message || 'Failed to claim PaniCafe reward')
+  }
+
+  return response.json()
+}
+
+/**
  * Redeems a reward from the marketplace by burning $BONDUM tokens.
  * The server verifies the user's balance, executes the burn/transfer,
  * and marks the reward as claimed.

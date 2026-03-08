@@ -11,7 +11,6 @@ import { TransactionConfirmation } from '../../components/TransactionConfirmatio
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
 import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
-import { PanicafeCouponCard } from '../../components/PanicafeCouponCard'
 import { isPanicafeReward } from '../../utils/panicafeCoupons'
 import { useStreak } from '../../hooks/useStreak'
 
@@ -33,6 +32,7 @@ export default function ScanScreen() {
   const [rewardClaimed, setRewardClaimed] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const [claimedAmount, setClaimedAmount] = useState<number | null>(null)
   const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
   const { logScan } = useStreak()
 
@@ -76,6 +76,7 @@ export default function ScanScreen() {
           })
         }
         setTxSignature(result.txSignature)
+        if (result.tokenAmount) setClaimedAmount(result.tokenAmount)
 
         const r = result as any
         if (r.multiplier) {
@@ -117,6 +118,7 @@ export default function ScanScreen() {
     setRewardClaimed(false)
     setTxSignature(null)
     setStreakInfo(null)
+    setClaimedAmount(null)
   }
 
   // ─── Compact Header (shared across all scan states) ──────────────────────
@@ -170,36 +172,36 @@ export default function ScanScreen() {
       <View className="flex-1 bg-gray-50">
         <ScanHeader />
 
-        <View className="flex-1 px-5 pt-6">
+        <View className="flex-1 px-5" style={{ paddingTop: 16 }}>
           {rewardClaimed ? (
             // ── Claimed: show confirmation ──
-            <View className="flex-1">
-              <View className="bg-white rounded-3xl flex-1" style={{ padding: 24, maxHeight: 520 }}>
+            <View className="flex-1 justify-center">
+              <View
+                className="bg-white rounded-3xl"
+                style={{ padding: 20, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
+              >
                 {txSignature ? (
                   <>
-                    {isPanicafeReward(parsedReward.brand) && (
-                      <PanicafeCouponCard value={parsedReward.value} size="sm" style={{ marginBottom: 12 }} />
-                    )}
                     <TransactionConfirmation
                       signature={txSignature}
                       title="Reward Claimed!"
-                      message={`${parsedReward.tokenAmount || ''} ${parsedReward.brand} tokens sent to your wallet`}
+                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} $${isPanicafeReward(parsedReward.brand) ? 'PANICAFE' : 'BONDUM'} tokens`}
                       onDone={() => router.replace('/(tabs)/(rewards)')}
                       onScanAnother={resetScanner}
                     />
-                    {streakInfo && (
-                      <View className="mt-2">
+                    {streakInfo && (streakInfo.streakBonus > 0 || streakInfo.milestoneReached) && (
+                      <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
                         {streakInfo.streakBonus > 0 && (
-                          <View className="bg-violet-50 rounded-xl px-4 py-3 mb-2" style={{ borderWidth: 1, borderColor: '#ddd6fe' }}>
-                            <Text className="text-violet-700 font-bold text-center" style={{ fontSize: 13 }}>
-                              🔥 +{streakInfo.streakBonus} streak bonus ({streakInfo.multiplier.toFixed(1)}x)
+                          <View style={{ backgroundColor: '#f5f3ff', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 8, borderWidth: 1, borderColor: '#ddd6fe' }}>
+                            <Text style={{ color: '#6d28d9', fontWeight: '700', textAlign: 'center', fontSize: 13 }}>
+                              +{streakInfo.streakBonus} streak bonus ({streakInfo.multiplier.toFixed(1)}x)
                             </Text>
                           </View>
                         )}
                         {streakInfo.milestoneReached && (
-                          <View className="bg-amber-50 rounded-xl px-4 py-3" style={{ borderWidth: 1, borderColor: '#fde68a' }}>
-                            <Text className="text-amber-700 font-bold text-center" style={{ fontSize: 13 }}>
-                              🎉 {streakInfo.milestoneReached}! +{streakInfo.milestoneBonus} bonus
+                          <View style={{ backgroundColor: '#fffbeb', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: '#fde68a' }}>
+                            <Text style={{ color: '#b45309', fontWeight: '700', textAlign: 'center', fontSize: 13 }}>
+                              {streakInfo.milestoneReached}! +{streakInfo.milestoneBonus} bonus
                             </Text>
                           </View>
                         )}
@@ -207,19 +209,25 @@ export default function ScanScreen() {
                     )}
                   </>
                 ) : (
-                  <View className="flex-1 items-center justify-center">
-                    <Text className="text-green-500" style={{ fontSize: 80 }}>{'\u2713'}</Text>
-                    <Text className="text-gray-900 font-bold text-center mb-2" style={{ fontSize: 24 }}>Reward Claimed!</Text>
-                    <Text className="text-gray-500 text-center mb-8" style={{ fontSize: 15 }}>
-                      {parsedReward.value} from {parsedReward.brand} saved to your account.
+                  <View className="items-center" style={{ paddingVertical: 32 }}>
+                    <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                      <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
+                    </View>
+                    <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 6 }}>Reward Claimed!</Text>
+                    <Text className="text-gray-500 text-center" style={{ fontSize: 15, marginBottom: 28 }}>
+                      {parsedReward.value} from {parsedReward.brand}
                     </Text>
-                    <View className="flex-row gap-3">
-                      <Button variant="outline" onPress={resetScanner}>
-                        <Text style={{ fontSize: 16 }}>Scan Another</Text>
-                      </Button>
-                      <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')}>
-                        <Text style={{ fontSize: 16, color: '#FFFFFF' }}>View Rewards</Text>
-                      </Button>
+                    <View className="flex-row gap-3" style={{ width: '100%', paddingHorizontal: 8 }}>
+                      <View style={{ flex: 1 }}>
+                        <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
+                          <Text style={{ fontSize: 16 }}>Scan Another</Text>
+                        </Button>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')} style={{ width: '100%', minHeight: 48 }}>
+                          <Text style={{ fontSize: 16, color: '#FFFFFF' }}>View Rewards</Text>
+                        </Button>
+                      </View>
                     </View>
                   </View>
                 )}
@@ -227,54 +235,70 @@ export default function ScanScreen() {
             </View>
           ) : (
             // ── Pre-claim: show reward preview ──
-            <View className="flex-1">
-              <View className="bg-white rounded-3xl flex-1 items-center justify-center" style={{ padding: 28, maxHeight: 480 }}>
+            <View className="flex-1 justify-center">
+              <View
+                className="bg-white rounded-3xl items-center"
+                style={{ padding: 24, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
+              >
                 {/* Brand badge */}
-                <View className={`rounded-full px-6 py-2 mb-4 ${isPanicafeReward(parsedReward.brand) ? 'bg-amber-100' : 'bg-violet-100'}`}>
-                  <Text className={`font-bold ${isPanicafeReward(parsedReward.brand) ? 'text-amber-700' : 'text-violet-600'}`} style={{ fontSize: 14 }}>{parsedReward.brand}</Text>
+                <View
+                  style={{
+                    backgroundColor: isPanicafeReward(parsedReward.brand) ? '#fef3c7' : '#ede9fe',
+                    borderRadius: 20,
+                    paddingHorizontal: 16,
+                    paddingVertical: 6,
+                    marginBottom: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: '700',
+                      fontSize: 13,
+                      color: isPanicafeReward(parsedReward.brand) ? '#92400e' : '#6d28d9',
+                    }}
+                  >
+                    {parsedReward.brand}
+                  </Text>
                 </View>
 
                 {/* Reward title */}
-                <Text className="text-gray-900 font-bold text-center mb-5" style={{ fontSize: 22 }}>
+                <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 20, marginBottom: 20 }}>
                   {parsedReward.title}
                 </Text>
 
-                {/* Value display */}
-                {isPanicafeReward(parsedReward.brand) ? (
-                  <PanicafeCouponCard value={parsedReward.value} size="md" style={{ width: '100%', marginBottom: 8 }} />
-                ) : (
-                  <View
-                    className="rounded-2xl items-center justify-center w-full mb-2"
-                    style={{
-                      paddingVertical: 32,
-                      paddingHorizontal: 24,
-                      backgroundColor: parsedReward.type === 'nft' ? '#111827' : '#7c3aed',
-                    }}
-                  >
-                    <Text className="text-white font-extrabold text-center" style={{ fontSize: 32 }}>
-                      {parsedReward.tokenAmount ? `${parsedReward.tokenAmount} TOKENS` : parsedReward.value}
-                    </Text>
-                    {parsedReward.brand !== 'Bondum' && (
-                      <Text className="text-violet-200 font-medium mt-1" style={{ fontSize: 14 }}>
-                        {parsedReward.brand}
-                      </Text>
-                    )}
-                  </View>
-                )}
-
-                {/* Token type label */}
-                <Text className="text-gray-400 text-xs uppercase mb-6">{parsedReward.type} reward</Text>
+                {/* Value display — big hero number */}
+                <View
+                  style={{
+                    width: '100%',
+                    borderRadius: 16,
+                    paddingVertical: 28,
+                    paddingHorizontal: 20,
+                    alignItems: 'center',
+                    backgroundColor: isPanicafeReward(parsedReward.brand) ? '#d97706' : parsedReward.type === 'nft' ? '#111827' : '#7c3aed',
+                    marginBottom: 20,
+                  }}
+                >
+                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
+                    You will receive
+                  </Text>
+                  <Text className="text-white font-extrabold text-center" style={{ fontSize: 36 }}>
+                    {parsedReward.tokenAmount ? `${parsedReward.tokenAmount.toLocaleString()}` : parsedReward.value}
+                  </Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '600', marginTop: 2 }}>
+                    {isPanicafeReward(parsedReward.brand) ? '$PANICAFE' : parsedReward.brand !== 'Bondum' ? parsedReward.brand : '$BONDUM'} tokens
+                  </Text>
+                </View>
 
                 {/* Action buttons */}
-                <View className="flex-row gap-3 w-full">
-                  <View className="flex-1">
-                    <Button variant="outline" onPress={resetScanner} style={{ width: '100%' }}>
+                <View className="flex-row gap-3" style={{ width: '100%' }}>
+                  <View style={{ flex: 1 }}>
+                    <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
                       <Text style={{ fontSize: 16 }}>Cancel</Text>
                     </Button>
                   </View>
-                  <View className="flex-1">
-                    <Button variant="primary" onPress={handleClaimReward} loading={isClaiming} style={{ width: '100%' }}>
-                      <Text style={{ fontSize: 16, color: '#FFFFFF' }}>Claim Reward</Text>
+                  <View style={{ flex: 1 }}>
+                    <Button variant="primary" onPress={handleClaimReward} loading={isClaiming} style={{ width: '100%', minHeight: 48 }}>
+                      <Text style={{ fontSize: 16, color: '#FFFFFF' }}>Claim</Text>
                     </Button>
                   </View>
                 </View>
