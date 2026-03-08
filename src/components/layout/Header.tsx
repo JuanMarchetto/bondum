@@ -5,6 +5,7 @@ import { Avatar } from '../ui/Avatar'
 import { BellIcon } from '../ui/BellIcon'
 import type { ReactNode } from 'react'
 import { fontSize } from '../../constants/typography'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 const avatarImage = undefined
 const bondumLogo = require('../../assets/bondum_logo.png')
@@ -32,13 +33,14 @@ export function Header({
 }: HeaderProps) {
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const { t } = useLanguage()
 
   return (
     <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
       {showBackButton ? (
         <View className="flex-row items-center mb-4 relative">
           <Pressable onPress={() => router.back()} className="mr-4">
-            <Text className="text-white" style={{ fontSize: fontSize['5xl'] }}>←</Text>
+            <Text className="text-white" style={{ fontSize: fontSize['5xl'] }}>{'\u2190'}</Text>
           </Pressable>
           <View className="absolute left-0 right-0 items-center">
             <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
@@ -53,7 +55,7 @@ export function Header({
       {/* User Info Row */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-white font-bold" style={{ fontSize: fontSize['2xl'] }} numberOfLines={1}>Hello, {userName.length > 16 ? userName.slice(0, 16) + '...' : userName}!</Text>
+          <Text className="text-white font-bold" style={{ fontSize: fontSize['2xl'] }} numberOfLines={1}>{t('header.hello', { name: userName.length > 16 ? userName.slice(0, 16) + '...' : userName })}</Text>
           <Text className="text-violet-200" style={{ fontSize: fontSize.lg }}>{balance} $BONDUM</Text>
         </View>
 

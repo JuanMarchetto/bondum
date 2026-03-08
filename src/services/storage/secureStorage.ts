@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 const AUTH_TOKEN_KEY = 'auth_token'
 const AUTH_PROVIDER_KEY = 'auth_provider'
 const USER_DATA_KEY = 'user_data'
+const LANGUAGE_KEY = 'app_language'
 
 export const secureStorage = {
   // Auth token
@@ -22,6 +23,10 @@ export const secureStorage = {
   },
   setUserData: (data: object) => SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(data)),
   removeUserData: () => SecureStore.deleteItemAsync(USER_DATA_KEY),
+
+  // Language
+  getLanguage: () => SecureStore.getItemAsync(LANGUAGE_KEY),
+  setLanguage: (lang: 'en' | 'es') => SecureStore.setItemAsync(LANGUAGE_KEY, lang),
 
   // Clear all auth data
   clearAuth: async () => {

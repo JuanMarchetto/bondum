@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PrivyProvider } from '@privy-io/expo'
 import { useEffect } from 'react'
 import { AuthContextProvider, useAuth } from '../contexts/AuthContext'
+import { LanguageProvider } from '../contexts/LanguageContext'
 
 const cluster = createSolanaMainnet(process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
 const identity = {
@@ -51,13 +52,15 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider appId={PRIVY_APP_ID} clientId={PRIVY_CLIENT_ID}>
-        <MobileWalletProvider cluster={cluster} identity={identity}>
-          <AuthContextProvider>
-            <RootLayoutNav />
-          </AuthContextProvider>
-        </MobileWalletProvider>
-      </PrivyProvider>
+      <LanguageProvider>
+        <PrivyProvider appId={PRIVY_APP_ID} clientId={PRIVY_CLIENT_ID}>
+          <MobileWalletProvider cluster={cluster} identity={identity}>
+            <AuthContextProvider>
+              <RootLayoutNav />
+            </AuthContextProvider>
+          </MobileWalletProvider>
+        </PrivyProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   )
 }

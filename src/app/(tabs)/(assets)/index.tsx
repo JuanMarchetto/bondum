@@ -9,6 +9,7 @@ import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { Card } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 const solLogo = require('../../../assets/sol-logo.png')
 const bLogo = require('../../../assets/b-logo.png')
@@ -22,6 +23,7 @@ export default function AssetsScreen() {
   const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
   const [refreshing, setRefreshing] = useState(false)
+  const { t } = useLanguage()
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
     await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
@@ -39,8 +41,8 @@ export default function AssetsScreen() {
       <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
         {/* Title */}
         <Text className="text-center mb-6">
-          <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>YOUR </Text>
-          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>ASSETS</Text>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>{t('assets.title')} </Text>
+          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>{t('assets.titleSuffix')}</Text>
         </Text>
 
         {/* NFT Collection Card — bigger version */}
@@ -48,16 +50,16 @@ export default function AssetsScreen() {
           <View className="flex-row items-start justify-between mb-4">
             <View className="flex-1">
               <Text className="text-lg leading-tight mb-1">
-                <Text className="text-gray-400">View </Text>
-                <Text className="text-violet-500">collection</Text>
+                <Text className="text-gray-400">{t('assets.viewCollection')} </Text>
+                <Text className="text-violet-500">{t('assets.collection')}</Text>
               </Text>
               {isNftsLoading ? (
-                <Text className="text-gray-900 text-3xl font-extrabold leading-tight">Loading...</Text>
+                <Text className="text-gray-900 text-3xl font-extrabold leading-tight">{t('assets.loadingNfts')}</Text>
               ) : nftCount === 0 ? (
-                <Text className="text-gray-900 text-2xl font-extrabold leading-tight">You don't have NFTs yet</Text>
+                <Text className="text-gray-900 text-2xl font-extrabold leading-tight">{t('assets.noNfts')}</Text>
               ) : (
                 <Text className="text-gray-900 text-3xl font-extrabold leading-tight">
-                  You have {nftCount} NFT{nftCount !== 1 ? 's' : ''}
+                  {t('assets.hasNfts', { count: nftCount, plural: nftCount !== 1 ? 's' : '' })}
                 </Text>
               )}
             </View>
@@ -106,7 +108,7 @@ export default function AssetsScreen() {
             style={{ paddingVertical: 14 }}
           >
             <Ionicons name="swap-horizontal" size={20} color="white" />
-            <Text className="text-white font-bold text-base">Swap</Text>
+            <Text className="text-white font-bold text-base">{t('common.swap')}</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(tabs)/(home)/send')}
@@ -114,17 +116,17 @@ export default function AssetsScreen() {
             style={{ paddingVertical: 14, borderWidth: 1, borderColor: '#E5E5E5' }}
           >
             <Ionicons name="paper-plane-outline" size={20} color="#8B5CF6" />
-            <Text className="text-violet-500 font-bold text-base">Send</Text>
+            <Text className="text-violet-500 font-bold text-base">{t('common.send')}</Text>
           </Pressable>
         </View>
 
         {/* Token List */}
-        <Text className="text-gray-500 text-sm font-semibold mb-3">TOKENS</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-3">{t('assets.tokens')}</Text>
 
         <View className="mb-8">
           {isTokensLoading ? (
             <Card padding="none" style={{ padding: 20 }}>
-              <Text className="text-gray-400 text-center text-lg">Loading balances...</Text>
+              <Text className="text-gray-400 text-center text-lg">{t('assets.loadingBalances')}</Text>
             </Card>
           ) : (
             tokens.map((token, index) => (

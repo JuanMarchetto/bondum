@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 const TAB_ICONS: Record<string, { focused: keyof typeof Ionicons.glyphMap; unfocused: keyof typeof Ionicons.glyphMap }> = {
   home: { focused: 'home', unfocused: 'home-outline' },
@@ -21,6 +22,8 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
 }
 
 export default function TabsLayout() {
+  const { t } = useLanguage()
+
   return (
     <Tabs
       screenOptions={{
@@ -44,35 +47,35 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(home)"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="(trade)"
         options={{
-          title: 'Trade',
+          title: t('tabs.trade'),
           tabBarIcon: ({ focused }) => <TabIcon name="trade" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="(assets)"
         options={{
-          title: 'Wallet',
+          title: t('tabs.wallet'),
           tabBarIcon: ({ focused }) => <TabIcon name="assets" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="(rewards)"
         options={{
-          title: 'Rewards',
+          title: t('tabs.rewards'),
           tabBarIcon: ({ focused }) => <TabIcon name="rewards" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="(profile)"
         options={{
-          title: 'Profile',
+          title: t('tabs.profile'),
           tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />

@@ -16,6 +16,7 @@ import { useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { Buffer } from 'buffer'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
@@ -41,6 +42,7 @@ export default function TradeScreen() {
   const { tokens } = useTokenBalances()
   const mobileWallet = useMobileWallet()
   const embeddedSolanaWallet = useEmbeddedSolanaWallet()
+  const { t } = useLanguage()
 
   const [fromToken, setFromToken] = useState<TokenSymbol>('BONDUM')
   const [toToken, setToToken] = useState<TokenSymbol>('USDC')
@@ -58,7 +60,6 @@ export default function TradeScreen() {
   // Get token balance for display
   const getTokenBalance = (symbol: TokenSymbol): number => {
     if (symbol === 'SOL') {
-      // SOL balance would need to be fetched separately or from tokens
       const solToken = tokens.find((t) => t.symbol === 'SOL')
       return solToken?.balance || 0
     }
@@ -68,12 +69,10 @@ export default function TradeScreen() {
 
   const handleTokenSelect = (symbol: TokenSymbol) => {
     if (showTokenPicker === 'from') {
-      // Don't allow selecting the same token as the other side
       if (symbol !== toToken) {
         setFromToken(symbol)
       }
     } else if (showTokenPicker === 'to') {
-      // Don't allow selecting the same token as the other side
       if (symbol !== fromToken) {
         setToToken(symbol)
       }
@@ -82,7 +81,6 @@ export default function TradeScreen() {
   }
 
   const handleSwapTokens = () => {
-    // Swap tokens and amounts
     const tempToken = fromToken
     setFromToken(toToken)
     setToToken(tempToken)
@@ -91,60 +89,45 @@ export default function TradeScreen() {
 
   const handleSwap = async () => {
     if (!address || !quote || !fromAmount || parseFloat(fromAmount) <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount')
+      Alert.alert(t('common.error'), t('trade.enterValidAmount'))
       return
     }
 
     if (fromToken === toToken) {
-      Alert.alert('Error', 'Cannot swap the same token')
+      Alert.alert(t('common.error'), t('trade.cannotSwapSame'))
       return
     }
 
     const balance = getTokenBalance(fromToken)
     if (parseFloat(fromAmount) > balance) {
-      Alert.alert('Insufficient Balance', `You don't have enough ${fromToken}`)
+      Alert.alert(t('trade.insufficientBalance'), t('trade.notEnoughToken', { token: fromToken }))
       return
     }
 
     setIsSwapping(true)
 
     try {
-      // Get swap transaction from Jupiter (throws on error with descriptive message)
       const swapTxBase64 = await getSwapTransaction(quote, address)
-
-      // Decode the base64 transaction to bytes
       const txBytes = Buffer.from(swapTxBase64, 'base64')
       let signature: string
 
       if (provider === 'solana' && mobileWallet.account) {
-        // ─── MWA (Mobile Wallet Adapter) ───
-        // Decode bytes into @solana/kit Transaction type
         const decoder = getTransactionDecoder()
         const transaction = decoder.decode(txBytes)
-
-        // signAndSendTransaction returns SignatureBytes[]
         const signatures = await mobileWallet.signAndSendTransaction(
           transaction,
-          BigInt(0), // minContextSlot
+          BigInt(0),
         )
-
         if (!signatures || signatures.length === 0) {
           throw new Error('Wallet did not return a signature')
         }
-        // Convert first SignatureBytes to base58 for display
         const sigArray = Array.from(signatures[0] as Uint8Array)
         signature = sigArray.map(b => b.toString(16).padStart(2, '0')).join('')
       } else if (provider === 'privy' && embeddedSolanaWallet.status === 'connected') {
-        // ─── Privy Embedded Wallet ───
-        // Uses @solana/web3.js VersionedTransaction (required by Privy SDK)
         const transaction = VersionedTransaction.deserialize(txBytes)
-
         const RPC_URL = process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
         const connection = new Connection(RPC_URL, 'confirmed')
-
-        // Get the Privy provider and request signing + sending
         const privyProvider = await embeddedSolanaWallet.getProvider()
-
         const result = await privyProvider.request({
           method: 'signAndSendTransaction',
           params: {
@@ -152,22 +135,19 @@ export default function TradeScreen() {
             connection,
           },
         })
-
         signature = result.signature
       } else {
-        throw new Error('No wallet connected. Please reconnect your wallet.')
+        throw new Error(t('send.noWallet'))
       }
 
-      // Success — show transaction confirmation
       setFromAmount('')
       setCompletedSwapTx(signature)
 
-      // Invalidate balance caches to trigger fresh refetch
       queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
       queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to execute swap. Please try again.'
-      Alert.alert('Swap Failed', errorMessage)
+      const errorMessage = error?.message || t('scan.claimFailedMessage')
+      Alert.alert(t('trade.swapFailed'), errorMessage)
     } finally {
       setIsSwapping(false)
     }
@@ -189,10 +169,9 @@ export default function TradeScreen() {
           <View className="bg-white rounded-3xl">
             <TransactionConfirmation
               signature={completedSwapTx}
-              title="Swap Successful!"
-              message={`Swapped ${fromToken} for ${toToken}`}
+              title={t('trade.swapSuccessful')}
+              message={t('trade.swappedMessage', { from: fromToken, to: toToken })}
               onDone={() => setCompletedSwapTx(null)}
-
             />
           </View>
         </View>
@@ -211,8 +190,8 @@ export default function TradeScreen() {
       <View className="flex-1 px-4" style={{ paddingTop: 24 }}>
         <View className="mb-4">
           <Text className="text-center mb-6">
-            <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>SWAP </Text>
-            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>YOUR TOKENS</Text>
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>{t('trade.title')} </Text>
+            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>{t('trade.titleSuffix')}</Text>
           </Text>
 
           {/* From Token */}
@@ -230,9 +209,9 @@ export default function TradeScreen() {
                 <Text className="font-semibold" style={{ color: '#cbc2e2', fontSize: 18 }}>
                   {fromTokenInfo.symbol}
                 </Text>
-                <Text style={{ fontSize: 16 }}>▼</Text>
+                <Text style={{ fontSize: 16 }}>{'\u25BC'}</Text>
               </Pressable>
-              <Text className="text-gray-500 text-sm">Balance: {fromBalance.toFixed(4)}</Text>
+              <Text className="text-gray-500 text-sm">{t('common.balance', { amount: fromBalance.toFixed(4) })}</Text>
             </View>
             <TextInput
               style={{
@@ -250,7 +229,6 @@ export default function TradeScreen() {
               placeholderTextColor="#A3A3A3"
               value={fromAmount}
               onChangeText={(text) => {
-                // Allow only numbers and one decimal point
                 const formatted = text.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
                 setFromAmount(formatted)
               }}
@@ -298,7 +276,7 @@ export default function TradeScreen() {
                     {isQuoteLoading ? '...' : toAmount || '0.00'} {toTokenInfo.symbol}
                   </Text>
                 </View>
-                <Text style={{ fontSize: 12, marginLeft: 4 }}>▼</Text>
+                <Text style={{ fontSize: 12, marginLeft: 4 }}>{'\u25BC'}</Text>
               </Pressable>
             </View>
             <TextInput
@@ -317,7 +295,7 @@ export default function TradeScreen() {
             />
             {priceImpact > 0 && (
               <Text className="text-center text-xs mt-1" style={{ color: priceImpact > 1 ? '#ef4444' : '#6b7280' }}>
-                Price impact: {priceImpact.toFixed(2)}%
+                {t('trade.priceImpact', { percent: priceImpact.toFixed(2) })}
               </Text>
             )}
             {quoteError && (
@@ -335,7 +313,7 @@ export default function TradeScreen() {
               disabled={!quote || isSwapping || isQuoteLoading || !fromAmount || parseFloat(fromAmount) <= 0}
               loading={isSwapping}
             >
-              <Text style={{ color: '#FFFFFF', fontSize: 36 }}>Swap</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 36 }}>{t('trade.swap')}</Text>
             </Button>
           </View>
         </View>
@@ -351,7 +329,7 @@ export default function TradeScreen() {
         <View className="flex-1 bg-black/50 justify-end">
           <Pressable className="flex-1" onPress={() => setShowTokenPicker(null)} />
           <View className="bg-white rounded-t-3xl p-6" style={{ maxHeight: '50%' }}>
-            <Text className="text-xl font-bold mb-4">Select Token</Text>
+            <Text className="text-xl font-bold mb-4">{t('trade.selectToken')}</Text>
             <ScrollView>
               {(Object.keys(TOKENS) as TokenSymbol[]).map((symbol) => {
                 const token = TOKENS[symbol]

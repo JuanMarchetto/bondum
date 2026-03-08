@@ -12,6 +12,7 @@ import { useRewards } from '../../../hooks/useRewards'
 import { useStreak } from '../../../hooks/useStreak'
 import { fetchDailyChallenge, fetchSmartRecommendation } from '../../../services/rewardApi'
 import { Card, Badge, Avatar, IconButton } from '../../../components/ui'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -32,6 +33,7 @@ export default function HomeScreen() {
   const { rewards, refetch: refetchRewards } = useRewards('Bondum')
   const { currentStreak, totalScans, multiplier, nextMilestone } = useStreak()
   const { width } = useWindowDimensions()
+  const { t } = useLanguage()
 
   // Daily challenge
   const { data: dailyChallenge } = useQuery({
@@ -59,10 +61,10 @@ export default function HomeScreen() {
   }, [refetchBalance, refetchTokens, refetchNfts, refetchRewards])
 
   const quickActions = [
-    { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
-    { icon: sendIcon, label: 'Send', onPress: () => router.push('/(tabs)/(home)/send') },
-    { icon: boxesIcon, label: 'Boxes', onPress: () => router.push('/(tabs)/(rewards)') },
-    { icon: settingsIcon, label: 'Settings', onPress: () => router.push('/(tabs)/(home)/settings') },
+    { icon: scanIcon, label: t('home.scan'), onPress: () => router.push('/scan') },
+    { icon: sendIcon, label: t('home.send'), onPress: () => router.push('/(tabs)/(home)/send') },
+    { icon: boxesIcon, label: t('home.boxes'), onPress: () => router.push('/(tabs)/(rewards)') },
+    { icon: settingsIcon, label: t('home.settings'), onPress: () => router.push('/(tabs)/(home)/settings') },
   ]
 
   // Featured rewards from API (show first 2)
@@ -159,13 +161,13 @@ export default function HomeScreen() {
           <View className="flex-row items-center justify-between mb-2">
             <View className="flex-row items-center gap-3">
               <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
-                <Text style={{ fontSize: 22 }}>🔥</Text>
+                <Text style={{ fontSize: 22 }}>{'\uD83D\uDD25'}</Text>
               </View>
               <View>
                 <Text className="text-gray-900 font-bold" style={{ fontSize: 16 }}>
-                  {currentStreak > 0 ? `${currentStreak}-day streak` : 'Start a streak!'}
+                  {currentStreak > 0 ? t('home.streakCount', { count: currentStreak }) : t('home.startStreak')}
                 </Text>
-                <Text className="text-gray-500 text-xs">{totalScans} total scans</Text>
+                <Text className="text-gray-500 text-xs">{t('home.totalScans', { count: totalScans })}</Text>
               </View>
             </View>
             <View className="flex-row items-center gap-2">
@@ -173,7 +175,7 @@ export default function HomeScreen() {
                 <Text className="text-white font-bold text-xs">{multiplier.toFixed(1)}x</Text>
               </View>
               <Pressable onPress={() => router.push('/scan')} className="bg-violet-500 rounded-xl px-4 py-2">
-                <Text className="text-white font-bold text-sm">Scan</Text>
+                <Text className="text-white font-bold text-sm">{t('home.scan')}</Text>
               </Pressable>
             </View>
           </View>
@@ -181,9 +183,9 @@ export default function HomeScreen() {
             <View>
               <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-gray-500 text-xs">
-                  Day {currentStreak} of {nextMilestone.days} streak
+                  {t('home.streakProgress', { current: currentStreak, target: nextMilestone.days })}
                 </Text>
-                <Text className="text-violet-500 text-xs font-bold">+{nextMilestone.bonus} bonus</Text>
+                <Text className="text-violet-500 text-xs font-bold">{t('home.streakBonus', { bonus: nextMilestone.bonus })}</Text>
               </View>
               <View className="bg-violet-200 rounded-full h-2 overflow-hidden">
                 <View
@@ -203,8 +205,8 @@ export default function HomeScreen() {
             onPress={() => smartRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${smartRecommendation.suggestedReward}`) : router.push('/scan')}
           >
             <View className="flex-row items-center gap-2 mb-2">
-              <Text style={{ fontSize: 16 }}>✨</Text>
-              <Text className="text-violet-200 font-bold text-xs uppercase">Smart Recommendation</Text>
+              <Text style={{ fontSize: 16 }}>{'\u2728'}</Text>
+              <Text className="text-violet-200 font-bold text-xs uppercase">{t('home.smartRecommendation')}</Text>
             </View>
             <Text className="text-white font-medium" style={{ fontSize: 14, lineHeight: 20 }}>
               {smartRecommendation.recommendation}
@@ -217,10 +219,10 @@ export default function HomeScreen() {
           <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }}>
             <View className="flex-row items-center gap-3 flex-1">
               <View className="bg-amber-400 rounded-xl items-center justify-center" style={{ width: 40, height: 40 }}>
-                <Text style={{ fontSize: 18 }}>🎯</Text>
+                <Text style={{ fontSize: 18 }}>{'\uD83C\uDFAF'}</Text>
               </View>
               <View className="flex-1">
-                <Text className="text-gray-900 font-bold text-sm">Daily Challenge</Text>
+                <Text className="text-gray-900 font-bold text-sm">{t('home.dailyChallenge')}</Text>
                 <Text className="text-gray-600 text-xs">{dailyChallenge.description}</Text>
               </View>
             </View>
@@ -236,8 +238,8 @@ export default function HomeScreen() {
             {featuredRewards.map((reward) => (
               <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
-                  <Text className="text-violet-500 text-lg font-bold">Reward</Text>
-                  <Badge variant="outline">{reward.available} available</Badge>
+                  <Text className="text-violet-500 text-lg font-bold">{t('common.reward')}</Text>
+                  <Badge variant="outline">{t('common.available', { count: reward.available })}</Badge>
                 </View>
                 <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
                 <View className="bg-red-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
