@@ -177,50 +177,59 @@ export default function RewardDetailScreen() {
         />
 
         {/* Celebration View */}
-        <View className="flex-1 items-center px-6" style={{ paddingTop: 50 }}>
-          <View className="items-center bg-white rounded-2xl shadow-sm" style={{ paddingVertical: 60, paddingHorizontal: 24, width: '100%' }}>
+        <View className="flex-1 justify-center px-5">
+          <View
+            className="bg-white rounded-3xl"
+            style={{ paddingVertical: 24, paddingHorizontal: 20, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
+          >
             {txSignature ? (
-              <TransactionConfirmation
-                signature={txSignature}
-                title="Reward Redeemed!"
-                message={`You've won: ${reward.value}`}
-                onDone={() => router.replace('/(tabs)/(rewards)')}
-
-              />
-            ) : (
               <>
-                <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>{"You've Won"}</Text>
-                <Text className="text-center mb-6">
-                  <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>A </Text>
-                  <Text className="text-violet-500 font-extrabold" style={{ fontSize: 48 }}>
-                    {reward.type === 'nft' ? 'ULTRA RARE ' : ''}
-                  </Text>
-                  <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>{reward.type === 'nft' ? 'NFT' : 'REWARD'}</Text>
+                {isPanicafe && (
+                  <PanicafeCouponCard value={reward.value} cost={reward.cost} size="sm" style={{ marginHorizontal: 16, marginBottom: 4 }} />
+                )}
+                <TransactionConfirmation
+                  signature={txSignature}
+                  title="Reward Redeemed!"
+                  message={isPanicafe ? `Coupon: ${reward.value}` : `You've won: ${reward.value}`}
+                  onDone={() => router.replace('/(tabs)/(rewards)')}
+                />
+              </>
+            ) : (
+              <View className="items-center" style={{ paddingVertical: 20 }}>
+                <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                  <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
+                </View>
+
+                <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 8 }}>
+                  {"You've Won a Reward!"}
                 </Text>
 
-                {isPanicafeReward(reward.brand) ? (
-                  <PanicafeCouponCard value={reward.value} cost={reward.cost} size="lg" style={{ marginBottom: 24 }} />
-                ) : reward.type === 'token' ? (
-                  <View className="bg-gray-1000 rounded-2xl px-12 py-8 mb-6">
-                    <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
-                  </View>
+                {isPanicafe ? (
+                  <PanicafeCouponCard value={reward.value} cost={reward.cost} size="md" style={{ marginBottom: 24, width: '100%' }} />
                 ) : reward.type === 'nft' ? (
-                  <View className="bg-violet-100 rounded-2xl p-6 mb-6 border-4 border-violet-500">
-                    <View className="w-48 h-48 bg-violet-400 rounded-xl items-center justify-center">
-                      <Text className="text-white font-extrabold" style={{ fontSize: 80 }}>NFT</Text>
-                      <Text className="text-white font-bold mt-2" style={{ fontSize: 32 }}>BONDUM</Text>
+                  <View style={{ backgroundColor: '#ede9fe', borderRadius: 16, padding: 20, marginBottom: 24, borderWidth: 3, borderColor: '#8b5cf6' }}>
+                    <View style={{ width: 160, height: 160, backgroundColor: '#8b5cf6', borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ color: '#fff', fontWeight: '800', fontSize: 56 }}>NFT</Text>
                     </View>
                   </View>
                 ) : (
-                  <View className="bg-red-600 rounded-2xl px-12 py-8 mb-6">
-                    <Text className="text-white font-extrabold" style={{ fontSize: 60 }}>{reward.value}</Text>
+                  <View
+                    style={{
+                      backgroundColor: reward.type === 'token' ? '#111827' : '#dc2626',
+                      borderRadius: 16,
+                      paddingHorizontal: 32,
+                      paddingVertical: 20,
+                      marginBottom: 24,
+                    }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: '800', fontSize: 36, textAlign: 'center' }}>{reward.value}</Text>
                   </View>
                 )}
 
-                <Button variant="primary" size="lg" style={{ paddingVertical: 32, borderRadius: 12, marginTop: 24 }} onPress={() => router.replace('/(tabs)/(rewards)')}>
-                  <Text className="text-white font-bold" style={{ fontSize: 36 }}>Back to Rewards</Text>
+                <Button variant="primary" size="lg" style={{ paddingVertical: 18, borderRadius: 14, width: '100%' }} onPress={() => router.replace('/(tabs)/(rewards)')}>
+                  <Text className="text-white font-bold" style={{ fontSize: 18 }}>Back to Rewards</Text>
                 </Button>
-              </>
+              </View>
             )}
           </View>
         </View>
