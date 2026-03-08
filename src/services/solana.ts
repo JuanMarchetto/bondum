@@ -13,6 +13,7 @@ import {
 export const BONDUM_MINT = '84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump'
 export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 export const PANICAFE_MINT = 'H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1'
+export const SKR_MINT = 'SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3'
 
 // Program IDs
 const TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'

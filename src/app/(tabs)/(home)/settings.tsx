@@ -1,13 +1,12 @@
-import { View, Text, Pressable, Alert, Image } from 'react-native'
+import { View, Text, Pressable, Alert } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSeekerDevice } from '../../../hooks/useSeekerDevice'
 import { useStreak } from '../../../hooks/useStreak'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import * as Clipboard from 'expo-clipboard'
 import { Button } from '../../../components/ui'
-
-const bondumLogo = require('../../../assets/bondum_logo.png')
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets()
@@ -15,28 +14,43 @@ export default function SettingsScreen() {
   const { user, address, provider, disconnect, isLoading } = useAuth()
   const { isSeeker, hasSeedVault } = useSeekerDevice()
   const { currentStreak, totalScans, multiplier } = useStreak()
+  const { t, language, setLanguage } = useLanguage()
 
   const handleCopyAddress = async () => {
     if (address) {
       await Clipboard.setStringAsync(address)
-      Alert.alert('Copied', 'Wallet address copied to clipboard')
+      Alert.alert(t('common.copied'), t('settings.copiedAddress'))
     }
   }
 
   const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('settings.logOut'), t('settings.logOutConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Log Out',
+        text: t('settings.logOut'),
         style: 'destructive',
         onPress: async () => {
           try {
             await disconnect()
           } catch {
-            Alert.alert('Error', 'Failed to log out. Please try again.')
+            Alert.alert(t('common.error'), t('settings.logOutFailed'))
           }
         },
       },
+    ])
+  }
+
+  const handleLanguageChange = () => {
+    Alert.alert(t('settings.selectLanguage'), '', [
+      {
+        text: 'English',
+        onPress: () => setLanguage('en'),
+      },
+      {
+        text: 'Espa\u00f1ol',
+        onPress: () => setLanguage('es'),
+      },
+      { text: t('common.cancel'), style: 'cancel' },
     ])
   }
 
@@ -49,9 +63,9 @@ export default function SettingsScreen() {
       >
         <View className="flex-row items-center justify-between">
           <Pressable onPress={() => router.back()} className="p-2 -ml-2">
-            <Text className="text-white text-3xl">←</Text>
+            <Text className="text-white text-3xl">{'\u2190'}</Text>
           </Pressable>
-          <Text className="text-white font-bold text-xl">Settings</Text>
+          <Text className="text-white font-bold text-xl">{t('settings.title')}</Text>
           <View className="w-10" />
         </View>
       </View>
@@ -59,70 +73,77 @@ export default function SettingsScreen() {
       <View className="flex-1 px-5 pt-6">
         {/* User Info Section */}
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Text className="text-gray-500 text-sm mb-1">Account</Text>
+          <Text className="text-gray-500 text-sm mb-1">{t('settings.account')}</Text>
           <Text className="text-gray-900 font-bold text-lg">{user?.username || 'User'}</Text>
           {address && provider !== 'privy' && (
             <Pressable onPress={handleCopyAddress} className="mt-2">
-              <Text className="text-gray-500 text-sm mb-1">Wallet Address</Text>
+              <Text className="text-gray-500 text-sm mb-1">{t('settings.walletAddress')}</Text>
               <Text className="text-violet-500 text-sm" numberOfLines={1}>
                 {address.slice(0, 8)}...{address.slice(-8)}
               </Text>
-              <Text className="text-gray-400 text-xs mt-1">Tap to copy</Text>
+              <Text className="text-gray-400 text-xs mt-1">{t('settings.tapToCopy')}</Text>
             </Pressable>
           )}
         </View>
 
         {/* Wallet & Device Info */}
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Text className="text-gray-500 text-sm mb-2">Connection</Text>
+          <Text className="text-gray-500 text-sm mb-2">{t('settings.connection')}</Text>
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-gray-900 text-sm">Sign-in Method</Text>
-            <Text className="text-violet-500 text-sm font-bold">{provider === 'solana' ? 'Mobile Wallet' : provider === 'privy' ? 'Email' : 'Guest'}</Text>
+            <Text className="text-gray-900 text-sm">{t('settings.signInMethod')}</Text>
+            <Text className="text-violet-500 text-sm font-bold">{provider === 'solana' ? t('settings.mobileWallet') : provider === 'privy' ? t('settings.email') : t('settings.guest')}</Text>
           </View>
           {isSeeker && (
             <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-gray-900 text-sm">Device</Text>
-              <Text className="text-green-600 text-sm font-bold">Solana Seeker</Text>
+              <Text className="text-gray-900 text-sm">{t('settings.device')}</Text>
+              <Text className="text-green-600 text-sm font-bold">{t('settings.solanaSeeker')}</Text>
             </View>
           )}
           {hasSeedVault && (
             <View className="flex-row items-center justify-between">
-              <Text className="text-gray-900 text-sm">Seed Vault</Text>
-              <Text className="text-green-600 text-sm font-bold">Active</Text>
+              <Text className="text-gray-900 text-sm">{t('settings.seedVault')}</Text>
+              <Text className="text-green-600 text-sm font-bold">{t('settings.active')}</Text>
             </View>
           )}
         </View>
 
         {/* Streak Stats */}
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Text className="text-gray-500 text-sm mb-2">Streak Stats</Text>
+          <Text className="text-gray-500 text-sm mb-2">{t('settings.streakStats')}</Text>
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-gray-900 text-sm">Current Streak</Text>
-            <Text className="text-violet-500 text-sm font-bold">{currentStreak} days</Text>
+            <Text className="text-gray-900 text-sm">{t('settings.currentStreak')}</Text>
+            <Text className="text-violet-500 text-sm font-bold">{t('settings.days', { count: currentStreak })}</Text>
           </View>
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-gray-900 text-sm">Multiplier</Text>
+            <Text className="text-gray-900 text-sm">{t('settings.multiplier')}</Text>
             <Text className="text-violet-500 text-sm font-bold">{multiplier.toFixed(1)}x</Text>
           </View>
           <View className="flex-row items-center justify-between">
-            <Text className="text-gray-900 text-sm">Total Scans</Text>
+            <Text className="text-gray-900 text-sm">{t('settings.totalScans')}</Text>
             <Text className="text-gray-900 text-sm font-bold">{totalScans}</Text>
           </View>
         </View>
 
         {/* Settings Options */}
         <View className="bg-gray-100 rounded-2xl mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Pressable onPress={() => Alert.alert('Notifications', 'Push notifications coming in the next update.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
-            <Text className="text-gray-900 text-base">Notifications</Text>
-            <Text className="text-gray-400 text-lg">›</Text>
+          <Pressable onPress={handleLanguageChange} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+            <Text className="text-gray-900 text-base">{t('settings.language')}</Text>
+            <View className="flex-row items-center">
+              <Text className="text-violet-500 text-sm font-bold mr-2">{language === 'es' ? t('settings.languageSpanish') : t('settings.languageEnglish')}</Text>
+              <Text className="text-gray-400 text-lg">{'\u203A'}</Text>
+            </View>
           </Pressable>
-          <Pressable onPress={() => Alert.alert('Security', hasSeedVault ? 'Your keys are secured by the Seed Vault hardware enclave.' : 'Keys are managed by your wallet provider.')} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
-            <Text className="text-gray-900 text-base">Security</Text>
-            <Text className="text-gray-400 text-lg">›</Text>
+          <Pressable onPress={() => Alert.alert(t('settings.notifications'), t('settings.notificationsMessage'))} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+            <Text className="text-gray-900 text-base">{t('settings.notifications')}</Text>
+            <Text className="text-gray-400 text-lg">{'\u203A'}</Text>
           </Pressable>
-          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 2.0.0\n\nBondum - On-Chain Loyalty Wallet\n\nFeatures:\n- Streak multipliers (up to 2x)\n- Smart recommendations\n- Helius RPC with priority fees\n- Seed Vault SDK support\n- Live on Solana dApp Store\n\nbondum.xyz')} className="flex-row items-center justify-between p-4">
-            <Text className="text-gray-900 text-base">About</Text>
-            <Text className="text-gray-400 text-lg">›</Text>
+          <Pressable onPress={() => Alert.alert(t('settings.security'), hasSeedVault ? t('settings.securitySeedVault') : t('settings.securityProvider'))} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+            <Text className="text-gray-900 text-base">{t('settings.security')}</Text>
+            <Text className="text-gray-400 text-lg">{'\u203A'}</Text>
+          </Pressable>
+          <Pressable onPress={() => Alert.alert(t('settings.aboutTitle'), t('settings.aboutMessage'))} className="flex-row items-center justify-between p-4">
+            <Text className="text-gray-900 text-base">{t('settings.about')}</Text>
+            <Text className="text-gray-400 text-lg">{'\u203A'}</Text>
           </Pressable>
         </View>
 
@@ -135,10 +156,9 @@ export default function SettingsScreen() {
           loading={isLoading}
           style={{ paddingVertical: 12 }}
         >
-          <Text style={{ fontSize: 30, color: '#FFFFFF' }}>Log Out</Text>
+          <Text style={{ fontSize: 30, color: '#FFFFFF' }}>{t('settings.logOut')}</Text>
         </Button>
       </View>
     </View>
   )
 }
-

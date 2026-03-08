@@ -15,6 +15,7 @@ import { useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { Buffer } from 'buffer'
 import { useQueryClient } from '@tanstack/react-query'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 const bondumLogo = require('../../../assets/bondum_logo.png')
 
@@ -33,15 +34,17 @@ export default function SendScreen() {
   const queryClient = useQueryClient()
   const mobileWallet = useMobileWallet()
   const embeddedSolanaWallet = useEmbeddedSolanaWallet()
+  const { t } = useLanguage()
 
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
   const [selectedToken, setSelectedToken] = useState(0)
   const [isSending, setIsSending] = useState(false)
   const [completedTx, setCompletedTx] = useState<string | null>(null)
+  const [sentAmount, setSentAmount] = useState('')
 
   const currentToken = TOKEN_LIST[selectedToken]
-  const tokenBalance = tokens.find((t) => t.symbol === currentToken.symbol)?.balance || 0
+  const tokenBalance = tokens.find((tk) => tk.symbol === currentToken.symbol)?.balance || 0
 
   const handlePaste = async () => {
     const text = await Clipboard.getStringAsync()
@@ -54,20 +57,20 @@ export default function SendScreen() {
 
   const handleSend = async () => {
     if (!address) {
-      Alert.alert('Error', 'Please connect a wallet first.')
+      Alert.alert(t('common.error'), t('send.connectWallet'))
       return
     }
     if (!recipient || recipient.length < 32) {
-      Alert.alert('Error', 'Please enter a valid Solana address.')
+      Alert.alert(t('common.error'), t('send.invalidAddress'))
       return
     }
     const sendAmount = parseFloat(amount)
     if (!sendAmount || sendAmount <= 0) {
-      Alert.alert('Error', 'Please enter a valid amount.')
+      Alert.alert(t('common.error'), t('send.invalidAmount'))
       return
     }
     if (sendAmount > tokenBalance) {
-      Alert.alert('Insufficient Balance', `You don't have enough ${currentToken.symbol}.`)
+      Alert.alert(t('send.insufficientBalance'), t('send.notEnoughToken', { symbol: currentToken.symbol }))
       return
     }
 
@@ -102,18 +105,18 @@ export default function SendScreen() {
         })
         signature = result.signature
       } else {
-        throw new Error('No wallet connected. Please reconnect your wallet.')
+        throw new Error(t('send.noWallet'))
       }
 
+      setSentAmount(amount)
       setAmount('')
       setRecipient('')
       setCompletedTx(signature)
 
-      // Invalidate balance caches to trigger fresh refetch
       queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
       queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
     } catch (error: any) {
-      Alert.alert('Transfer Failed', error?.message || 'Please try again.')
+      Alert.alert(t('send.transferFailed'), error?.message || t('send.transferFailed'))
     } finally {
       setIsSending(false)
     }
@@ -133,10 +136,9 @@ export default function SendScreen() {
           <View className="bg-white rounded-3xl">
             <TransactionConfirmation
               signature={completedTx}
-              title="Transfer Sent!"
-              message={`${amount || ''} ${currentToken.symbol} sent successfully.`}
+              title={t('send.transferSent')}
+              message={t('send.transferMessage', { amount: sentAmount, symbol: currentToken.symbol })}
               onDone={() => router.back()}
-
             />
           </View>
         </View>
@@ -159,16 +161,16 @@ export default function SendScreen() {
 
       <ScrollView className="flex-1 px-5 pt-6" keyboardShouldPersistTaps="handled">
         <Text className="text-center mb-6">
-          <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>SEND </Text>
-          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>TOKENS</Text>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>{t('send.title')} </Text>
+          <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>{t('send.titleSuffix')}</Text>
         </Text>
 
         {/* Recipient */}
-        <Text className="text-gray-500 text-sm font-semibold mb-2">RECIPIENT ADDRESS</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-2">{t('send.recipientAddress')}</Text>
         <View className="bg-white rounded-2xl px-4 py-3 mb-4 flex-row items-center" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
           <TextInput
             className="flex-1 text-base text-gray-900"
-            placeholder="Solana address..."
+            placeholder={t('send.addressPlaceholder')}
             placeholderTextColor="#A3A3A3"
             value={recipient}
             onChangeText={setRecipient}
@@ -176,12 +178,12 @@ export default function SendScreen() {
             autoCorrect={false}
           />
           <Pressable onPress={handlePaste} className="ml-2 bg-violet-100 rounded-lg px-3 py-1">
-            <Text className="text-violet-600 font-semibold text-sm">Paste</Text>
+            <Text className="text-violet-600 font-semibold text-sm">{t('send.paste')}</Text>
           </Pressable>
         </View>
 
         {/* Token Selector */}
-        <Text className="text-gray-500 text-sm font-semibold mb-2">TOKEN</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-2">{t('send.token')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
           {TOKEN_LIST.map((token, index) => (
             <Pressable
@@ -198,7 +200,7 @@ export default function SendScreen() {
         </ScrollView>
 
         {/* Amount */}
-        <Text className="text-gray-500 text-sm font-semibold mb-2">AMOUNT</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-2">{t('send.amount')}</Text>
         <View className="bg-white rounded-2xl px-4 py-3 mb-2 flex-row items-center" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
           <TextInput
             className="flex-1 text-gray-900 font-bold"
@@ -213,11 +215,11 @@ export default function SendScreen() {
             keyboardType="numeric"
           />
           <Pressable onPress={handleMax} className="ml-2 bg-violet-100 rounded-lg px-3 py-1">
-            <Text className="text-violet-600 font-semibold text-sm">MAX</Text>
+            <Text className="text-violet-600 font-semibold text-sm">{t('send.max')}</Text>
           </Pressable>
         </View>
         <Text className="text-gray-400 text-sm mb-6">
-          Balance: {tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 4 })} {currentToken.symbol}
+          {t('send.balanceDisplay', { amount: tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 4 }), symbol: currentToken.symbol })}
         </Text>
 
         {/* Send Button */}
@@ -230,7 +232,7 @@ export default function SendScreen() {
           disabled={!recipient || !amount || parseFloat(amount) <= 0 || isSending}
           style={{ paddingVertical: 14, borderRadius: 20 }}
         >
-          <Text style={{ color: '#FFFFFF', fontSize: 32 }}>Send {currentToken.symbol}</Text>
+          <Text style={{ color: '#FFFFFF', fontSize: 32 }}>{t('send.sendToken', { symbol: currentToken.symbol })}</Text>
         </Button>
       </ScrollView>
     </View>

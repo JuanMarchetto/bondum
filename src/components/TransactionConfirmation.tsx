@@ -2,6 +2,7 @@ import { View, Text, Pressable, Linking } from 'react-native'
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
 import { Button } from './ui'
+import { useLanguage } from '../contexts/LanguageContext'
 
 interface TransactionConfirmationProps {
   signature: string
@@ -19,7 +20,7 @@ function isOnChainSignature(sig: string): boolean {
 
 export function TransactionConfirmation({
   signature,
-  title = 'Transaction Confirmed!',
+  title,
   message,
   onDone,
   onScanAnother,
@@ -27,6 +28,10 @@ export function TransactionConfirmation({
   const [copiedSig, setCopiedSig] = useState(false)
   const isRealTx = isOnChainSignature(signature)
   const truncatedSig = `${signature.slice(0, 14)}...${signature.slice(-6)}`
+  const { t } = useLanguage()
+
+  const displayTitle = title || t('tx.confirmed')
+
 
   const openExplorer = () => {
     Linking.openURL(`${EXPLORER_BASE}/${signature}`)
@@ -57,7 +62,7 @@ export function TransactionConfirmation({
 
       {/* Title */}
       <Text className="text-gray-900 font-bold mb-1 text-center" style={{ fontSize: 24 }}>
-        {title}
+        {displayTitle}
       </Text>
 
       {/* Message */}
@@ -81,7 +86,7 @@ export function TransactionConfirmation({
             }}
           >
             <Text className="text-gray-400" style={{ fontSize: 11, marginBottom: 4 }}>
-              Transaction Signature
+              {t('tx.signature')}
             </Text>
             <View className="flex-row items-center justify-between">
               <Text className="text-gray-700" style={{ fontSize: 13, fontFamily: 'monospace', flex: 1 }}>
@@ -103,7 +108,7 @@ export function TransactionConfirmation({
                     color: copiedSig ? '#10b981' : '#7c3aed',
                   }}
                 >
-                  {copiedSig ? 'Copied!' : 'Copy'}
+                  {copiedSig ? t('common.copied') : t('common.copy')}
                 </Text>
               </View>
             </View>
@@ -115,7 +120,7 @@ export function TransactionConfirmation({
       {isRealTx && (
         <Pressable onPress={openExplorer} style={{ marginBottom: 20, paddingVertical: 6 }}>
           <Text style={{ color: '#7c3aed', fontWeight: '600', fontSize: 14 }}>
-            View on Orb Explorer {'\u2192'}
+            {t('tx.viewExplorer')}
           </Text>
         </Pressable>
       )}
@@ -125,13 +130,13 @@ export function TransactionConfirmation({
         {onScanAnother && (
           <View style={{ flex: 1 }}>
             <Button variant="outline" onPress={onScanAnother} style={{ width: '100%', minHeight: 48 }}>
-              <Text style={{ fontSize: 16 }}>Scan Another</Text>
+              <Text style={{ fontSize: 16 }}>{t('tx.scanAnother')}</Text>
             </Button>
           </View>
         )}
         <View style={{ flex: 1 }}>
           <Button variant="primary" onPress={onDone} style={{ width: '100%', minHeight: 48 }}>
-            <Text style={{ fontSize: 16, color: '#FFFFFF' }}>Done</Text>
+            <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('tx.done')}</Text>
           </Button>
         </View>
       </View>

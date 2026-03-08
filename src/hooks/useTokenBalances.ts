@@ -6,6 +6,7 @@ import {
   BONDUM_MINT,
   USDC_MINT,
   PANICAFE_MINT,
+  SKR_MINT,
 } from '../services/solana'
 
 export interface TokenInfo {
@@ -16,11 +17,12 @@ export interface TokenInfo {
 }
 
 async function fetchAllBalances(walletAddress: string): Promise<TokenInfo[]> {
-  const [solBalance, bondumBalance, usdcBalance, panicafeBalance] = await Promise.all([
+  const [solBalance, bondumBalance, usdcBalance, panicafeBalance, skrBalance] = await Promise.all([
     getSolBalance(walletAddress),
     getTokenBalance(walletAddress, BONDUM_MINT),
     getTokenBalance(walletAddress, USDC_MINT),
     getTokenBalance(walletAddress, PANICAFE_MINT),
+    getTokenBalance(walletAddress, SKR_MINT),
   ])
 
   return [
@@ -28,6 +30,7 @@ async function fetchAllBalances(walletAddress: string): Promise<TokenInfo[]> {
     { symbol: 'BONDUM', name: 'Bondum', balance: bondumBalance, icon: '🅱️' },
     { symbol: 'USDC', name: 'USD Coin', balance: usdcBalance, icon: '💲' },
     { symbol: 'PANICAFE', name: 'PaniCafe', balance: panicafeBalance, icon: '☕' },
+    { symbol: 'SKR', name: 'Seeker', balance: skrBalance, icon: '📱' },
   ]
 }
 

@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { Avatar, BellIcon } from '../../../components/ui'
+import { useLanguage } from '../../../contexts/LanguageContext'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -20,10 +21,11 @@ export default function ProfileScreen() {
   const { width } = useWindowDimensions()
   const avatarSize = Math.round(width * 0.24)
   const [copied, setCopied] = useState(false)
+  const { t } = useLanguage()
 
   const truncatedAddress = address
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : 'No wallet connected'
+    : t('profile.noWallet')
 
   const handleCopyAddress = async () => {
     if (!address) return
@@ -65,7 +67,7 @@ export default function ProfileScreen() {
         <View className="flex-row items-center gap-3">
           <Image source={usdcLogo} style={{ width: 24, height: 24, resizeMode: 'contain' }} />
           <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
-            {isTokensLoading ? '...' : (tokens.find(t => t.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
+            {isTokensLoading ? '...' : (tokens.find(tk => tk.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
           </Text>
         </View>
       </View>
@@ -73,7 +75,7 @@ export default function ProfileScreen() {
       {/* White content area */}
       <ScrollView className="flex-1 px-5 pt-6" contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Wallet Address — visible for all users */}
-        <Text className="text-gray-500 text-sm font-semibold mb-2">WALLET ADDRESS</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-2">{t('profile.walletAddress')}</Text>
         <Pressable
           onPress={handleCopyAddress}
           className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
@@ -86,40 +88,40 @@ export default function ProfileScreen() {
             </Text>
           </View>
           <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
-            <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
+            <Text className="text-white font-bold text-sm">{copied ? t('common.copied') : t('common.copy')}</Text>
           </View>
         </Pressable>
 
         {/* Wallet Recovery / Security */}
-        <Text className="text-gray-500 text-sm font-semibold mb-2 mt-6">WALLET SECURITY</Text>
+        <Text className="text-gray-500 text-sm font-semibold mb-2 mt-6">{t('profile.walletSecurity')}</Text>
         {provider === 'privy' ? (
           <View className="bg-green-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#bbf7d0' }}>
-            <Text className="text-green-700 font-bold text-lg mb-2">Embedded Wallet (Privy)</Text>
+            <Text className="text-green-700 font-bold text-lg mb-2">{t('profile.embeddedWallet')}</Text>
             <Text className="text-green-600 text-sm mb-3">
-              Your wallet is managed securely by Privy. You can recover it by logging in with your email on any device.
+              {t('profile.embeddedWalletDesc')}
             </Text>
             <View className="bg-white rounded-xl" style={{ padding: 14, borderWidth: 1, borderColor: '#d1fae5' }}>
-              <Text className="text-gray-700 text-sm font-semibold mb-1">Recovery method</Text>
-              <Text className="text-gray-500 text-sm">Log in with your email ({user?.username}) to recover your wallet on a new device. No seed phrase needed.</Text>
+              <Text className="text-gray-700 text-sm font-semibold mb-1">{t('profile.recoveryMethod')}</Text>
+              <Text className="text-gray-500 text-sm">{t('profile.recoveryDesc', { email: user?.username || '' })}</Text>
             </View>
           </View>
         ) : provider === 'solana' ? (
           <View className="bg-amber-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#fde68a' }}>
-            <Text className="text-amber-700 font-bold text-lg mb-2">External Wallet</Text>
+            <Text className="text-amber-700 font-bold text-lg mb-2">{t('profile.externalWallet')}</Text>
             <Text className="text-amber-600 text-sm mb-3">
-              Your wallet is managed by your wallet app (Phantom, Solflare, or Seed Vault).
+              {t('profile.externalWalletDesc')}
             </Text>
             <View className="bg-white rounded-xl" style={{ padding: 14, borderWidth: 1, borderColor: '#fef3c7' }}>
-              <Text className="text-gray-700 text-sm font-semibold mb-1">Seed Phrase Recovery</Text>
+              <Text className="text-gray-700 text-sm font-semibold mb-1">{t('profile.seedPhraseRecovery')}</Text>
               <Text className="text-gray-500 text-sm">
-                Open your wallet app to view and back up your seed phrase. Never share it with anyone. Store it offline in a safe place.
+                {t('profile.seedPhraseDesc')}
               </Text>
             </View>
           </View>
         ) : (
           <View className="bg-gray-100 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}>
-            <Text className="text-gray-700 font-bold text-lg mb-1">Guest Mode</Text>
-            <Text className="text-gray-500 text-sm">Connect a wallet to access on-chain features and secure your account.</Text>
+            <Text className="text-gray-700 font-bold text-lg mb-1">{t('profile.guestMode')}</Text>
+            <Text className="text-gray-500 text-sm">{t('profile.guestModeDesc')}</Text>
           </View>
         )}
       </ScrollView>
