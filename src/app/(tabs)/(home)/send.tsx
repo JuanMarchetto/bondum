@@ -109,10 +109,9 @@ export default function SendScreen() {
       setRecipient('')
       setCompletedTx(signature)
 
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
-        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
-      }, 2000)
+      // Invalidate balance caches to trigger fresh refetch
+      queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+      queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
     } catch (error: any) {
       Alert.alert('Transfer Failed', error?.message || 'Please try again.')
     } finally {

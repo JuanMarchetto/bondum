@@ -6,6 +6,7 @@ import {
   Transaction,
   SystemProgram,
   TransactionInstruction,
+  ComputeBudgetProgram,
 } from '@solana/web3.js'
 
 // Token mint addresses
@@ -408,6 +409,10 @@ export async function getWalletNfts(walletAddress: string): Promise<NftAsset[]> 
   }
 }
 
+// ─── Shared Connection (singleton) ──────────────────────────────────────────
+
+const sharedConnection = new Connection(RPC_URL, 'confirmed')
+
 // ─── Transfer Transaction Builder ────────────────────────────────────────────
 
 const SPL_TOKEN_PROGRAM = new PublicKey(TOKEN_PROGRAM_ID)
@@ -434,10 +439,14 @@ export async function buildTransferTransaction(
   amount: number,
   decimals: number,
 ): Promise<string> {
-  const connection = new Connection(RPC_URL, 'confirmed')
   const fromPubkey = new PublicKey(from)
   const toPubkey = new PublicKey(to)
   const transaction = new Transaction()
+
+  // Priority fee for faster inclusion during network congestion
+  transaction.add(
+    ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 5000 }),
+  )
 
   if (!mint) {
     // SOL transfer
@@ -456,7 +465,7 @@ export async function buildTransferTransaction(
     const toAta = findAssociatedTokenAddress(toPubkey, mintPubkey, tokenProgramId)
 
     // Check if destination ATA exists; if not, create it
-    const toAtaInfo = await connection.getAccountInfo(toAta)
+    const toAtaInfo = await sharedConnection.getAccountInfo(toAta)
     if (!toAtaInfo) {
       transaction.add(
         new TransactionInstruction({
@@ -493,7 +502,7 @@ export async function buildTransferTransaction(
     )
   }
 
-  const { blockhash } = await connection.getLatestBlockhash()
+  const { blockhash } = await sharedConnection.getLatestBlockhash()
   transaction.recentBlockhash = blockhash
   transaction.feePayer = fromPubkey
 

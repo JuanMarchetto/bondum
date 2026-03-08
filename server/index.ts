@@ -245,13 +245,31 @@ const server = http.createServer(async (req, res) => {
         return
       }
 
-      // In production: verify user has enough $BONDUM and execute a burn
-      // For hackathon: decrement availability and return success
       reward.available--
 
+      // For token rewards, send tokens from treasury on-chain
+      if (reward.type === 'token' && (reward as any).tokenAmount) {
+        const brandKey = (brand || reward.brand || 'bondum').toLowerCase()
+        const mintInfo = BRAND_MINTS[brandKey] || BRAND_MINTS.bondum
+        const txSignature = await transferTokens(
+          walletAddress,
+          mintInfo.mint,
+          (reward as any).tokenAmount,
+          mintInfo.decimals,
+        )
+        sendJson(res, 200, {
+          success: true,
+          txSignature,
+          rewardId,
+          message: `${(reward as any).tokenAmount} tokens sent to ${walletAddress.slice(0, 8)}...`,
+        })
+        return
+      }
+
+      // For discount/NFT rewards, no on-chain transfer needed
       sendJson(res, 200, {
         success: true,
-        txSignature: 'redemption-' + Date.now().toString(36),
+        txSignature: null,
         rewardId,
         message: `Reward "${reward.title}" redeemed successfully`,
       })

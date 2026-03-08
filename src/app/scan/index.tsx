@@ -11,6 +11,7 @@ import { TransactionConfirmation } from '../../components/TransactionConfirmatio
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
 import { claimScanReward } from '../../services/rewardApi'
+import { useStreak } from '../../hooks/useStreak'
 
 const avatarImage = undefined
 const bondumLogo = require('../../assets/bondum_logo.png')
@@ -27,6 +28,7 @@ export default function ScanScreen() {
   const [rewardClaimed, setRewardClaimed] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const { logScan } = useStreak()
 
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return
@@ -59,11 +61,12 @@ export default function ScanScreen() {
         setTxSignature(result.txSignature)
 
         // Invalidate balance caches so they refresh
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
-          queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
-        }, 2000)
+        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
       }
+
+      // Record scan for streak tracking
+      await logScan()
 
       // Also store locally for history
       await addClaimedReward({

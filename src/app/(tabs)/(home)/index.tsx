@@ -8,6 +8,7 @@ import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useRewards } from '../../../hooks/useRewards'
+import { useStreak } from '../../../hooks/useStreak'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
   const { rewards, refetch: refetchRewards } = useRewards('Bondum')
+  const { currentStreak, totalScans } = useStreak()
   const { width } = useWindowDimensions()
   const avatarSize = Math.round(width * 0.24)
   const [refreshing, setRefreshing] = useState(false)
@@ -141,6 +143,26 @@ export default function HomeScreen() {
             />
           ))}
         </View>
+
+        {/* Streak Banner */}
+        {totalScans > 0 && (
+          <View className="mx-2 mb-4 bg-violet-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }}>
+            <View className="flex-row items-center gap-3">
+              <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
+                <Text className="text-white font-bold" style={{ fontSize: 20 }}>{currentStreak}</Text>
+              </View>
+              <View>
+                <Text className="text-gray-900 font-bold" style={{ fontSize: 16 }}>
+                  {currentStreak > 0 ? `${currentStreak}-day streak` : 'Start a streak!'}
+                </Text>
+                <Text className="text-gray-500 text-xs">{totalScans} total scans</Text>
+              </View>
+            </View>
+            <Pressable onPress={() => router.push('/scan')} className="bg-violet-500 rounded-xl px-4 py-2">
+              <Text className="text-white font-bold text-sm">Scan now</Text>
+            </Pressable>
+          </View>
+        )}
 
         {/* Rewards Section */}
         <View className="mb-4">

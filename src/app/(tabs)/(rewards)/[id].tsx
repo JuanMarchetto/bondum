@@ -63,16 +63,14 @@ export default function RewardDetailScreen() {
         type: reward.type,
         value: reward.value,
         claimedAt: new Date().toISOString(),
-        txSignature: result.txSignature,
+        txSignature: result.txSignature || undefined,
       })
       setClaimed(true)
 
       // Refresh balances and reward catalog
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
-        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
-        queryClient.invalidateQueries({ queryKey: ['rewards'] })
-      }, 2000)
+      queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
+      queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+      queryClient.invalidateQueries({ queryKey: ['rewards'] })
     } catch (error: any) {
       Alert.alert('Error', error?.message || 'Failed to claim reward. Please try again.')
     } finally {

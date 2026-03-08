@@ -14,10 +14,9 @@ export interface ParsedQrReward {
  * Supports three formats:
  *   1. JSON: { brand, type, value, title?, tokenAmount?, nonce?, exp?, sig? }
  *   2. Deep link: bondum://?brand=X&type=X&value=X&tokens=X&nonce=X&exp=X&sig=X
- *   3. Fallback: any scanned data → generic 100 $BONDUM reward
- *
  * When nonce/exp/sig are present, the reward server validates them
  * to prevent replay attacks and expired QR codes.
+ * Unrecognized formats return null (no fallback rewards).
  */
 export function parseQrCode(data: string): ParsedQrReward | null {
   if (!data || typeof data !== 'string') return null
@@ -69,12 +68,6 @@ export function parseQrCode(data: string): ParsedQrReward | null {
     }
   }
 
-  // Fallback: treat any scanned data as a generic Bondum reward
-  return {
-    brand: 'Bondum',
-    type: 'token',
-    value: '100 $BONDUM',
-    title: 'Product Scan Reward',
-    tokenAmount: 100,
-  }
+  // Unrecognized QR format — reject
+  return null
 }

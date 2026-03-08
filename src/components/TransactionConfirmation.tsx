@@ -11,6 +11,14 @@ interface TransactionConfirmationProps {
 
 const SOLSCAN_BASE = 'https://solscan.io/tx'
 
+/**
+ * Returns true if the signature looks like a real on-chain transaction
+ * (base58, 64+ chars). Fake signatures like "redemption-..." are filtered out.
+ */
+function isOnChainSignature(sig: string): boolean {
+  return /^[1-9A-HJ-NP-Za-km-z]{64,}$/.test(sig)
+}
+
 export function TransactionConfirmation({
   signature,
   title = 'Transaction Confirmed!',
@@ -18,6 +26,7 @@ export function TransactionConfirmation({
   onDone,
   onScanAnother,
 }: TransactionConfirmationProps) {
+  const isRealTx = isOnChainSignature(signature)
   const truncatedSig = `${signature.slice(0, 12)}...${signature.slice(-8)}`
 
   const openSolscan = () => {
@@ -38,14 +47,18 @@ export function TransactionConfirmation({
         </Text>
       )}
 
-      <View className="bg-gray-100 rounded-xl px-4 py-3 mb-4 w-full">
-        <Text className="text-gray-400 text-xs mb-1">Transaction Signature</Text>
-        <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
-      </View>
+      {isRealTx && (
+        <View className="bg-gray-100 rounded-xl px-4 py-3 mb-4 w-full">
+          <Text className="text-gray-400 text-xs mb-1">Transaction Signature</Text>
+          <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
+        </View>
+      )}
 
-      <Pressable onPress={openSolscan} className="mb-6">
-        <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
-      </Pressable>
+      {isRealTx && (
+        <Pressable onPress={openSolscan} className="mb-6">
+          <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
+        </Pressable>
+      )}
 
       <View className="flex-row gap-3">
         {onScanAnother && (

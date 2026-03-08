@@ -28,7 +28,7 @@ export interface ClaimResult {
 
 export interface RedeemResult {
   success: boolean
-  txSignature: string
+  txSignature: string | null
   rewardId: string
   message: string
 }

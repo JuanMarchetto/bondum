@@ -161,12 +161,9 @@ export default function TradeScreen() {
       setFromAmount('')
       setCompletedSwapTx(signature)
 
-      // Wait 2s for the transaction to finalize, then invalidate all balance caches
-      // This forces a fresh refetch on every screen that uses these queries
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
-        queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
-      }, 2000)
+      // Invalidate balance caches to trigger fresh refetch
+      queryClient.invalidateQueries({ queryKey: ['tokenBalances'] })
+      queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to execute swap. Please try again.'
       Alert.alert('Swap Failed', errorMessage)
