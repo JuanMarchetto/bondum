@@ -32,6 +32,7 @@ export default function ScanScreen() {
   const [rewardClaimed, setRewardClaimed] = useState(false)
   const [isClaiming, setIsClaiming] = useState(false)
   const [txSignature, setTxSignature] = useState<string | null>(null)
+  const [claimedAmount, setClaimedAmount] = useState<number | null>(null)
   const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
   const { logScan } = useStreak()
 
@@ -75,6 +76,7 @@ export default function ScanScreen() {
           })
         }
         setTxSignature(result.txSignature)
+        if (result.tokenAmount) setClaimedAmount(result.tokenAmount)
 
         const r = result as any
         if (r.multiplier) {
@@ -116,6 +118,7 @@ export default function ScanScreen() {
     setRewardClaimed(false)
     setTxSignature(null)
     setStreakInfo(null)
+    setClaimedAmount(null)
   }
 
   // ─── Compact Header (shared across all scan states) ──────────────────────
@@ -182,7 +185,7 @@ export default function ScanScreen() {
                     <TransactionConfirmation
                       signature={txSignature}
                       title="Reward Claimed!"
-                      message={`+${parsedReward.tokenAmount || ''} $${isPanicafeReward(parsedReward.brand) ? 'PANICAFE' : 'BONDUM'} tokens`}
+                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} $${isPanicafeReward(parsedReward.brand) ? 'PANICAFE' : 'BONDUM'} tokens`}
                       onDone={() => router.replace('/(tabs)/(rewards)')}
                       onScanAnother={resetScanner}
                     />
