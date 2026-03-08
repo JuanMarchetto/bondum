@@ -1,6 +1,5 @@
-import { View, Text, Pressable, useWindowDimensions, Image, Alert } from 'react-native'
+import { View, Text, Pressable, useWindowDimensions, Image } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -15,8 +14,7 @@ const usdcLogo = require('../../../assets/usdc-logo.png')
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets()
-  const router = useRouter()
-  const { user, address } = useAuth()
+  const { user, address, provider } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const { tokens, isLoading: isTokensLoading } = useTokenBalances()
   const { width } = useWindowDimensions()
@@ -72,38 +70,35 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* White content area — wallet pubkey */}
+      {/* White content area */}
       <View className="flex-1 px-5 pt-6">
-        <Text className="text-gray-500 text-sm font-semibold mb-2">WALLET ADDRESS</Text>
+        {provider !== 'privy' && (
+          <>
+            <Text className="text-gray-500 text-sm font-semibold mb-2">WALLET ADDRESS</Text>
+            <Pressable
+              onPress={handleCopyAddress}
+              className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
+              style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}
+            >
+              <View className="flex-1 mr-3">
+                <Text className="text-gray-900 font-bold text-lg mb-1">{truncatedAddress}</Text>
+                <Text className="text-gray-400 text-xs" numberOfLines={1} ellipsizeMode="middle">
+                  {address || ''}
+                </Text>
+              </View>
+              <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
+                <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
+              </View>
+            </Pressable>
+          </>
+        )}
 
-        <Pressable
-          onPress={handleCopyAddress}
-          className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
-          style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}
-        >
-          <View className="flex-1 mr-3">
-            <Text className="text-gray-900 font-bold text-lg mb-1">{truncatedAddress}</Text>
-            <Text className="text-gray-400 text-xs" numberOfLines={1} ellipsizeMode="middle">
-              {address || ''}
-            </Text>
+        {provider === 'privy' && (
+          <View className="bg-green-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#bbf7d0' }}>
+            <Text className="text-green-700 font-bold text-lg mb-1">Wallet Connected</Text>
+            <Text className="text-green-600 text-sm">Your wallet is managed securely. All transactions are verified on the Solana blockchain.</Text>
           </View>
-          <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ paddingVertical: 8, paddingHorizontal: 16 }}>
-            <Text className="text-white font-bold text-sm">{copied ? 'Copied!' : 'Copy'}</Text>
-          </View>
-        </Pressable>
-
-        {/* Referral Section */}
-        <Pressable
-          onPress={() => router.push('/(tabs)/(profile)/referral')}
-          className="bg-violet-500 rounded-2xl mt-6 flex-row items-center justify-between"
-          style={{ padding: 18 }}
-        >
-          <View className="flex-1">
-            <Text className="text-white font-bold text-lg">Invite Friends</Text>
-            <Text className="text-violet-200 text-sm">Earn bonus $BONDUM for each referral</Text>
-          </View>
-          <Text className="text-white text-2xl">{'>'}</Text>
-        </Pressable>
+        )}
       </View>
     </View>
   )

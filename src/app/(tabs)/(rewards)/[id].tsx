@@ -179,6 +179,7 @@ export default function RewardDetailScreen() {
                 title="Reward Redeemed!"
                 message={`You've won: ${reward.value}`}
                 onDone={() => router.replace('/(tabs)/(rewards)')}
+                simplified={provider === 'privy'}
               />
             ) : (
               <>

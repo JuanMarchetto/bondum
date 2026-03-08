@@ -61,7 +61,7 @@ export default function SettingsScreen() {
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
           <Text className="text-gray-500 text-sm mb-1">Account</Text>
           <Text className="text-gray-900 font-bold text-lg">{user?.username || 'User'}</Text>
-          {address && (
+          {address && provider !== 'privy' && (
             <Pressable onPress={handleCopyAddress} className="mt-2">
               <Text className="text-gray-500 text-sm mb-1">Wallet Address</Text>
               <Text className="text-violet-500 text-sm" numberOfLines={1}>
@@ -76,8 +76,8 @@ export default function SettingsScreen() {
         <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
           <Text className="text-gray-500 text-sm mb-2">Connection</Text>
           <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-gray-900 text-sm">Auth Provider</Text>
-            <Text className="text-violet-500 text-sm font-bold">{provider === 'solana' ? 'Mobile Wallet (MWA)' : provider === 'privy' ? 'Privy (Email)' : 'Guest'}</Text>
+            <Text className="text-gray-900 text-sm">Sign-in Method</Text>
+            <Text className="text-violet-500 text-sm font-bold">{provider === 'solana' ? 'Mobile Wallet' : provider === 'privy' ? 'Email' : 'Guest'}</Text>
           </View>
           {isSeeker && (
             <View className="flex-row items-center justify-between mb-2">

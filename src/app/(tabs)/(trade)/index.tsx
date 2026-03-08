@@ -191,6 +191,7 @@ export default function TradeScreen() {
               title="Swap Successful!"
               message={`Swapped ${fromToken} for ${toToken}`}
               onDone={() => setCompletedSwapTx(null)}
+              simplified={provider === 'privy'}
             />
           </View>
         </View>

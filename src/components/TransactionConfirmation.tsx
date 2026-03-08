@@ -7,6 +7,8 @@ interface TransactionConfirmationProps {
   message?: string
   onDone: () => void
   onScanAnother?: () => void
+  /** When true, hides the raw signature and Solscan link (for non-crypto users) */
+  simplified?: boolean
 }
 
 const SOLSCAN_BASE = 'https://solscan.io/tx'
@@ -25,9 +27,11 @@ export function TransactionConfirmation({
   message,
   onDone,
   onScanAnother,
+  simplified = false,
 }: TransactionConfirmationProps) {
   const isRealTx = isOnChainSignature(signature)
   const truncatedSig = `${signature.slice(0, 12)}...${signature.slice(-8)}`
+  const showDetails = isRealTx && !simplified
 
   const openSolscan = () => {
     Linking.openURL(`${SOLSCAN_BASE}/${signature}`)
@@ -47,14 +51,20 @@ export function TransactionConfirmation({
         </Text>
       )}
 
-      {isRealTx && (
+      {simplified && isRealTx && (
+        <View className="bg-green-50 rounded-xl px-4 py-3 mb-4 w-full" style={{ borderWidth: 1, borderColor: '#bbf7d0' }}>
+          <Text className="text-green-700 text-center text-sm font-medium">Verified on blockchain</Text>
+        </View>
+      )}
+
+      {showDetails && (
         <View className="bg-gray-100 rounded-xl px-4 py-3 mb-4 w-full">
           <Text className="text-gray-400 text-xs mb-1">Transaction Signature</Text>
           <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
         </View>
       )}
 
-      {isRealTx && (
+      {showDetails && (
         <Pressable onPress={openSolscan} className="mb-6">
           <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
         </Pressable>

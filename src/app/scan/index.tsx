@@ -20,7 +20,7 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { user, address } = useAuth()
+  const { user, address, provider } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanned, setScanned] = useState(false)
@@ -179,6 +179,7 @@ export default function ScanScreen() {
                     message={`${parsedReward.value} from ${parsedReward.brand} has been sent to your wallet.`}
                     onDone={() => router.replace('/(tabs)/(rewards)')}
                     onScanAnother={resetScanner}
+                    simplified={provider === 'privy'}
                   />
                   {streakInfo && (
                     <View className="w-full mt-4">

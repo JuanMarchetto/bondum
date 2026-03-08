@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, Pressable, Image, RefreshControl } from 'react-native'
 import { Image as ExpoImage } from 'expo-image'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState, useCallback } from 'react'
@@ -118,6 +119,26 @@ export default function AssetsScreen() {
             </View>
           )}
         </Card>
+
+        {/* Quick Actions */}
+        <View className="flex-row gap-3 mb-6">
+          <Pressable
+            onPress={() => router.push('/(tabs)/(trade)')}
+            className="flex-1 bg-violet-500 rounded-2xl items-center justify-center flex-row gap-2"
+            style={{ paddingVertical: 14 }}
+          >
+            <Ionicons name="swap-horizontal" size={20} color="white" />
+            <Text className="text-white font-bold text-base">Swap</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push('/(tabs)/(home)/send')}
+            className="flex-1 bg-gray-100 rounded-2xl items-center justify-center flex-row gap-2"
+            style={{ paddingVertical: 14, borderWidth: 1, borderColor: '#E5E5E5' }}
+          >
+            <Ionicons name="paper-plane-outline" size={20} color="#8B5CF6" />
+            <Text className="text-violet-500 font-bold text-base">Send</Text>
+          </Pressable>
+        </View>
 
         {/* Token List */}
         <Text className="text-gray-500 text-sm font-semibold mb-3">TOKENS</Text>
