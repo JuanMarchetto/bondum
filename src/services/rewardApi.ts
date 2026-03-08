@@ -4,6 +4,7 @@
  */
 
 const REWARD_API_URL = process.env.EXPO_PUBLIC_REWARD_API_URL || 'https://api.bondum.xyz'
+const PANICAFE_API_URL = process.env.EXPO_PUBLIC_PANICAFE_API_URL || 'https://panicafe.bondum.xyz'
 
 export interface RewardCatalogItem {
   id: string
@@ -106,6 +107,42 @@ export async function claimScanReward(params: {
   }
 
   return response.json()
+}
+
+/**
+ * Claims a PaniCafe box reward via the PaniCafe production API.
+ * Sends the box token (boxId:hmac) to the PaniCafe server which validates
+ * the HMAC, distributes PANICAFE tokens on-chain, and returns the tx signature.
+ */
+export async function claimPanicafeBox(params: {
+  boxToken: string
+  userWallet: string
+  privyToken?: string | null
+}): Promise<ClaimResult> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (params.privyToken) {
+    headers['Cookie'] = `privy-token=${params.privyToken}`
+  }
+
+  const response = await fetch(`${PANICAFE_API_URL}/api/open-box`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ boxToken: params.boxToken, userWallet: params.userWallet }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to open PaniCafe box' }))
+    throw new Error(error.message || 'Failed to claim PaniCafe reward')
+  }
+
+  const data = await response.json()
+  return {
+    success: true,
+    txSignature: data.signature || '',
+    tokenAmount: data.tokens || 0,
+    mint: 'H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1',
+    message: `${data.tokens || 0} PANICAFE tokens sent to your wallet`,
+  }
 }
 
 /**

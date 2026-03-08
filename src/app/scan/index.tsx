@@ -10,7 +10,7 @@ import { Avatar, Button, BellIcon } from '../../components/ui'
 import { TransactionConfirmation } from '../../components/TransactionConfirmation'
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
-import { claimScanReward } from '../../services/rewardApi'
+import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
 import { useStreak } from '../../hooks/useStreak'
 
 const avatarImage = undefined
@@ -20,7 +20,7 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { user, address, provider } = useAuth()
+  const { user, address, provider, getPrivyAccessToken } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanned, setScanned] = useState(false)
@@ -50,15 +50,26 @@ export default function ScanScreen() {
     try {
       // Attempt on-chain claim via reward API
       if (address && parsedReward.tokenAmount) {
-        const result = await claimScanReward({
-          walletAddress: address,
-          brand: parsedReward.brand,
-          type: parsedReward.type,
-          value: parsedReward.value,
-          tokenAmount: parsedReward.tokenAmount,
-          nonce: parsedReward.nonce,
-          signature: parsedReward.sig,
-        })
+        let result
+        if (parsedReward.brand === 'PaniCafe' && parsedReward.nonce) {
+          // PaniCafe QRs go to the PaniCafe production API
+          const privyToken = provider === 'privy' ? await getPrivyAccessToken() : null
+          result = await claimPanicafeBox({
+            boxToken: parsedReward.nonce,
+            userWallet: address,
+            privyToken,
+          })
+        } else {
+          result = await claimScanReward({
+            walletAddress: address,
+            brand: parsedReward.brand,
+            type: parsedReward.type,
+            value: parsedReward.value,
+            tokenAmount: parsedReward.tokenAmount,
+            nonce: parsedReward.nonce,
+            signature: parsedReward.sig,
+          })
+        }
         setTxSignature(result.txSignature)
 
         // Capture streak info from server response
