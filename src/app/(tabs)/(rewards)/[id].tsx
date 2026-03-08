@@ -1,4 +1,5 @@
 import { View, Text, Alert } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
@@ -156,6 +157,7 @@ export default function RewardDetailScreen() {
         claimedAt: new Date().toISOString(),
         txSignature: sig || undefined,
       })
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setClaimed(true)
 
       queryClient.invalidateQueries({ queryKey: ['bondumBalance'] })

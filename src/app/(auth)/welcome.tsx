@@ -190,7 +190,7 @@ export default function WelcomeScreen() {
         <Text className="text-violet-200 text-lg text-center mb-4">Pay. Earn. Enjoy.</Text>
 
         <Text className="text-violet-100 text-base text-center max-w-xs opacity-80">
-          Earn $BONDUM and loyalty tokens by engaging with your favorite brands
+          Earn rewards and loyalty points by engaging with your favorite brands
         </Text>
       </View>
 

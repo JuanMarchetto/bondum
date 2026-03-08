@@ -1,4 +1,5 @@
 import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
@@ -43,6 +44,7 @@ export default function ScanScreen() {
     setScanned(true)
     const parsed = parseQrCode(data)
     if (parsed) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setParsedReward(parsed)
     } else {
       Alert.alert('Invalid QR Code', 'This QR code is expired or does not contain a valid reward.')
@@ -104,6 +106,7 @@ export default function ScanScreen() {
         claimedAt: new Date().toISOString(),
         txSignature: txSignature || undefined,
       })
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       setRewardClaimed(true)
     } catch (error: any) {
       Alert.alert('Claim Failed', error?.message || 'Failed to claim reward. Please try again.')
@@ -185,7 +188,7 @@ export default function ScanScreen() {
                     <TransactionConfirmation
                       signature={txSignature}
                       title="Reward Claimed!"
-                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} $${isPanicafeReward(parsedReward.brand) ? 'PANICAFE' : 'BONDUM'} tokens`}
+                      message={`+${(claimedAmount || parsedReward.tokenAmount || '').toLocaleString()} ${isPanicafeReward(parsedReward.brand) ? 'PaniCafe' : 'Bondum'} points`}
                       onDone={() => router.replace('/(tabs)/(rewards)')}
                       onScanAnother={resetScanner}
                     />
@@ -285,7 +288,7 @@ export default function ScanScreen() {
                     {parsedReward.tokenAmount ? `${parsedReward.tokenAmount.toLocaleString()}` : parsedReward.value}
                   </Text>
                   <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: '600', marginTop: 2 }}>
-                    {isPanicafeReward(parsedReward.brand) ? '$PANICAFE' : parsedReward.brand !== 'Bondum' ? parsedReward.brand : '$BONDUM'} tokens
+                    {isPanicafeReward(parsedReward.brand) ? 'PaniCafe' : parsedReward.brand !== 'Bondum' ? parsedReward.brand : 'Bondum'} points
                   </Text>
                 </View>
 
@@ -345,7 +348,7 @@ export default function ScanScreen() {
         </View>
 
         <Text className="text-gray-400 text-center mt-6" style={{ fontSize: 15, lineHeight: 22 }}>
-          Scan a QR code to earn $BONDUM{'\n'}and loyalty tokens from your favorite brands.
+          Scan a QR code to earn rewards{'\n'}and loyalty points from your favorite brands.
         </Text>
       </View>
 

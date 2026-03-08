@@ -30,6 +30,7 @@ const TOKEN_ICONS: Record<TokenSymbol, { source: any; isSvg?: boolean }> = {
   USDC: { source: usdcCoin },
   BONDUM: { source: bLogo },
   PANICAFE: { source: panicoinSvg, isSvg: true },
+  SKR: { source: solLogo },
 }
 
 export default function TradeScreen() {
@@ -235,7 +236,7 @@ export default function TradeScreen() {
             </View>
             <TextInput
               style={{
-                fontSize: 100,
+                fontSize: 48,
                 color: '#000000',
                 fontWeight: 'bold',
                 textAlign: 'center',
@@ -302,7 +303,7 @@ export default function TradeScreen() {
             </View>
             <TextInput
               style={{
-                fontSize: 60,
+                fontSize: 36,
                 fontWeight: 'bold',
                 textAlign: 'center',
                 width: '100%',

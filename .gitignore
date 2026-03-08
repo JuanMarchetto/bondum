@@ -50,3 +50,6 @@ server/streaks.json
 
 # Build/health logs
 scripts/*.log
+
+# Anchor / Solana program build artifacts
+target/

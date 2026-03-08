@@ -11,7 +11,7 @@ import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useRewards } from '../../../hooks/useRewards'
 import { useStreak } from '../../../hooks/useStreak'
 import { fetchDailyChallenge, fetchSmartRecommendation } from '../../../services/rewardApi'
-import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
+import { Card, Badge, Avatar, IconButton } from '../../../components/ui'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -72,12 +72,9 @@ export default function HomeScreen() {
     <View className="flex-1 bg-white">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 20, backgroundColor: '#8b66df' }}>
-        {/* Logo + Bell */}
+        {/* Logo */}
         <View className="flex-row items-center justify-between" style={{ marginBottom: 20 }}>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-          <Pressable className="p-2">
-            <BellIcon size={32} color="white" />
-          </Pressable>
         </View>
 
         {/* User Info + Avatar */}

@@ -51,7 +51,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(trade)"
         options={{
-          href: null,
+          title: 'Trade',
+          tabBarIcon: ({ focused }) => <TabIcon name="trade" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -71,7 +72,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="(profile)"
         options={{
-          href: null,
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => <TabIcon name="profile" focused={focused} />,
         }}
       />
     </Tabs>
