@@ -1,9 +1,12 @@
 import { View, Text, Pressable, Image } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import { Avatar } from '../ui/Avatar'
 import { BellIcon } from '../ui/BellIcon'
 import type { ReactNode } from 'react'
+import { fontSize } from '../../constants/typography'
 
-const avatarImage = undefined // require('../../assets/avatar.png')
+const avatarImage = undefined
 const bondumLogo = require('../../assets/bondum_logo.png')
 
 interface HeaderProps {
@@ -13,6 +16,8 @@ interface HeaderProps {
   onNotificationPress?: () => void
   onAvatarPress?: () => void
   rightContent?: ReactNode
+  showBackButton?: boolean
+  children?: ReactNode
 }
 
 export function Header({
@@ -22,19 +27,34 @@ export function Header({
   onNotificationPress,
   onAvatarPress,
   rightContent,
+  showBackButton = false,
+  children,
 }: HeaderProps) {
+  const insets = useSafeAreaInsets()
+  const router = useRouter()
+
   return (
-    <View className="px-5 pt-12 pb-6" style={{ backgroundColor: '#8b66df' }}>
-      {/* Logo */}
-      <View className="items-center mb-4">
-        <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-      </View>
+    <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+      {showBackButton ? (
+        <View className="flex-row items-center mb-4 relative">
+          <Pressable onPress={() => router.back()} className="mr-4">
+            <Text className="text-white" style={{ fontSize: fontSize['5xl'] }}>←</Text>
+          </Pressable>
+          <View className="absolute left-0 right-0 items-center">
+            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+          </View>
+        </View>
+      ) : (
+        <View className="items-center mb-4">
+          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+        </View>
+      )}
 
       {/* User Info Row */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {userName}!</Text>
-          <Text className="text-violet-200" style={{ fontSize: 19 }}>{balance} $BONDUM</Text>
+          <Text className="text-white font-bold" style={{ fontSize: fontSize['2xl'] }}>Hello, {userName}!</Text>
+          <Text className="text-violet-200" style={{ fontSize: fontSize.lg }}>{balance} $BONDUM</Text>
         </View>
 
         <View className="flex-row items-center gap-3">
@@ -47,6 +67,8 @@ export function Header({
           </Pressable>
         </View>
       </View>
+
+      {children}
     </View>
   )
 }

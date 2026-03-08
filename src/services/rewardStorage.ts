@@ -8,6 +8,7 @@ export interface ClaimedReward {
   type: string
   value: string
   claimedAt: string
+  txSignature?: string
 }
 
 export async function getClaimedRewards(): Promise<ClaimedReward[]> {

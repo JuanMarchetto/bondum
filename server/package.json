@@ -1,0 +1,19 @@
+{
+  "name": "bondum-reward-server",
+  "version": "1.0.0",
+  "description": "Bondum reward distribution API — validates QR scans and distributes SPL tokens on-chain",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "npx tsx watch index.ts",
+    "start": "npx tsx index.ts",
+    "test": "node --test index.test.ts --loader tsx"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.0",
+    "@solana/spl-token": "^0.4.12"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "@types/node": "^22.0.0"
+  }
+}

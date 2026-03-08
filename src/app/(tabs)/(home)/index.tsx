@@ -3,10 +3,14 @@ import { Image as ExpoImage } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
+import { useRewards } from '../../../hooks/useRewards'
+import { useStreak } from '../../../hooks/useStreak'
+import { fetchDailyChallenge, fetchSmartRecommendation } from '../../../services/rewardApi'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined
@@ -21,18 +25,39 @@ const settingsIcon = require('../../../assets/settings.png')
 export default function HomeScreen() {
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, address } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
   const { nfts, nftCount, isLoading: isNftsLoading, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
+  const { rewards, refetch: refetchRewards } = useRewards('Bondum')
+  const { currentStreak, totalScans, multiplier, nextMilestone } = useStreak()
   const { width } = useWindowDimensions()
+
+  // Daily challenge
+  const { data: dailyChallenge } = useQuery({
+    queryKey: ['dailyChallenge'],
+    queryFn: fetchDailyChallenge,
+    staleTime: 5 * 60_000,
+  })
+
+  // Smart recommendation
+  const { data: smartRecommendation } = useQuery({
+    queryKey: ['smartRecommendation', address, currentStreak, bondumBalance],
+    queryFn: () => fetchSmartRecommendation({
+      walletAddress: address!,
+      streak: currentStreak,
+      balance: bondumBalance,
+    }),
+    enabled: !!address,
+    staleTime: 2 * 60_000,
+  })
   const avatarSize = Math.round(width * 0.24)
   const [refreshing, setRefreshing] = useState(false)
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
+    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts(), refetchRewards()])
     setRefreshing(false)
-  }, [refetchBalance, refetchTokens, refetchNfts])
+  }, [refetchBalance, refetchTokens, refetchNfts, refetchRewards])
 
   const quickActions = [
     { icon: scanIcon, label: 'Scan', onPress: () => router.push('/scan') },
@@ -41,11 +66,8 @@ export default function HomeScreen() {
     { icon: settingsIcon, label: 'Settings', onPress: () => router.push('/(tabs)/(home)/settings') },
   ]
 
-  // Mock rewards data
-  const rewards = [
-    { id: '1', title: '40% discount on your next purchase', value: '40% OFF', available: 3 },
-    { id: '2', title: 'Free shipping on orders over $50', value: 'FREE', available: 1 },
-  ]
+  // Featured rewards from API (show first 2)
+  const featuredRewards = rewards.slice(0, 2)
 
   return (
     <View className="flex-1 bg-white">
@@ -143,10 +165,86 @@ export default function HomeScreen() {
           ))}
         </View>
 
+        {/* Streak Banner with Multiplier */}
+        <View className="mx-2 mb-4 bg-violet-50 rounded-2xl" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }}>
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center gap-3">
+              <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
+                <Text style={{ fontSize: 22 }}>🔥</Text>
+              </View>
+              <View>
+                <Text className="text-gray-900 font-bold" style={{ fontSize: 16 }}>
+                  {currentStreak > 0 ? `${currentStreak}-day streak` : 'Start a streak!'}
+                </Text>
+                <Text className="text-gray-500 text-xs">{totalScans} total scans</Text>
+              </View>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <View className="bg-violet-600 rounded-lg px-2 py-1">
+                <Text className="text-white font-bold text-xs">{multiplier.toFixed(1)}x</Text>
+              </View>
+              <Pressable onPress={() => router.push('/scan')} className="bg-violet-500 rounded-xl px-4 py-2">
+                <Text className="text-white font-bold text-sm">Scan</Text>
+              </Pressable>
+            </View>
+          </View>
+          {nextMilestone && (
+            <View>
+              <View className="flex-row items-center justify-between mb-1">
+                <Text className="text-gray-500 text-xs">
+                  Day {currentStreak} of {nextMilestone.days} streak
+                </Text>
+                <Text className="text-violet-500 text-xs font-bold">+{nextMilestone.bonus} bonus</Text>
+              </View>
+              <View className="bg-violet-200 rounded-full h-2 overflow-hidden">
+                <View
+                  className="bg-violet-500 h-2 rounded-full"
+                  style={{ width: `${Math.min((currentStreak / nextMilestone.days) * 100, 100)}%` }}
+                />
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Smart Recommendation Card */}
+        {smartRecommendation && (
+          <Pressable
+            className="mx-2 mb-4 rounded-2xl overflow-hidden"
+            style={{ backgroundColor: '#7c3aed', padding: 16 }}
+            onPress={() => smartRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${smartRecommendation.suggestedReward}`) : router.push('/scan')}
+          >
+            <View className="flex-row items-center gap-2 mb-2">
+              <Text style={{ fontSize: 16 }}>✨</Text>
+              <Text className="text-violet-200 font-bold text-xs uppercase">Smart Recommendation</Text>
+            </View>
+            <Text className="text-white font-medium" style={{ fontSize: 14, lineHeight: 20 }}>
+              {smartRecommendation.recommendation}
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Daily Challenge */}
+        {dailyChallenge && (
+          <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }}>
+            <View className="flex-row items-center gap-3 flex-1">
+              <View className="bg-amber-400 rounded-xl items-center justify-center" style={{ width: 40, height: 40 }}>
+                <Text style={{ fontSize: 18 }}>🎯</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-900 font-bold text-sm">Daily Challenge</Text>
+                <Text className="text-gray-600 text-xs">{dailyChallenge.description}</Text>
+              </View>
+            </View>
+            <View className="bg-amber-400 rounded-lg px-2 py-1">
+              <Text className="text-amber-900 font-bold text-xs">+{dailyChallenge.reward}</Text>
+            </View>
+          </View>
+        )}
+
         {/* Rewards Section */}
         <View className="mb-4">
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
-            {rewards.map((reward) => (
+            {featuredRewards.map((reward) => (
               <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
                 <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
                   <Text className="text-violet-500 text-lg font-bold">Reward</Text>
