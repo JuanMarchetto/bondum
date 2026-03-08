@@ -8,6 +8,16 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 
 **Already live** with [PaniCafe](https://panicafe.com.ar), serving **~8,000 real users** with on-chain reward transactions in production.
 
+## Download
+
+| Platform | Link |
+|----------|------|
+| Android (APK) | [Download latest release](https://github.com/JuanMarchetto/bondum/releases/latest) |
+| Solana dApp Store | [Available on Solana dApp Store](https://dappstore.app) -- pre-installed or searchable on Saga & Seeker devices |
+| iOS (TestFlight) | Coming soon |
+
+> **Solana dApp Store**: Bondum is published and listed on the official Solana dApp Store, available to all Saga and Seeker device users. This is the recommended install method for Solana Mobile devices.
+
 ## How It Works
 
 1. **Scan** a product QR code at a partner brand (e.g. PaniCafe)

@@ -1,6 +1,5 @@
-import { View, Text, Pressable, Image, Alert } from 'react-native'
+import { View, Text, Pressable, Alert } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -8,7 +7,8 @@ import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useReward } from '../../../hooks/useRewards'
 import { addClaimedReward } from '../../../services/rewardStorage'
 import { requestRedemption, redeemReward } from '../../../services/rewardApi'
-import { Button, Avatar, BellIcon } from '../../../components/ui'
+import { Button } from '../../../components/ui'
+import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { useEmbeddedSolanaWallet } from '@privy-io/expo'
@@ -16,12 +16,8 @@ import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { getTransactionDecoder } from '@solana/kit'
 import { Buffer } from 'buffer'
 
-const avatarImage = undefined
-const bondumLogo = require('../../../assets/bondum_logo.png')
-
 export default function RewardDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const insets = useSafeAreaInsets()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { user, address, provider } = useAuth()
@@ -150,25 +146,10 @@ export default function RewardDetailScreen() {
   if (claimed) {
     return (
       <View className="flex-1 bg-gray-100">
-        {/* Header */}
-        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-          <View className="items-center mb-4">
-            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-              <Text className="text-violet-200" style={{ fontSize: 19 }}>{bondumBalance.toLocaleString()} $BONDUM</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <Pressable className="p-2">
-                <BellIcon size={32} color="white" />
-              </Pressable>
-              <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
-            </View>
-          </View>
-        </View>
+        <Header
+          userName={user?.username || 'User'}
+          balance={bondumBalance.toLocaleString()}
+        />
 
         {/* Celebration View */}
         <View className="flex-1 items-center px-6" style={{ paddingTop: 50 }}>
@@ -183,7 +164,7 @@ export default function RewardDetailScreen() {
               />
             ) : (
               <>
-                <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>You&apos;ve Won</Text>
+                <Text className="text-gray-500 mb-2" style={{ fontSize: 36 }}>{"You've Won"}</Text>
                 <Text className="text-center mb-6">
                   <Text className="text-gray-900 font-bold" style={{ fontSize: 48 }}>A </Text>
                   <Text className="text-violet-500 font-extrabold" style={{ fontSize: 48 }}>
@@ -222,30 +203,11 @@ export default function RewardDetailScreen() {
 
   return (
     <View className="flex-1 bg-gray-100">
-      {/* Header */}
-      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-        <View className="flex-row items-center mb-4 relative">
-          <Pressable onPress={() => router.back()} className="mr-4">
-            <Text className="text-white" style={{ fontSize: 64 }}>←</Text>
-          </Pressable>
-          <View className="absolute left-0 right-0 items-center">
-            <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-          </View>
-        </View>
-
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-white text-lg font-bold">Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200">~ {bondumBalance.toLocaleString()} $BONDUM</Text>
-          </View>
-          <View className="flex-row items-center gap-3">
-            <Pressable className="p-2">
-              <BellIcon size={32} color="white" />
-            </Pressable>
-            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
-          </View>
-        </View>
-      </View>
+      <Header
+        userName={user?.username || 'User'}
+        balance={`~ ${bondumBalance.toLocaleString()}`}
+        showBackButton
+      />
 
       {/* Reward Detail */}
       <View className="flex-1 px-2 pt-6 justify-center">

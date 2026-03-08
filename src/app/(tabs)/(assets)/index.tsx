@@ -2,23 +2,20 @@ import { View, Text, ScrollView, Pressable, Image, RefreshControl } from 'react-
 import { Image as ExpoImage } from 'expo-image'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useRouter } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useState, useCallback } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Avatar, BellIcon, Card } from '../../../components/ui'
+import { Card } from '../../../components/ui'
+import { Header } from '../../../components/layout/Header'
 
-const avatarImage = undefined
-const bondumLogo = require('../../../assets/bondum_logo.png')
 const solLogo = require('../../../assets/sol-logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const usdcLogo = require('../../../assets/usdc-logo.png')
 const panicoinSvg = require('../../../assets/panicoin.svg')
 
 export default function AssetsScreen() {
-  const insets = useSafeAreaInsets()
   const router = useRouter()
   const { user } = useAuth()
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
@@ -33,29 +30,10 @@ export default function AssetsScreen() {
 
   return (
     <View className="flex-1 bg-violet-50">
-      {/* Small Header — same style as Swap page */}
-      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-        {/* Logo */}
-        <View className="items-center mb-4">
-          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-        </View>
-
-        {/* User Info */}
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200" style={{ fontSize: 19 }}>
-              {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-3">
-            <Pressable className="p-2">
-              <BellIcon size={32} color="white" />
-            </Pressable>
-            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
-          </View>
-        </View>
-      </View>
+      <Header
+        userName={user?.username || 'User'}
+        balance={isBalanceLoading ? '...' : bondumBalance.toLocaleString()}
+      />
 
       {/* Content */}
       <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>

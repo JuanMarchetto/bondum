@@ -10,7 +10,7 @@ import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useRewards } from '../../../hooks/useRewards'
 import { useStreak } from '../../../hooks/useStreak'
-import { fetchDailyChallenge, fetchAiRecommendation } from '../../../services/rewardApi'
+import { fetchDailyChallenge, fetchSmartRecommendation } from '../../../services/rewardApi'
 import { Card, Badge, Avatar, IconButton, BellIcon } from '../../../components/ui'
 
 const avatarImage = undefined
@@ -40,10 +40,10 @@ export default function HomeScreen() {
     staleTime: 5 * 60_000,
   })
 
-  // AI recommendation
-  const { data: aiRecommendation } = useQuery({
-    queryKey: ['aiRecommendation', address, currentStreak, bondumBalance],
-    queryFn: () => fetchAiRecommendation({
+  // Smart recommendation
+  const { data: smartRecommendation } = useQuery({
+    queryKey: ['smartRecommendation', address, currentStreak, bondumBalance],
+    queryFn: () => fetchSmartRecommendation({
       walletAddress: address!,
       streak: currentStreak,
       balance: bondumBalance,
@@ -206,19 +206,19 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Smart Insight Card */}
-        {aiRecommendation && (
+        {/* Smart Recommendation Card */}
+        {smartRecommendation && (
           <Pressable
             className="mx-2 mb-4 rounded-2xl overflow-hidden"
             style={{ backgroundColor: '#7c3aed', padding: 16 }}
-            onPress={() => aiRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${aiRecommendation.suggestedReward}`) : router.push('/scan')}
+            onPress={() => smartRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${smartRecommendation.suggestedReward}`) : router.push('/scan')}
           >
             <View className="flex-row items-center gap-2 mb-2">
               <Text style={{ fontSize: 16 }}>✨</Text>
-              <Text className="text-violet-200 font-bold text-xs uppercase">Smart Insight</Text>
+              <Text className="text-violet-200 font-bold text-xs uppercase">Smart Recommendation</Text>
             </View>
             <Text className="text-white font-medium" style={{ fontSize: 14, lineHeight: 20 }}>
-              {aiRecommendation.recommendation}
+              {smartRecommendation.recommendation}
             </Text>
           </Pressable>
         )}

@@ -68,7 +68,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
       const address = solanaWallet.account.address.toString()
       const user: User = {
         id: address,
-        username: 'User',
+        username: `${address.slice(0, 4)}...${address.slice(-4)}`,
         avatarUrl: null,
       }
 
@@ -98,7 +98,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
 
       const user: User = {
         id: privyUser.id,
-        username: 'User',
+        username: emailAccount?.address || `${address.slice(0, 4)}...${address.slice(-4)}`,
         avatarUrl: null,
       }
 

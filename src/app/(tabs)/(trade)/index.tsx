@@ -5,7 +5,8 @@ import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Button, Avatar, BellIcon } from '../../../components/ui'
+import { Button } from '../../../components/ui'
+import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { useSwapQuote, type TokenSymbol, TOKENS } from '../../../hooks/useSwapQuote'
 import { getSwapTransaction } from '../../../services/jupiter'
@@ -16,7 +17,6 @@ import { Buffer } from 'buffer'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 
-const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
 const swapArrows = require('../../../assets/swap_arrows.png')
@@ -201,40 +201,21 @@ export default function TradeScreen() {
 
   return (
     <View className="flex-1 bg-violet-50">
-      {/* Header */}
-      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
-        {/* Logo */}
-        <View className="items-center mb-4">
-          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
-        </View>
-
-        {/* User Info */}
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-white font-bold" style={{ fontSize: 24 }}>Hello, {user?.username || 'User'}!</Text>
-            <Text className="text-violet-200" style={{ fontSize: 19 }}>
-              {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-3">
-            <Pressable className="p-2">
-              <BellIcon size={32} color="white" />
-            </Pressable>
-            <Avatar source={avatarImage} size="lg" style={{ borderWidth: 2, borderColor: 'white' }} />
-          </View>
-        </View>
-      </View>
+      <Header
+        userName={user?.username || 'User'}
+        balance={isBalanceLoading ? '...' : bondumBalance.toLocaleString()}
+      />
 
       {/* Swap Card */}
-      <View className="flex-1 px-4" style={{ paddingTop: 33.6 }}>
+      <View className="flex-1 px-4" style={{ paddingTop: 24 }}>
         <View className="mb-4">
           <Text className="text-center mb-6">
-            <Text className="text-violet-500 font-bold" style={{ fontSize: 43.2 }}>SWAP </Text>
-            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 43.2 }}>YOUR TOKENS</Text>
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>SWAP </Text>
+            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>YOUR TOKENS</Text>
           </Text>
 
           {/* From Token */}
-          <View className="bg-white rounded-2xl mb-2 self-center" style={{ width: '95%', paddingTop: 0, paddingBottom: 5.184, paddingHorizontal: 16, borderWidth: 1, borderColor: '#9b9db5' }}>
+          <View className="bg-white rounded-2xl mb-2 self-center" style={{ width: '95%', paddingTop: 0, paddingBottom: 6, paddingHorizontal: 16, borderWidth: 1, borderColor: '#9b9db5' }}>
             <View className="flex-row items-center justify-between mb-2">
               <Pressable
                 onPress={() => setShowTokenPicker('from')}
@@ -293,7 +274,7 @@ export default function TradeScreen() {
             className="bg-white rounded-2xl self-center relative"
             style={{
               width: '95%',
-              paddingVertical: 5.12,
+              paddingVertical: 6,
               paddingHorizontal: 16,
               borderWidth: 1,
               borderColor: '#9b9db5',
@@ -321,7 +302,7 @@ export default function TradeScreen() {
             </View>
             <TextInput
               style={{
-                fontSize: 69.12,
+                fontSize: 60,
                 fontWeight: 'bold',
                 textAlign: 'center',
                 width: '100%',
@@ -348,12 +329,12 @@ export default function TradeScreen() {
             <Button
               variant="primary"
               size="lg"
-              style={{ paddingVertical: 10.752, borderRadius: 20.25, width: '75%' }}
+              style={{ paddingVertical: 12, borderRadius: 20, width: '75%' }}
               onPress={handleSwap}
               disabled={!quote || isSwapping || isQuoteLoading || !fromAmount || parseFloat(fromAmount) <= 0}
               loading={isSwapping}
             >
-              <Text style={{ color: '#FFFFFF', fontSize: 40.96 }}>Swap</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 36 }}>Swap</Text>
             </Button>
           </View>
         </View>

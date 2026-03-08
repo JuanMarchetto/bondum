@@ -128,7 +128,7 @@ export default function WelcomeScreen() {
             </View>
 
             <Text className="text-white text-2xl font-bold mb-2">Enter your email</Text>
-            <Text className="text-violet-200 text-center mb-8">We&apos;ll send you a verification code</Text>
+            <Text className="text-violet-200 text-center mb-8">{"We'll send you a verification code"}</Text>
 
             <Card className="w-full mb-4">
               <TextInput
@@ -206,7 +206,7 @@ export default function WelcomeScreen() {
             className="bg-white"
             style={{ paddingVertical: 21.6, borderWidth: 2, borderColor: '#22c55e' }}
           >
-            <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Connect with Seed Vault</Text>
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Connect with Seed Vault</Text>
           </Button>
         ) : (
           <Button
@@ -218,7 +218,7 @@ export default function WelcomeScreen() {
             className="bg-white"
             style={{ paddingVertical: 21.6 }}
           >
-            <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Connect Solana Wallet</Text>
+            <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Connect Solana Wallet</Text>
           </Button>
         )}
 
@@ -233,7 +233,7 @@ export default function WelcomeScreen() {
         </View>
 
         <Button variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white" style={{ paddingVertical: 21.6 }}>
-          <Text className="text-violet-500 font-bold" style={{ fontSize: 24.3 }}>Continue with Email</Text>
+          <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>Continue with Email</Text>
         </Button>
 
         {error && <Text className="text-red-200 text-center mt-2">{error}</Text>}

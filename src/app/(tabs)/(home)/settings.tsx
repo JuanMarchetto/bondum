@@ -120,7 +120,7 @@ export default function SettingsScreen() {
             <Text className="text-gray-900 text-base">Security</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
-          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 2.0.0\n\nBondum - On-Chain Loyalty Wallet\n\nFeatures:\n- Streak multipliers (up to 2x)\n- AI-powered recommendations\n- Helius RPC with priority fees\n- Seed Vault SDK support\n- Live on Solana dApp Store\n\nbondum.xyz')} className="flex-row items-center justify-between p-4">
+          <Pressable onPress={() => Alert.alert('About Bondum', 'Version 2.0.0\n\nBondum - On-Chain Loyalty Wallet\n\nFeatures:\n- Streak multipliers (up to 2x)\n- Smart recommendations\n- Helius RPC with priority fees\n- Seed Vault SDK support\n- Live on Solana dApp Store\n\nbondum.xyz')} className="flex-row items-center justify-between p-4">
             <Text className="text-gray-900 text-base">About</Text>
             <Text className="text-gray-400 text-lg">›</Text>
           </Pressable>
@@ -135,7 +135,7 @@ export default function SettingsScreen() {
           loading={isLoading}
           style={{ paddingVertical: 12 }}
         >
-          <Text style={{ fontSize: 32.4, color: '#FFFFFF' }}>Log Out</Text>
+          <Text style={{ fontSize: 30, color: '#FFFFFF' }}>Log Out</Text>
         </Button>
       </View>
     </View>

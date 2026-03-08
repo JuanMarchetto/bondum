@@ -57,7 +57,7 @@ export interface DailyChallenge {
   dayOfYear: number
 }
 
-export interface AiRecommendation {
+export interface SmartRecommendation {
   recommendation: string
   reasoning: string
   suggestedReward: string | null
@@ -244,13 +244,13 @@ export async function fetchDailyChallenge(): Promise<DailyChallenge> {
 }
 
 /**
- * Fetches an AI-powered reward recommendation.
+ * Fetches a context-aware smart recommendation based on user streak, balance, and activity.
  */
-export async function fetchAiRecommendation(params: {
+export async function fetchSmartRecommendation(params: {
   walletAddress: string
   streak: number
   balance: number
-}): Promise<AiRecommendation> {
+}): Promise<SmartRecommendation> {
   try {
     const response = await fetch(`${REWARD_API_URL}/recommend`, {
       method: 'POST',
