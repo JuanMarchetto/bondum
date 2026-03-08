@@ -1,5 +1,11 @@
 # Bondum Mobile
 
+[![Solana](https://img.shields.io/badge/Solana-9945FF?logo=solana&logoColor=white)](https://solana.com)
+[![Expo](https://img.shields.io/badge/Expo-000020?logo=expo&logoColor=white)](https://expo.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Solana dApp Store](https://img.shields.io/badge/Solana_dApp_Store-Live-22c55e)](https://dappstore.app)
+[![PaniCafe Users](https://img.shields.io/badge/Real_Users-~8%2C000-8b5cf6)](https://panicafe.com.ar)
+
 > [bondum.xyz](https://bondum.xyz) | Live on [Solana dApp Store](https://dappstore.app)
 
 ![Bondum - Simply scan your everyday products and get the rewards](banner.jpeg)
@@ -67,7 +73,7 @@ Mobile App (Expo / React Native)
   |                 POST /redeem -> submit signed tx -> confirm on-chain
   |
   |-- Home -------> Streak progress bar + multiplier badge
-  |                 AI recommendation card
+  |                 Smart recommendation card
   |                 Daily challenge card
   |
   |-- Balances ---> Helius RPC (getTokenAccountsByOwner)
@@ -142,7 +148,7 @@ src/
 |-- services/             # API clients and utilities
 |   |-- solana.ts         # RPC calls, DAS, transfers, priority fees
 |   |-- jupiter.ts        # Jupiter aggregator API
-|   |-- rewardApi.ts      # Reward API client (claim, redeem, streak, AI)
+|   |-- rewardApi.ts      # Reward API client (claim, redeem, streak, recommendations)
 |   |-- qrParser.ts       # QR code parser with nonce/expiry validation
 |   |-- streakStorage.ts  # Local streak persistence (offline fallback)
 
@@ -202,10 +208,10 @@ npm run build
 
 ## Token Mints
 
-| Token | Mint Address | Decimals |
-|-------|-------------|----------|
-| $BONDUM | `84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump` | 6 |
-| $PANICAFE | `H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1` | 6 |
+| Token | Mint Address | Decimals | Explorer |
+|-------|-------------|----------|----------|
+| $BONDUM | `84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump` | 6 | [Solscan](https://solscan.io/token/84ngjhwssch1wvhzqwgk6eznmtx9fwpndy3bqbzjpump) |
+| $PANICAFE | `H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1` | 6 | [Solscan](https://solscan.io/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1) \| [5,006 holders](https://solscan.io/token/H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1#holders) |
 
 ## API Endpoints
 
@@ -221,7 +227,7 @@ npm run build
 
 ## License
 
-Private -- All rights reserved
+MIT -- See [LICENSE](LICENSE)
 
 ## Links
 
