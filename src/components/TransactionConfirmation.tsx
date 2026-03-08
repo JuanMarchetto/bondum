@@ -1,4 +1,6 @@
 import { View, Text, Pressable, Linking } from 'react-native'
+import { useState } from 'react'
+import * as Clipboard from 'expo-clipboard'
 import { Button } from './ui'
 
 interface TransactionConfirmationProps {
@@ -7,8 +9,6 @@ interface TransactionConfirmationProps {
   message?: string
   onDone: () => void
   onScanAnother?: () => void
-  /** When true, hides the raw signature and Solscan link (for non-crypto users) */
-  simplified?: boolean
 }
 
 const SOLSCAN_BASE = 'https://solscan.io/tx'
@@ -27,14 +27,19 @@ export function TransactionConfirmation({
   message,
   onDone,
   onScanAnother,
-  simplified = false,
 }: TransactionConfirmationProps) {
+  const [copiedSig, setCopiedSig] = useState(false)
   const isRealTx = isOnChainSignature(signature)
   const truncatedSig = `${signature.slice(0, 12)}...${signature.slice(-8)}`
-  const showDetails = isRealTx && !simplified
 
   const openSolscan = () => {
     Linking.openURL(`${SOLSCAN_BASE}/${signature}`)
+  }
+
+  const copySignature = async () => {
+    await Clipboard.setStringAsync(signature)
+    setCopiedSig(true)
+    setTimeout(() => setCopiedSig(false), 2000)
   }
 
   return (
@@ -51,20 +56,19 @@ export function TransactionConfirmation({
         </Text>
       )}
 
-      {simplified && isRealTx && (
-        <View className="bg-green-50 rounded-xl px-4 py-3 mb-4 w-full" style={{ borderWidth: 1, borderColor: '#bbf7d0' }}>
-          <Text className="text-green-700 text-center text-sm font-medium">Verified on blockchain</Text>
-        </View>
+      {isRealTx && (
+        <Pressable onPress={copySignature} className="w-full mb-4">
+          <View className="bg-gray-100 rounded-xl px-4 py-3 w-full">
+            <View className="flex-row items-center justify-between mb-1">
+              <Text className="text-gray-400 text-xs">Transaction Signature</Text>
+              <Text className="text-violet-500 text-xs font-semibold">{copiedSig ? 'Copied!' : 'Tap to copy'}</Text>
+            </View>
+            <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
+          </View>
+        </Pressable>
       )}
 
-      {showDetails && (
-        <View className="bg-gray-100 rounded-xl px-4 py-3 mb-4 w-full">
-          <Text className="text-gray-400 text-xs mb-1">Transaction Signature</Text>
-          <Text className="text-gray-700 font-mono text-sm">{truncatedSig}</Text>
-        </View>
-      )}
-
-      {showDetails && (
+      {isRealTx && (
         <Pressable onPress={openSolscan} className="mb-6">
           <Text className="text-violet-500 font-semibold">View on Solscan {'>'}</Text>
         </Pressable>

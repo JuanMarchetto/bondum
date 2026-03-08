@@ -7,6 +7,8 @@ import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useRewards } from '../../../hooks/useRewards'
 import { Badge } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
+import { PanicafeCouponCard } from '../../../components/PanicafeCouponCard'
+import { isPanicafeReward } from '../../../utils/panicafeCoupons'
 
 const bLogo = require('../../../assets/b-logo.png')
 const panicoinSvg = require('../../../assets/panicoin.svg')
@@ -88,11 +90,15 @@ export default function RewardsScreen() {
 
                   <Text className="text-gray-900 font-semibold mb-5">{reward.title}</Text>
 
-                  <View
-                    className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : viewMode === 'panicafe' ? 'bg-amber-600' : 'bg-red-600'}`}
-                  >
-                    <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
-                  </View>
+                  {isPanicafeReward(reward.brand) ? (
+                    <PanicafeCouponCard value={reward.value} cost={reward.cost} size="sm" />
+                  ) : (
+                    <View
+                      className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+                    >
+                      <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
+                    </View>
+                  )}
                 </View>
               </Pressable>
             ))}
