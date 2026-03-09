@@ -53,3 +53,6 @@ scripts/*.log
 
 # Anchor / Solana program build artifacts
 target/
+
+# webreel recording artifacts
+.webreel
