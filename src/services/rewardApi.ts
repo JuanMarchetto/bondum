@@ -68,7 +68,7 @@ export interface SmartRecommendation {
 /**
  * Fetches available rewards for a given brand (or all brands).
  */
-export async function fetchRewards(brand?: string): Promise<RewardCatalogItem[]> {
+export async function fetchRewards(brand?: string, language: string = 'en'): Promise<RewardCatalogItem[]> {
   try {
     const params = brand ? `?brand=${encodeURIComponent(brand)}` : ''
     const response = await fetch(`${REWARD_API_URL}/rewards${params}`)
@@ -77,7 +77,7 @@ export async function fetchRewards(brand?: string): Promise<RewardCatalogItem[]>
     return data.rewards
   } catch {
     // Fallback to bundled catalog when API is unreachable
-    return getOfflineCatalog(brand)
+    return getOfflineCatalog(brand, language)
   }
 }
 
@@ -324,13 +324,13 @@ export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
 /**
  * Fetches today's daily challenge.
  */
-export async function fetchDailyChallenge(): Promise<DailyChallenge> {
+export async function fetchDailyChallenge(language: string = 'en'): Promise<DailyChallenge> {
   try {
     const response = await fetch(`${REWARD_API_URL}/daily-challenge`)
     if (!response.ok) throw new Error()
     return response.json()
   } catch {
-    return { type: 'scan', description: 'Scan a QR code today', reward: 100, target: 1, dayOfYear: 0 }
+    return { type: 'scan', description: language === 'es' ? 'Escaneá un código QR hoy' : 'Scan a QR code today', reward: 100, target: 1, dayOfYear: 0 }
   }
 }
 
@@ -341,6 +341,7 @@ export async function fetchSmartRecommendation(params: {
   walletAddress: string
   streak: number
   balance: number
+  language?: string
 }): Promise<SmartRecommendation> {
   try {
     const response = await fetch(`${REWARD_API_URL}/recommend`, {
@@ -351,8 +352,11 @@ export async function fetchSmartRecommendation(params: {
     if (!response.ok) throw new Error()
     return response.json()
   } catch {
+    const isEs = (params.language || 'en') === 'es'
     return {
-      recommendation: 'Scan a QR code to start earning rewards with streak multipliers!',
+      recommendation: isEs
+        ? '¡Escaneá un código QR para empezar a ganar recompensas con multiplicadores de racha!'
+        : 'Scan a QR code to start earning rewards with streak multipliers!',
       reasoning: 'Default recommendation',
       suggestedReward: null,
       urgency: 'low',
@@ -362,14 +366,16 @@ export async function fetchSmartRecommendation(params: {
 
 // ─── Offline Fallback Catalog ────────────────────────────────────────────────
 
-function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
+function getOfflineCatalog(brand?: string, language: string = 'en'): RewardCatalogItem[] {
+  const isEs = language === 'es'
+
   const bondumRewards: RewardCatalogItem[] = [
     {
       id: '1',
       brand: 'Bondum',
       type: 'discount',
-      title: '40% discount on your next purchase',
-      description: '40% discount on your next purchase of any product',
+      title: isEs ? '40% de descuento en tu próxima compra' : '40% discount on your next purchase',
+      description: isEs ? '40% de descuento en tu próxima compra de cualquier producto' : '40% discount on your next purchase of any product',
       value: '40% OFF',
       cost: 5000,
       available: 3,
@@ -378,8 +384,8 @@ function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
       id: '2',
       brand: 'Bondum',
       type: 'discount',
-      title: '15% discount on your next purchase of the product',
-      description: '15% discount on your next purchase of the product',
+      title: isEs ? '15% de descuento en tu próxima compra' : '15% discount on your next purchase of the product',
+      description: isEs ? '15% de descuento en tu próxima compra del producto' : '15% discount on your next purchase of the product',
       value: '15% OFF',
       cost: 10000,
       available: 3,
@@ -388,8 +394,8 @@ function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
       id: '3',
       brand: 'Bondum',
       type: 'token',
-      title: 'Bonus $BONDUM tokens',
-      description: 'Receive 500 bonus $BONDUM tokens',
+      title: isEs ? 'Bonus de tokens $BONDUM' : 'Bonus $BONDUM tokens',
+      description: isEs ? 'Recibí 500 tokens $BONDUM de bonus' : 'Receive 500 bonus $BONDUM tokens',
       value: '500 $BONDUM',
       cost: 2000,
       available: 10,
@@ -399,8 +405,8 @@ function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
       id: '4',
       brand: 'Bondum',
       type: 'nft',
-      title: 'Exclusive Bondum NFT',
-      description: 'An exclusive ultra rare Bondum NFT for your collection',
+      title: isEs ? 'NFT Exclusivo de Bondum' : 'Exclusive Bondum NFT',
+      description: isEs ? 'Un NFT exclusivo ultra raro de Bondum para tu colección' : 'An exclusive ultra rare Bondum NFT for your collection',
       value: 'ULTRA RARE NFT',
       cost: 15000,
       available: 1,
@@ -408,17 +414,17 @@ function getOfflineCatalog(brand?: string): RewardCatalogItem[] {
   ]
 
   const panicafeRewards: RewardCatalogItem[] = [
-    { id: 'pc-1', brand: 'PaniCafe', type: 'discount', title: 'Free Coffee with any pastry purchase', description: 'Get a free coffee when you buy any pastry at PaniCafe', value: 'FREE COFFEE', cost: 1000, available: 5 },
-    { id: 'pc-2', brand: 'PaniCafe', type: 'discount', title: '25% off any drink', description: '25% discount on any drink at PaniCafe', value: '25% OFF', cost: 2000, available: 3 },
-    { id: 'pc-3', brand: 'PaniCafe', type: 'token', title: 'Bonus PaniCafe tokens', description: 'Receive 200 bonus PANICAFE tokens', value: '200 PANICAFE', cost: 500, available: 10, tokenAmount: 200 },
-    { id: 'pc-4', brand: 'PaniCafe', type: 'discount', title: '50% off pastry of the day', description: '50% discount on the pastry of the day', value: '50% OFF', cost: 3000, available: 2 },
-    { id: 'pc-5', brand: 'PaniCafe', type: 'discount', title: 'Free Café', description: 'Redeem for a free Café at any PaniCafe location', value: 'FREE CAFÉ', cost: 30000, available: 5 },
-    { id: 'pc-6', brand: 'PaniCafe', type: 'discount', title: 'Free Medialuna or Factura', description: 'Redeem for a free Medialuna or Factura pastry', value: 'MEDIALUNA', cost: 20000, available: 8 },
-    { id: 'pc-7', brand: 'PaniCafe', type: 'discount', title: 'Free Croissant', description: 'Redeem for a free Croissant at PaniCafe', value: 'CROISSANT', cost: 40000, available: 4 },
-    { id: 'pc-8', brand: 'PaniCafe', type: 'discount', title: 'Free Jugo Natural', description: 'Redeem for a fresh natural juice at PaniCafe', value: 'JUGO NATURAL', cost: 40000, available: 4 },
-    { id: 'pc-9', brand: 'PaniCafe', type: 'discount', title: 'Desayuno Tradicional', description: 'Redeem for a full traditional breakfast at PaniCafe', value: 'DESAYUNO', cost: 70000, available: 2 },
-    { id: 'pc-10', brand: 'PaniCafe', type: 'discount', title: 'Helado Dos Bochas', description: 'Redeem for a two-scoop ice cream at PaniCafe', value: 'HELADO', cost: 50000, available: 3 },
-    { id: 'pc-11', brand: 'PaniCafe', type: 'discount', title: '1/4 Kilo de Helado', description: 'Redeem for a quarter kilo of ice cream', value: '1/4 KG HELADO', cost: 80000, available: 2 },
+    { id: 'pc-1', brand: 'PaniCafe', type: 'discount', title: isEs ? 'Café gratis con cualquier compra de panadería' : 'Free Coffee with any pastry purchase', description: isEs ? 'Obtené un café gratis al comprar cualquier producto de panadería en PaniCafe' : 'Get a free coffee when you buy any pastry at PaniCafe', value: isEs ? 'CAFÉ GRATIS' : 'FREE COFFEE', cost: 1000, available: 5 },
+    { id: 'pc-2', brand: 'PaniCafe', type: 'discount', title: isEs ? '25% de descuento en cualquier bebida' : '25% off any drink', description: isEs ? '25% de descuento en cualquier bebida en PaniCafe' : '25% discount on any drink at PaniCafe', value: '25% OFF', cost: 2000, available: 3 },
+    { id: 'pc-3', brand: 'PaniCafe', type: 'token', title: isEs ? 'Bonus de tokens PaniCafe' : 'Bonus PaniCafe tokens', description: isEs ? 'Recibí 200 tokens PANICAFE de bonus' : 'Receive 200 bonus PANICAFE tokens', value: '200 PANICAFE', cost: 500, available: 10, tokenAmount: 200 },
+    { id: 'pc-4', brand: 'PaniCafe', type: 'discount', title: isEs ? '50% de descuento en la factura del día' : '50% off pastry of the day', description: isEs ? '50% de descuento en la factura del día' : '50% discount on the pastry of the day', value: '50% OFF', cost: 3000, available: 2 },
+    { id: 'pc-5', brand: 'PaniCafe', type: 'discount', title: isEs ? 'Café Gratis' : 'Free Café', description: isEs ? 'Canjeá por un café gratis en cualquier sucursal de PaniCafe' : 'Redeem for a free Café at any PaniCafe location', value: isEs ? 'CAFÉ GRATIS' : 'FREE CAFÉ', cost: 30000, available: 5 },
+    { id: 'pc-6', brand: 'PaniCafe', type: 'discount', title: isEs ? 'Medialuna o Factura Gratis' : 'Free Medialuna or Factura', description: isEs ? 'Canjeá por una medialuna o factura gratis' : 'Redeem for a free Medialuna or Factura pastry', value: 'MEDIALUNA', cost: 20000, available: 8 },
+    { id: 'pc-7', brand: 'PaniCafe', type: 'discount', title: isEs ? 'Croissant Gratis' : 'Free Croissant', description: isEs ? 'Canjeá por un croissant gratis en PaniCafe' : 'Redeem for a free Croissant at PaniCafe', value: 'CROISSANT', cost: 40000, available: 4 },
+    { id: 'pc-8', brand: 'PaniCafe', type: 'discount', title: isEs ? 'Jugo Natural Gratis' : 'Free Jugo Natural', description: isEs ? 'Canjeá por un jugo natural fresco en PaniCafe' : 'Redeem for a fresh natural juice at PaniCafe', value: 'JUGO NATURAL', cost: 40000, available: 4 },
+    { id: 'pc-9', brand: 'PaniCafe', type: 'discount', title: 'Desayuno Tradicional', description: isEs ? 'Canjeá por un desayuno tradicional completo en PaniCafe' : 'Redeem for a full traditional breakfast at PaniCafe', value: 'DESAYUNO', cost: 70000, available: 2 },
+    { id: 'pc-10', brand: 'PaniCafe', type: 'discount', title: 'Helado Dos Bochas', description: isEs ? 'Canjeá por un helado de dos bochas en PaniCafe' : 'Redeem for a two-scoop ice cream at PaniCafe', value: 'HELADO', cost: 50000, available: 3 },
+    { id: 'pc-11', brand: 'PaniCafe', type: 'discount', title: isEs ? '1/4 Kilo de Helado' : '1/4 Kilo de Helado', description: isEs ? 'Canjeá por un cuarto kilo de helado' : 'Redeem for a quarter kilo of ice cream', value: '1/4 KG HELADO', cost: 80000, available: 2 },
   ]
 
   const all = [...bondumRewards, ...panicafeRewards]

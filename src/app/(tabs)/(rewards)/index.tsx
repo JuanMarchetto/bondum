@@ -51,10 +51,13 @@ export default function RewardsScreen() {
             <Pressable
               onPress={() => setViewMode('bondum')}
               className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
-              style={{ borderWidth: 1, borderColor: '#9b9db5' }}
+              style={{ borderWidth: 1, borderColor: '#9b9db5', opacity: 0.7 }}
             >
               <Image source={bLogo} style={{ width: 48, height: 48 }} resizeMode="contain" />
-              <Text className="text-gray-900 font-bold text-lg ml-4">{t('rewards.bondumRewards')}</Text>
+              <Text className="text-gray-900 font-bold text-lg ml-4 flex-1">{t('rewards.bondumRewards')}</Text>
+              <View className="bg-violet-100 rounded-lg px-3 py-1">
+                <Text className="text-violet-500 text-xs font-bold">{t('rewards.comingSoon')}</Text>
+              </View>
             </Pressable>
 
             {/* PaniCafe Row */}
@@ -96,7 +99,7 @@ export default function RewardsScreen() {
                     <PanicafeCouponCard value={reward.value} cost={reward.cost} size="sm" />
                   ) : (
                     <View
-                      className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-red-600'}`}
+                      className={`rounded-xl py-10 items-center ${reward.type === 'nft' ? 'bg-violet-500' : 'bg-violet-600'}`}
                     >
                       <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
                     </View>

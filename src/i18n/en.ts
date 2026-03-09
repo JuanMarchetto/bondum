@@ -123,6 +123,7 @@ export const en = {
     panicafeRewards: 'Panicafe Rewards',
     moreBrands: 'More brands joining soon',
     backToBrands: '\u2190 Back to Brands',
+    comingSoon: 'Coming Soon',
   },
   rewardDetail: {
     claimReward: 'Claim reward',
