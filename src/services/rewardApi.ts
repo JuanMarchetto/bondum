@@ -3,6 +3,8 @@
  * Communicates with the Bondum reward server to claim and redeem rewards on-chain.
  */
 
+import { Platform } from 'react-native'
+
 const REWARD_API_URL = process.env.EXPO_PUBLIC_REWARD_API_URL || 'https://api.bondum.xyz'
 const PANICAFE_API_URL = process.env.EXPO_PUBLIC_PANICAFE_API_URL || 'https://panicafe.bondum.xyz'
 
@@ -95,6 +97,23 @@ export async function claimScanReward(params: {
   nonce?: string
   signature?: string
 }): Promise<ClaimResult> {
+  // Web demo: return fake claim result
+  if (Platform.OS === 'web') {
+    await new Promise(r => setTimeout(r, 1500))
+    return {
+      success: true,
+      txSignature: '5xDemoTx' + Math.random().toString(36).slice(2, 10) + 'abcdef1234567890',
+      tokenAmount: params.tokenAmount,
+      mint: 'BONDUM',
+      message: `+${params.tokenAmount} BONDUM tokens sent`,
+      multiplier: 1.7,
+      streakBonus: 15,
+      currentStreak: 7,
+      milestoneReached: null,
+      milestoneBonus: 0,
+    } as any
+  }
+
   const response = await fetch(`${REWARD_API_URL}/claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -119,6 +138,18 @@ export async function claimPanicafeBox(params: {
   userWallet: string
   privyToken?: string | null
 }): Promise<ClaimResult> {
+  // Web demo: return fake PaniCafe claim result
+  if (Platform.OS === 'web') {
+    await new Promise(r => setTimeout(r, 1500))
+    return {
+      success: true,
+      txSignature: '4pDemo' + Math.random().toString(36).slice(2, 10) + 'panicafe9876543210',
+      tokenAmount: 150,
+      mint: 'H27GCsgxeM8RKMta6uBxhQeKSqUv9u4M5c2FyStoFbd1',
+      message: '150 PANICAFE tokens sent to your wallet',
+    }
+  }
+
   const response = await fetch(`${PANICAFE_API_URL}/api/open-box`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -154,6 +185,11 @@ export async function requestPanicafeRewardClaim(params: {
   userWalletAddress: string
   privyToken?: string | null
 }): Promise<{ id: number; serializedTransaction: string }> {
+  // Web demo: not reachable (claim is mocked at screen level)
+  if (Platform.OS === 'web') {
+    return { id: 1, serializedTransaction: '' }
+  }
+
   const response = await fetch(`${PANICAFE_API_URL}/api/request-reward-claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -273,6 +309,11 @@ export async function requestRedemption(params: {
   rewardId: string
   brand: string
 }): Promise<RedeemRequestResult> {
+  // Web demo: not reachable (claim is mocked at screen level)
+  if (Platform.OS === 'web') {
+    return { serializedTransaction: '', rewardId: params.rewardId, cost: 0, lastValidBlockHeight: 0 }
+  }
+
   const response = await fetch(`${REWARD_API_URL}/redeem/request`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -312,6 +353,11 @@ export async function submitSignedRedemption(params: {
  * Fetches server-side streak data for a wallet.
  */
 export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
+  // Web demo: return fake streak
+  if (Platform.OS === 'web') {
+    return { currentStreak: 7, longestStreak: 12, totalScans: 23, multiplier: 1.7, nextMilestone: { days: 14, bonus: 500, label: '2 Weeks' } }
+  }
+
   try {
     const response = await fetch(`${REWARD_API_URL}/streak/${walletAddress}`)
     if (!response.ok) throw new Error()
@@ -343,6 +389,16 @@ export async function fetchSmartRecommendation(params: {
   balance: number
   language?: string
 }): Promise<SmartRecommendation> {
+  // Web demo: return compelling recommendation
+  if (Platform.OS === 'web') {
+    return {
+      recommendation: 'Your 7-day streak gives you 1.7x multiplier! Scan now to maximize rewards before your streak resets.',
+      reasoning: 'Active streak with high multiplier',
+      suggestedReward: 'pc-1',
+      urgency: 'high' as const,
+    }
+  }
+
   try {
     const response = await fetch(`${REWARD_API_URL}/recommend`, {
       method: 'POST',

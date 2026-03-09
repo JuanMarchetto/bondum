@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Platform } from 'react-native'
 import { useAuth } from '../contexts/AuthContext'
 import {
   getTokenBalance,
@@ -39,6 +40,22 @@ async function fetchAllBalances(walletAddress: string): Promise<TokenInfo[]> {
  * All fetched in parallel for speed.
  */
 export function useTokenBalances() {
+  // Web demo: return fake token balances
+  if (Platform.OS === 'web') {
+    return {
+      tokens: [
+        { symbol: 'SOL', name: 'Solana', balance: 2.5, icon: '◎' },
+        { symbol: 'BONDUM', name: 'Bondum', balance: 12500, icon: '🅱️' },
+        { symbol: 'USDC', name: 'USD Coin', balance: 45.0, icon: '💲' },
+        { symbol: 'PANICAFE', name: 'PaniCafe', balance: 3200, icon: '☕' },
+        { symbol: 'SKR', name: 'Seeker', balance: 1, icon: '📱' },
+      ] as TokenInfo[],
+      isLoading: false,
+      error: null,
+      refetch: async () => ({} as any),
+    }
+  }
+
   const { address, isAuthenticated } = useAuth()
 
   const {

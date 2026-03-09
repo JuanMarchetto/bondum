@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, Image, Alert, Animated } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Image, Alert, Animated, Platform } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -66,6 +66,23 @@ export default function ScanScreen() {
   const [streakInfo, setStreakInfo] = useState<{ multiplier: number; streakBonus: number; currentStreak: number; milestoneReached: string | null; milestoneBonus: number } | null>(null)
   const { logScan } = useStreak()
   const { t } = useLanguage()
+
+  // Web demo: auto-trigger fake scan after 2 seconds
+  useEffect(() => {
+    if (Platform.OS !== 'web' || scanned || parsedReward || rewardClaimed) return
+    const timer = setTimeout(() => {
+      setScanned(true)
+      setParsedReward({
+        brand: 'PaniCafe',
+        type: 'token',
+        value: 'PANICAFE REWARD',
+        title: 'PaniCafe Box Reward',
+        tokenAmount: 150,
+        nonce: 'demo-box-token',
+      })
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [scanned, parsedReward, rewardClaimed])
 
   const displayName = truncateUsername(user?.username || 'User')
 
@@ -175,6 +192,35 @@ export default function ScanScreen() {
       </View>
     </View>
   )
+
+  // ─── Web demo: show scanner UI without camera ─────────────────────────
+  if (Platform.OS === 'web' && !parsedReward && !rewardClaimed) {
+    return (
+      <View className="flex-1 bg-gray-50">
+        <ScanHeader />
+        <View className="flex-1 px-5 pt-4">
+          <Text className="text-center mb-4">
+            <Text className="text-violet-500 font-bold italic" style={{ fontSize: 28 }}>{t('scan.title')} </Text>
+            <Text className="text-gray-900 font-extrabold" style={{ fontSize: 28 }}>{t('scan.titleSuffix')}</Text>
+          </Text>
+          <View className="rounded-2xl overflow-hidden relative" style={{ width: '100%', aspectRatio: 1, backgroundColor: '#1e1b4b' }}>
+            <View className="absolute inset-0 items-center justify-center">
+              <View className="w-64 h-64">
+                <View className="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-violet-500 rounded-tl-lg" />
+                <View className="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-violet-500 rounded-tr-lg" />
+                <View className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-violet-500 rounded-bl-lg" />
+                <View className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-violet-500 rounded-br-lg" />
+              </View>
+            </View>
+            <ScanLine />
+          </View>
+          <Text className="text-gray-400 text-center mt-6" style={{ fontSize: 15, lineHeight: 22 }}>
+            {t('scan.scanDescription')}
+          </Text>
+        </View>
+      </View>
+    )
+  }
 
   // ─── Permission request ──────────────────────────────────────────────────
   if (!permission) {

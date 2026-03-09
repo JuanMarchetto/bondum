@@ -1,9 +1,23 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Platform } from 'react-native'
 import { getStreakData, recordScan, type StreakData } from '../services/streakStorage'
 import { fetchStreak } from '../services/rewardApi'
 import { useAuth } from '../contexts/AuthContext'
 
 export function useStreak() {
+  // Web demo: return fake streak data
+  if (Platform.OS === 'web') {
+    return {
+      currentStreak: 7,
+      longestStreak: 12,
+      totalScans: 23,
+      lastScanDate: '2026-03-08',
+      multiplier: 1.7,
+      nextMilestone: { days: 14, bonus: 500, label: '2 Weeks' },
+      logScan: async () => ({ currentStreak: 8, longestStreak: 12, totalScans: 24, lastScanDate: '2026-03-09' }),
+    }
+  }
+
   const { isAuthenticated, address } = useAuth()
   const queryClient = useQueryClient()
 

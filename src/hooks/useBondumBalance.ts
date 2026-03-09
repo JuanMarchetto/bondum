@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Platform } from 'react-native'
 import { useAuth } from '../contexts/AuthContext'
 import { getTokenBalance, BONDUM_MINT } from '../services/solana'
 
@@ -8,6 +9,11 @@ import { getTokenBalance, BONDUM_MINT } from '../services/solana'
  * Uses react-query for caching, auto-refetching, and loading states.
  */
 export function useBondumBalance() {
+  // Web demo: return fake balance
+  if (Platform.OS === 'web') {
+    return { balance: 12500, isLoading: false, error: null, refetch: async () => ({} as any) }
+  }
+
   const { address, isAuthenticated } = useAuth()
 
   const {

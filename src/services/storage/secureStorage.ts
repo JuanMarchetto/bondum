@@ -1,39 +1,51 @@
 import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const AUTH_PROVIDER_KEY = 'auth_provider'
 const USER_DATA_KEY = 'user_data'
 const LANGUAGE_KEY = 'app_language'
 
+// Web fallback: use localStorage since expo-secure-store is mobile-only
+const getItem = (key: string) =>
+  Platform.OS === 'web'
+    ? Promise.resolve(localStorage.getItem(key))
+    : SecureStore.getItemAsync(key)
+
+const setItem = (key: string, value: string) =>
+  Platform.OS === 'web'
+    ? Promise.resolve(localStorage.setItem(key, value))
+    : SecureStore.setItemAsync(key, value)
+
+const deleteItem = (key: string) =>
+  Platform.OS === 'web'
+    ? Promise.resolve(localStorage.removeItem(key))
+    : SecureStore.deleteItemAsync(key)
+
 export const secureStorage = {
-  // Auth token
-  getAuthToken: () => SecureStore.getItemAsync(AUTH_TOKEN_KEY),
-  setAuthToken: (token: string) => SecureStore.setItemAsync(AUTH_TOKEN_KEY, token),
-  removeAuthToken: () => SecureStore.deleteItemAsync(AUTH_TOKEN_KEY),
+  getAuthToken: () => getItem(AUTH_TOKEN_KEY),
+  setAuthToken: (token: string) => setItem(AUTH_TOKEN_KEY, token),
+  removeAuthToken: () => deleteItem(AUTH_TOKEN_KEY),
 
-  // Auth provider
-  getAuthProvider: () => SecureStore.getItemAsync(AUTH_PROVIDER_KEY),
-  setAuthProvider: (provider: string) => SecureStore.setItemAsync(AUTH_PROVIDER_KEY, provider),
-  removeAuthProvider: () => SecureStore.deleteItemAsync(AUTH_PROVIDER_KEY),
+  getAuthProvider: () => getItem(AUTH_PROVIDER_KEY),
+  setAuthProvider: (provider: string) => setItem(AUTH_PROVIDER_KEY, provider),
+  removeAuthProvider: () => deleteItem(AUTH_PROVIDER_KEY),
 
-  // User data
   getUserData: async () => {
-    const data = await SecureStore.getItemAsync(USER_DATA_KEY)
+    const data = await getItem(USER_DATA_KEY)
     return data ? JSON.parse(data) : null
   },
-  setUserData: (data: object) => SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(data)),
-  removeUserData: () => SecureStore.deleteItemAsync(USER_DATA_KEY),
+  setUserData: (data: object) => setItem(USER_DATA_KEY, JSON.stringify(data)),
+  removeUserData: () => deleteItem(USER_DATA_KEY),
 
-  // Language
-  getLanguage: () => SecureStore.getItemAsync(LANGUAGE_KEY),
-  setLanguage: (lang: 'en' | 'es') => SecureStore.setItemAsync(LANGUAGE_KEY, lang),
+  getLanguage: () => getItem(LANGUAGE_KEY),
+  setLanguage: (lang: 'en' | 'es') => setItem(LANGUAGE_KEY, lang),
 
-  // Clear all auth data
   clearAuth: async () => {
     await Promise.all([
-      SecureStore.deleteItemAsync(AUTH_TOKEN_KEY),
-      SecureStore.deleteItemAsync(AUTH_PROVIDER_KEY),
-      SecureStore.deleteItemAsync(USER_DATA_KEY),
+      deleteItem(AUTH_TOKEN_KEY),
+      deleteItem(AUTH_PROVIDER_KEY),
+      deleteItem(USER_DATA_KEY),
     ])
   },
 }

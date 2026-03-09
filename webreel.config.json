@@ -1,0 +1,71 @@
+{
+  "$schema": "https://webreel.dev/schema/v1.json",
+  "outDir": "videos/",
+  "baseUrl": "http://localhost:8081",
+  "viewport": { "width": 393, "height": 852 },
+  "defaultDelay": 800,
+  "clickDwell": 300,
+  "theme": {
+    "cursor": {
+      "size": 28,
+      "hotspot": "center"
+    }
+  },
+  "videos": {
+    "bondum-demo": {
+      "url": "/",
+      "waitFor": "Continue as Guest",
+      "output": "bondum-demo.mp4",
+      "fps": 30,
+      "quality": 90,
+      "steps": [
+        { "action": "pause", "ms": 2000, "description": "Show welcome screen with auth options" },
+
+        { "action": "click", "text": "Continue as Guest", "delay": 2500, "description": "Login as guest" },
+
+        { "action": "wait", "text": "Home", "timeout": 8000, "description": "Wait for home screen" },
+        { "action": "pause", "ms": 2000, "description": "Show home dashboard with balances" },
+        { "action": "scroll", "y": 300, "delay": 1500, "description": "Scroll to streak + daily challenge" },
+        { "action": "scroll", "y": 300, "delay": 1500, "description": "Scroll to featured rewards" },
+        { "action": "scroll", "y": -600, "delay": 1000, "description": "Back to top" },
+
+        { "action": "click", "text": "Scan", "delay": 1000, "description": "Tap Scan quick action" },
+        { "action": "pause", "ms": 3000, "description": "Scanner UI + auto-scan triggers" },
+        { "action": "pause", "ms": 1500, "description": "Reward preview card" },
+        { "action": "click", "text": "Claim", "delay": 2500, "description": "Claim PaniCafe reward" },
+        { "action": "pause", "ms": 2500, "description": "Success with tx confirmation" },
+        { "action": "click", "text": "View Rewards", "delay": 1500, "description": "Go to rewards" },
+
+        { "action": "pause", "ms": 1500, "description": "Rewards brands view" },
+        { "action": "click", "text": "PaniCafe Rewards", "delay": 1500, "description": "Open PaniCafe" },
+        { "action": "pause", "ms": 1000, "description": "PaniCafe reward list" },
+        { "action": "scroll", "y": 250, "delay": 1000, "description": "Browse rewards" },
+        { "action": "scroll", "y": -250, "delay": 800, "description": "Back to top" },
+        { "action": "click", "text": "Free Coffee", "delay": 1500, "description": "Select Free Coffee" },
+        { "action": "pause", "ms": 1500, "description": "Coupon detail + claim button" },
+        { "action": "click", "text": "Claim", "delay": 2500, "description": "Claim the coupon" },
+        { "action": "pause", "ms": 2500, "description": "Coupon claimed success" },
+        { "action": "click", "text": "Back to Rewards", "delay": 1500, "description": "Return to list" },
+
+        { "action": "click", "text": "Trade", "delay": 1500, "description": "Trade tab" },
+        { "action": "pause", "ms": 1500, "description": "Swap interface" },
+        { "action": "click", "selector": "input", "delay": 500, "description": "Focus amount" },
+        { "action": "type", "text": "1.5", "selector": "input", "charDelay": 150, "delay": 2000, "description": "Type amount" },
+        { "action": "pause", "ms": 2000, "description": "Show quote + price impact" },
+
+        { "action": "click", "text": "Wallet", "delay": 1500, "description": "Assets tab" },
+        { "action": "pause", "ms": 1500, "description": "NFT collection + tokens" },
+        { "action": "scroll", "y": 200, "delay": 1500, "description": "Scroll tokens" },
+        { "action": "scroll", "y": -200, "delay": 1000, "description": "Back to top" },
+
+        { "action": "click", "text": "Profile", "delay": 1500, "description": "Profile tab" },
+        { "action": "pause", "ms": 1500, "description": "Profile + wallet info" },
+        { "action": "scroll", "y": 200, "delay": 1500, "description": "Wallet security" },
+        { "action": "scroll", "y": -200, "delay": 1000, "description": "Back to top" },
+
+        { "action": "click", "text": "Home", "delay": 1500, "description": "Back to Home" },
+        { "action": "pause", "ms": 2000, "description": "Final home screen" }
+      ]
+    }
+  }
+}

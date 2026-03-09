@@ -33,6 +33,18 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     }
   }
 
+  // Redirect uuid to ESM browser build (fixes wrapper.mjs CJS import on web)
+  if (platform === 'web' && (moduleName === 'uuid' || moduleName.startsWith('uuid/'))) {
+    const uuidPath = path.resolve(
+      __dirname,
+      'node_modules/uuid/dist/esm-browser/index.js',
+    )
+    return {
+      filePath: uuidPath,
+      type: 'sourceFile',
+    }
+  }
+
   // Use default resolver for everything else
   if (originalResolveRequest) {
     return originalResolveRequest(context, moduleName, platform)

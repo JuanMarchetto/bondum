@@ -4,11 +4,14 @@ import { Slot, useRouter, useSegments } from 'expo-router'
 import { MobileWalletProvider, createSolanaMainnet } from '@wallet-ui/react-native-kit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PrivyProvider } from '@privy-io/expo'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import { Platform } from 'react-native'
 import { AuthContextProvider, useAuth } from '../contexts/AuthContext'
 import { LanguageProvider } from '../contexts/LanguageContext'
 
-const cluster = createSolanaMainnet(process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
+const isWeb = Platform.OS === 'web'
+
+const cluster = isWeb ? null as any : createSolanaMainnet(process.env.EXPO_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
 const identity = {
   name: 'Bondum',
   uri: 'https://bondum.xyz',
@@ -49,17 +52,27 @@ function RootLayoutNav() {
   return <Slot />
 }
 
+// On web, skip native-only providers (MobileWallet + Privy)
+function NativeProviders({ children }: { children: ReactNode }) {
+  if (isWeb) return <>{children}</>
+  return (
+    <PrivyProvider appId={PRIVY_APP_ID} clientId={PRIVY_CLIENT_ID}>
+      <MobileWalletProvider cluster={cluster} identity={identity}>
+        {children}
+      </MobileWalletProvider>
+    </PrivyProvider>
+  )
+}
+
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <PrivyProvider appId={PRIVY_APP_ID} clientId={PRIVY_CLIENT_ID}>
-          <MobileWalletProvider cluster={cluster} identity={identity}>
-            <AuthContextProvider>
-              <RootLayoutNav />
-            </AuthContextProvider>
-          </MobileWalletProvider>
-        </PrivyProvider>
+        <NativeProviders>
+          <AuthContextProvider>
+            <RootLayoutNav />
+          </AuthContextProvider>
+        </NativeProviders>
       </LanguageProvider>
     </QueryClientProvider>
   )

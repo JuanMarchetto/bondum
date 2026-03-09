@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Platform } from 'react-native'
 import { getSwapQuote, type SwapQuote, SOL_MINT } from '../services/jupiter'
 import { BONDUM_MINT, USDC_MINT, PANICAFE_MINT, SKR_MINT } from '../services/solana'
 
@@ -94,6 +95,27 @@ export function useSwapQuote(
   toToken: TokenSymbol | null,
   fromAmount: string,
 ): UseSwapQuoteResult {
+  // Web demo: return fake quote
+  if (Platform.OS === 'web') {
+    const amount = parseFloat(fromAmount) || 0
+    if (!fromToken || !toToken || fromToken === toToken || amount <= 0) {
+      return { quote: null, toAmount: '0', priceImpact: 0, isLoading: false, error: null }
+    }
+    const rates: Record<string, number> = {
+      'SOL-USDC': 180, 'SOL-BONDUM': 50000, 'USDC-SOL': 0.0055, 'USDC-BONDUM': 277,
+      'BONDUM-SOL': 0.00002, 'BONDUM-USDC': 0.0036, 'PANICAFE-USDC': 0.001, 'USDC-PANICAFE': 1000,
+    }
+    const rate = rates[`${fromToken}-${toToken}`] || 1
+    const out = (amount * rate).toFixed(toToken === 'SOL' ? 4 : 2)
+    return {
+      quote: { outAmount: '0', priceImpact: 0.12, rawQuoteResponse: {} },
+      toAmount: out,
+      priceImpact: 0.12,
+      isLoading: false,
+      error: null,
+    }
+  }
+
   const [quote, setQuote] = useState<SwapQuote | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

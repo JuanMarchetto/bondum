@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import { Platform } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { usePrivy, useLoginWithEmail, useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { useQueryClient } from '@tanstack/react-query'
@@ -33,10 +34,15 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
   const [pendingPrivyEmail, setPendingPrivyEmail] = useState<string | null>(null)
 
   const queryClient = useQueryClient()
-  const solanaWallet = useMobileWallet()
-  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout, getAccessToken } = usePrivy()
-  const { sendCode, loginWithCode, state: privyLoginState } = useLoginWithEmail()
-  const embeddedWallet = useEmbeddedSolanaWallet()
+  // On web, these native-only hooks are unavailable (providers skipped)
+  const solanaWallet = Platform.OS === 'web' ? { account: null, connect: async () => {}, disconnect: async () => {} } as any : useMobileWallet()
+  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout, getAccessToken } = Platform.OS === 'web'
+    ? { isReady: false, user: null, logout: async () => {}, getAccessToken: async () => null } as any
+    : usePrivy()
+  const { sendCode, loginWithCode, state: privyLoginState } = Platform.OS === 'web'
+    ? { sendCode: async () => {}, loginWithCode: async () => {}, state: { status: 'idle' } } as any
+    : useLoginWithEmail()
+  const embeddedWallet = Platform.OS === 'web' ? { status: 'not-connected', wallets: [] } as any : useEmbeddedSolanaWallet()
 
   // Check for existing auth on mount
   useEffect(() => {
@@ -163,21 +169,22 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
   )
 
   const connectAsGuest = useCallback(() => {
+    const isWeb = Platform.OS === 'web'
     const user: User = {
       id: 'guest',
-      username: 'Guest',
+      username: isWeb ? 'Bondum User' : 'Guest',
       avatarUrl: null,
     }
 
     setAuthState({
       isAuthenticated: true,
       provider: 'guest',
-      address: null,
+      address: isWeb ? 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z' : null,
       user,
     })
 
     secureStorage.setAuthProvider('guest')
-    secureStorage.setUserData({ address: null, user })
+    secureStorage.setUserData({ address: isWeb ? 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z' : null, user })
   }, [])
 
   const disconnect = useCallback(async () => {
