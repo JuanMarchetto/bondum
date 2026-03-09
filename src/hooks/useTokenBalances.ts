@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { Platform } from 'react-native'
 import { useAuth } from '../contexts/AuthContext'
 import {
   getTokenBalance,
@@ -16,6 +15,14 @@ export interface TokenInfo {
   balance: number
   icon: string // emoji fallback
 }
+
+const DEMO_TOKENS: TokenInfo[] = [
+  { symbol: 'SOL', name: 'Solana', balance: 2.5, icon: '◎' },
+  { symbol: 'BONDUM', name: 'Bondum', balance: 12500, icon: '🅱️' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 45.0, icon: '💲' },
+  { symbol: 'PANICAFE', name: 'PaniCafe', balance: 3200, icon: '☕' },
+  { symbol: 'SKR', name: 'Seeker', balance: 1, icon: '📱' },
+]
 
 async function fetchAllBalances(walletAddress: string): Promise<TokenInfo[]> {
   const [solBalance, bondumBalance, usdcBalance, panicafeBalance, skrBalance] = await Promise.all([
@@ -40,23 +47,8 @@ async function fetchAllBalances(walletAddress: string): Promise<TokenInfo[]> {
  * All fetched in parallel for speed.
  */
 export function useTokenBalances() {
-  // Web demo: return fake token balances
-  if (Platform.OS === 'web') {
-    return {
-      tokens: [
-        { symbol: 'SOL', name: 'Solana', balance: 2.5, icon: '◎' },
-        { symbol: 'BONDUM', name: 'Bondum', balance: 12500, icon: '🅱️' },
-        { symbol: 'USDC', name: 'USD Coin', balance: 45.0, icon: '💲' },
-        { symbol: 'PANICAFE', name: 'PaniCafe', balance: 3200, icon: '☕' },
-        { symbol: 'SKR', name: 'Seeker', balance: 1, icon: '📱' },
-      ] as TokenInfo[],
-      isLoading: false,
-      error: null,
-      refetch: async () => ({} as any),
-    }
-  }
-
-  const { address, isAuthenticated } = useAuth()
+  const { address, isAuthenticated, provider } = useAuth()
+  const isDemo = provider === 'guest'
 
   const {
     data: tokens = [],
@@ -66,17 +58,16 @@ export function useTokenBalances() {
   } = useQuery({
     queryKey: ['tokenBalances', address],
     queryFn: () => fetchAllBalances(address!),
-    enabled: isAuthenticated && !!address,
-    staleTime: 0, // always treat as stale so every mount triggers a refetch
-    gcTime: 5 * 60_000, // keep in cache for 5 min (garbage collection)
-    refetchOnMount: 'always', // always refetch when the component mounts
-    refetchInterval: 30_000, // auto-refetch every 30 seconds in background
+    enabled: isAuthenticated && !!address && !isDemo,
+    staleTime: 0,
+    gcTime: 5 * 60_000,
+    refetchOnMount: 'always',
+    refetchInterval: 30_000,
   })
 
-  return {
-    tokens,
-    isLoading,
-    error,
-    refetch,
+  if (isDemo) {
+    return { tokens: DEMO_TOKENS, isLoading: false, error: null, refetch: async () => ({} as any) }
   }
+
+  return { tokens, isLoading, error, refetch }
 }

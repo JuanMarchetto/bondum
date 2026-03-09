@@ -1,12 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Platform } from 'react-native'
 import { getStreakData, recordScan, type StreakData } from '../services/streakStorage'
 import { fetchStreak } from '../services/rewardApi'
 import { useAuth } from '../contexts/AuthContext'
 
 export function useStreak() {
-  // Web demo: return fake streak data
-  if (Platform.OS === 'web') {
+  const { isAuthenticated, address, provider } = useAuth()
+  const queryClient = useQueryClient()
+  const isDemo = provider === 'guest'
+
+  if (isDemo) {
     return {
       currentStreak: 7,
       longestStreak: 12,
@@ -17,9 +19,6 @@ export function useStreak() {
       logScan: async () => ({ currentStreak: 8, longestStreak: 12, totalScans: 24, lastScanDate: '2026-03-09' }),
     }
   }
-
-  const { isAuthenticated, address } = useAuth()
-  const queryClient = useQueryClient()
 
   // Server-side streak (authoritative when available)
   const { data: serverStreak } = useQuery({

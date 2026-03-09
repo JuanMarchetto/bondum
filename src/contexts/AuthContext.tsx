@@ -169,22 +169,22 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
   )
 
   const connectAsGuest = useCallback(() => {
-    const isWeb = Platform.OS === 'web'
+    const demoAddress = 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z'
     const user: User = {
       id: 'guest',
-      username: isWeb ? 'Bondum User' : 'Guest',
+      username: 'Bondum User',
       avatarUrl: null,
     }
 
     setAuthState({
       isAuthenticated: true,
       provider: 'guest',
-      address: isWeb ? 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z' : null,
+      address: demoAddress,
       user,
     })
 
     secureStorage.setAuthProvider('guest')
-    secureStorage.setUserData({ address: isWeb ? 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z' : null, user })
+    secureStorage.setUserData({ address: demoAddress, user })
   }, [])
 
   const disconnect = useCallback(async () => {

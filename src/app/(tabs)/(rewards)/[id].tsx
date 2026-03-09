@@ -1,4 +1,4 @@
-import { View, Text, Alert, Platform } from 'react-native'
+import { View, Text, Alert } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -143,8 +143,8 @@ export default function RewardDetailScreen() {
     try {
       let sig: string
 
-      if (Platform.OS === 'web') {
-        // Web demo: fake claim with delay
+      if (provider === 'guest') {
+        // Demo: fake claim with delay
         await new Promise(r => setTimeout(r, 1500))
         sig = '3xDemoReward' + Math.random().toString(36).slice(2, 10) + 'abcdef1234567890'
       } else {

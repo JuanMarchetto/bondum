@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Platform } from 'react-native'
 import { getSwapQuote, type SwapQuote, SOL_MINT } from '../services/jupiter'
 import { BONDUM_MINT, USDC_MINT, PANICAFE_MINT, SKR_MINT } from '../services/solana'
+import { useAuth } from '../contexts/AuthContext'
 
 export type TokenSymbol = 'SOL' | 'USDC' | 'BONDUM' | 'PANICAFE' | 'SKR'
 
@@ -95,8 +95,71 @@ export function useSwapQuote(
   toToken: TokenSymbol | null,
   fromAmount: string,
 ): UseSwapQuoteResult {
-  // Web demo: return fake quote
-  if (Platform.OS === 'web') {
+  const { provider } = useAuth()
+  const isDemo = provider === 'guest'
+
+  const [quote, setQuote] = useState<SwapQuote | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isDemo) return
+
+    // Reset state when inputs change
+    setQuote(null)
+    setError(null)
+
+    if (
+      !fromToken ||
+      !toToken ||
+      fromToken === toToken ||
+      !fromAmount ||
+      fromAmount === '0' ||
+      fromAmount === '' ||
+      isNaN(parseFloat(fromAmount)) ||
+      parseFloat(fromAmount) <= 0
+    ) {
+      setIsLoading(false)
+      return
+    }
+
+    const fromTokenInfo = TOKENS[fromToken]
+    const toTokenInfo = TOKENS[toToken]
+
+    const timeoutId = setTimeout(async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const amountInSmallestUnit = toSmallestUnit(fromAmount, fromTokenInfo.decimals)
+        if (amountInSmallestUnit === '0') {
+          setIsLoading(false)
+          return
+        }
+
+        const result = await getSwapQuote(
+          fromTokenInfo.mint,
+          toTokenInfo.mint,
+          amountInSmallestUnit,
+          50,
+        )
+
+        setQuote(result)
+        setError(null)
+      } catch (err: any) {
+        const message = err?.message || 'Failed to get quote. Please try again.'
+        setError(message)
+        setQuote(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [fromToken, toToken, fromAmount, isDemo])
+
+  // Demo mode: return fake quote
+  if (isDemo) {
     const amount = parseFloat(fromAmount) || 0
     if (!fromToken || !toToken || fromToken === toToken || amount <= 0) {
       return { quote: null, toAmount: '0', priceImpact: 0, isLoading: false, error: null }
@@ -116,70 +179,6 @@ export function useSwapQuote(
     }
   }
 
-  const [quote, setQuote] = useState<SwapQuote | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Reset state when inputs change
-    setQuote(null)
-    setError(null)
-
-    // Don't fetch if:
-    // - No tokens selected
-    // - Same token on both sides
-    // - Amount is invalid or zero
-    if (
-      !fromToken ||
-      !toToken ||
-      fromToken === toToken ||
-      !fromAmount ||
-      fromAmount === '0' ||
-      fromAmount === '' ||
-      isNaN(parseFloat(fromAmount)) ||
-      parseFloat(fromAmount) <= 0
-    ) {
-      setIsLoading(false)
-      return
-    }
-
-    const fromTokenInfo = TOKENS[fromToken]
-    const toTokenInfo = TOKENS[toToken]
-
-    // Debounce the API call
-    const timeoutId = setTimeout(async () => {
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const amountInSmallestUnit = toSmallestUnit(fromAmount, fromTokenInfo.decimals)
-        if (amountInSmallestUnit === '0') {
-          setIsLoading(false)
-          return
-        }
-
-        const result = await getSwapQuote(
-          fromTokenInfo.mint,
-          toTokenInfo.mint,
-          amountInSmallestUnit,
-          50, // 0.5% slippage
-        )
-
-        setQuote(result)
-        setError(null)
-      } catch (err: any) {
-        const message = err?.message || 'Failed to get quote. Please try again.'
-        setError(message)
-        setQuote(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 500) // 500ms debounce
-
-    return () => clearTimeout(timeoutId)
-  }, [fromToken, toToken, fromAmount])
-
-  // Convert outAmount to human-readable format
   const toAmount = quote && toToken
     ? fromSmallestUnit(quote.outAmount, TOKENS[toToken].decimals)
     : '0'

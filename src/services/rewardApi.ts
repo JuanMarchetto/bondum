@@ -3,7 +3,7 @@
  * Communicates with the Bondum reward server to claim and redeem rewards on-chain.
  */
 
-import { Platform } from 'react-native'
+const DEMO_ADDRESS = 'Demo7xR4nkJv9fS2mBqazALp8xKYcPe3z'
 
 const REWARD_API_URL = process.env.EXPO_PUBLIC_REWARD_API_URL || 'https://api.bondum.xyz'
 const PANICAFE_API_URL = process.env.EXPO_PUBLIC_PANICAFE_API_URL || 'https://panicafe.bondum.xyz'
@@ -97,8 +97,7 @@ export async function claimScanReward(params: {
   nonce?: string
   signature?: string
 }): Promise<ClaimResult> {
-  // Web demo: return fake claim result
-  if (Platform.OS === 'web') {
+  if (params.walletAddress === DEMO_ADDRESS) {
     await new Promise(r => setTimeout(r, 1500))
     return {
       success: true,
@@ -138,8 +137,7 @@ export async function claimPanicafeBox(params: {
   userWallet: string
   privyToken?: string | null
 }): Promise<ClaimResult> {
-  // Web demo: return fake PaniCafe claim result
-  if (Platform.OS === 'web') {
+  if (params.userWallet === DEMO_ADDRESS) {
     await new Promise(r => setTimeout(r, 1500))
     return {
       success: true,
@@ -185,8 +183,7 @@ export async function requestPanicafeRewardClaim(params: {
   userWalletAddress: string
   privyToken?: string | null
 }): Promise<{ id: number; serializedTransaction: string }> {
-  // Web demo: not reachable (claim is mocked at screen level)
-  if (Platform.OS === 'web') {
+  if (params.userWalletAddress === DEMO_ADDRESS) {
     return { id: 1, serializedTransaction: '' }
   }
 
@@ -309,8 +306,7 @@ export async function requestRedemption(params: {
   rewardId: string
   brand: string
 }): Promise<RedeemRequestResult> {
-  // Web demo: not reachable (claim is mocked at screen level)
-  if (Platform.OS === 'web') {
+  if (params.walletAddress === DEMO_ADDRESS) {
     return { serializedTransaction: '', rewardId: params.rewardId, cost: 0, lastValidBlockHeight: 0 }
   }
 
@@ -353,8 +349,7 @@ export async function submitSignedRedemption(params: {
  * Fetches server-side streak data for a wallet.
  */
 export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
-  // Web demo: return fake streak
-  if (Platform.OS === 'web') {
+  if (walletAddress === DEMO_ADDRESS) {
     return { currentStreak: 7, longestStreak: 12, totalScans: 23, multiplier: 1.7, nextMilestone: { days: 14, bonus: 500, label: '2 Weeks' } }
   }
 
@@ -389,8 +384,7 @@ export async function fetchSmartRecommendation(params: {
   balance: number
   language?: string
 }): Promise<SmartRecommendation> {
-  // Web demo: return compelling recommendation
-  if (Platform.OS === 'web') {
+  if (params.walletAddress === DEMO_ADDRESS) {
     return {
       recommendation: 'Your 7-day streak gives you 1.7x multiplier! Scan now to maximize rewards before your streak resets.',
       reasoning: 'Active streak with high multiplier',

@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet, Image, Alert, Animated, Platform } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Image, Alert, Animated } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -67,9 +67,9 @@ export default function ScanScreen() {
   const { logScan } = useStreak()
   const { t } = useLanguage()
 
-  // Web demo: auto-trigger fake scan after 2 seconds
+  // Demo: auto-trigger fake scan after 2 seconds in guest mode
   useEffect(() => {
-    if (Platform.OS !== 'web' || scanned || parsedReward || rewardClaimed) return
+    if (provider !== 'guest' || scanned || parsedReward || rewardClaimed) return
     const timer = setTimeout(() => {
       setScanned(true)
       setParsedReward({
@@ -193,8 +193,8 @@ export default function ScanScreen() {
     </View>
   )
 
-  // ─── Web demo: show scanner UI without camera ─────────────────────────
-  if (Platform.OS === 'web' && !parsedReward && !rewardClaimed) {
+  // ─── Demo: show scanner UI without camera in guest mode ─────────────
+  if (provider === 'guest' && !parsedReward && !rewardClaimed) {
     return (
       <View className="flex-1 bg-gray-50">
         <ScanHeader />
