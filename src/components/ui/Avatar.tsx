@@ -1,5 +1,8 @@
-import { View, Text, type ViewStyle, type ImageStyle } from 'react-native'
+import { View, type ViewStyle, type ImageStyle } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
+import Svg, { Circle, Path } from 'react-native-svg'
+
+// SVG user silhouette for consistent cross-device rendering
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl' | 'custom'
 
@@ -37,7 +40,10 @@ export function Avatar({ source, size = 'md', customSize, className = '', style 
           style,
         ]}
       >
-        <Text style={{ fontSize: s * 0.5, color: '#8b66df' }}>👤</Text>
+        <Svg width={s * 0.55} height={s * 0.55} viewBox="0 0 24 24" fill="none">
+          <Circle cx="12" cy="8" r="4" fill="#8b66df" />
+          <Path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" fill="#8b66df" />
+        </Svg>
       </View>
     )
   }

@@ -11,7 +11,8 @@ import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useRewards } from '../../../hooks/useRewards'
 import { useStreak } from '../../../hooks/useStreak'
 import { fetchDailyChallenge, fetchSmartRecommendation } from '../../../services/rewardApi'
-import { Card, Badge, Avatar, IconButton } from '../../../components/ui'
+import { Card, Badge, Avatar, IconButton, Skeleton, FadeIn } from '../../../components/ui'
+import { colors } from '../../../constants'
 import { useLanguage } from '../../../contexts/LanguageContext'
 
 const avatarImage = undefined
@@ -74,10 +75,10 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
-      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 20, backgroundColor: '#8b66df' }}>
+      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 8, backgroundColor: colors.background.header }}>
         {/* Logo */}
-        <View className="flex-row items-center justify-between" style={{ marginBottom: 20 }}>
-          <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
+        <View className="flex-row items-center justify-between" style={{ marginBottom: 12 }}>
+          <Image source={bondumLogo} style={{ width: 100, height: 44, resizeMode: 'contain' }} />
         </View>
 
         {/* User Info + Avatar */}
@@ -94,9 +95,11 @@ export default function HomeScreen() {
         <View className="flex-row items-center gap-4">
           <View className="flex-row items-center gap-2">
             <Image source={bLogo} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
-            <Text className="text-white font-bold" style={{ fontSize: 18 }}>
-              {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
-            </Text>
+            {isBalanceLoading ? (
+              <Skeleton width={80} height={20} borderRadius={6} />
+            ) : (
+              <Text className="text-white font-bold" style={{ fontSize: 18 }}>{bondumBalance.toLocaleString()} $BONDUM</Text>
+            )}
           </View>
           {!isTokensLoading && (tokens.find(t => t.symbol === 'USDC')?.balance || 0) > 0 && (
             <View className="flex-row items-center gap-2">
@@ -146,110 +149,120 @@ export default function HomeScreen() {
 
       <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
         {/* Quick Actions */}
-        <View className="flex-row justify-around mb-4">
-          {quickActions.map((action) => (
-            <IconButton
-              key={action.label}
-              icon={<Image source={action.icon} style={{ width: 24, height: 24 }} resizeMode="contain" />}
-              label={action.label}
-              onPress={action.onPress}
-            />
-          ))}
-        </View>
+        <FadeIn delay={0}>
+          <View className="flex-row justify-around mb-4">
+            {quickActions.map((action) => (
+              <IconButton
+                key={action.label}
+                icon={<Image source={action.icon} style={{ width: 24, height: 24 }} resizeMode="contain" />}
+                label={action.label}
+                onPress={action.onPress}
+              />
+            ))}
+          </View>
+        </FadeIn>
 
         {/* Streak Banner with Multiplier */}
-        <View className="mx-2 mb-4 bg-violet-50 rounded-2xl" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }}>
-          <View className="flex-row items-center justify-between mb-2">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
-                <Text style={{ fontSize: 22 }}>{'\uD83D\uDD25'}</Text>
+        <FadeIn delay={100}>
+          <View className="mx-2 mb-4 bg-violet-50 rounded-2xl" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }}>
+            <View className="flex-row items-center justify-between mb-2">
+              <View className="flex-row items-center gap-3">
+                <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
+                  <Text style={{ fontSize: 22 }}>{'\uD83D\uDD25'}</Text>
+                </View>
+                <View>
+                  <Text className="text-gray-900 font-bold" style={{ fontSize: 16 }}>
+                    {currentStreak > 0 ? t('home.streakCount', { count: currentStreak }) : t('home.startStreak')}
+                  </Text>
+                  <Text className="text-gray-500 text-xs">{t('home.totalScans', { count: totalScans })}</Text>
+                </View>
               </View>
+              <View className="flex-row items-center gap-2">
+                <View className="bg-violet-600 rounded-lg px-2 py-1">
+                  <Text className="text-white font-bold text-xs">{multiplier.toFixed(1)}x</Text>
+                </View>
+                <Pressable onPress={() => router.push('/scan')} className="bg-violet-500 rounded-xl px-4 py-2">
+                  <Text className="text-white font-bold text-sm">{t('home.scan')}</Text>
+                </Pressable>
+              </View>
+            </View>
+            {nextMilestone && (
               <View>
-                <Text className="text-gray-900 font-bold" style={{ fontSize: 16 }}>
-                  {currentStreak > 0 ? t('home.streakCount', { count: currentStreak }) : t('home.startStreak')}
-                </Text>
-                <Text className="text-gray-500 text-xs">{t('home.totalScans', { count: totalScans })}</Text>
+                <View className="flex-row items-center justify-between mb-1">
+                  <Text className="text-gray-500 text-xs">
+                    {t('home.streakProgress', { current: currentStreak, target: nextMilestone.days })}
+                  </Text>
+                  <Text className="text-violet-500 text-xs font-bold">{t('home.streakBonus', { bonus: nextMilestone.bonus })}</Text>
+                </View>
+                <View className="bg-violet-200 rounded-full h-2 overflow-hidden">
+                  <View
+                    className="bg-violet-500 h-2 rounded-full"
+                    style={{ width: `${Math.min((currentStreak / nextMilestone.days) * 100, 100)}%` }}
+                  />
+                </View>
               </View>
-            </View>
-            <View className="flex-row items-center gap-2">
-              <View className="bg-violet-600 rounded-lg px-2 py-1">
-                <Text className="text-white font-bold text-xs">{multiplier.toFixed(1)}x</Text>
-              </View>
-              <Pressable onPress={() => router.push('/scan')} className="bg-violet-500 rounded-xl px-4 py-2">
-                <Text className="text-white font-bold text-sm">{t('home.scan')}</Text>
-              </Pressable>
-            </View>
+            )}
           </View>
-          {nextMilestone && (
-            <View>
-              <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-gray-500 text-xs">
-                  {t('home.streakProgress', { current: currentStreak, target: nextMilestone.days })}
-                </Text>
-                <Text className="text-violet-500 text-xs font-bold">{t('home.streakBonus', { bonus: nextMilestone.bonus })}</Text>
-              </View>
-              <View className="bg-violet-200 rounded-full h-2 overflow-hidden">
-                <View
-                  className="bg-violet-500 h-2 rounded-full"
-                  style={{ width: `${Math.min((currentStreak / nextMilestone.days) * 100, 100)}%` }}
-                />
-              </View>
-            </View>
-          )}
-        </View>
+        </FadeIn>
 
         {/* Smart Recommendation Card */}
         {smartRecommendation && (
-          <Pressable
-            className="mx-2 mb-4 rounded-2xl overflow-hidden"
-            style={{ backgroundColor: '#7c3aed', padding: 16 }}
-            onPress={() => smartRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${smartRecommendation.suggestedReward}`) : router.push('/scan')}
-          >
-            <View className="flex-row items-center gap-2 mb-2">
-              <Text style={{ fontSize: 16 }}>{'\u2728'}</Text>
-              <Text className="text-violet-200 font-bold text-xs uppercase">{t('home.smartRecommendation')}</Text>
-            </View>
-            <Text className="text-white font-medium" style={{ fontSize: 14, lineHeight: 20 }}>
-              {smartRecommendation.recommendation}
-            </Text>
-          </Pressable>
+          <FadeIn delay={200}>
+            <Pressable
+              className="mx-2 mb-4 rounded-2xl overflow-hidden"
+              style={{ backgroundColor: '#7c3aed', padding: 16 }}
+              onPress={() => smartRecommendation.suggestedReward ? router.push(`/(tabs)/(rewards)/${smartRecommendation.suggestedReward}`) : router.push('/scan')}
+            >
+              <View className="flex-row items-center gap-2 mb-2">
+                <Text style={{ fontSize: 16 }}>{'\u2728'}</Text>
+                <Text className="text-violet-200 font-bold text-xs uppercase">{t('home.smartRecommendation')}</Text>
+              </View>
+              <Text className="text-white font-medium" style={{ fontSize: 14, lineHeight: 20 }}>
+                {smartRecommendation.recommendation}
+              </Text>
+            </Pressable>
+          </FadeIn>
         )}
 
         {/* Daily Challenge */}
         {dailyChallenge && (
-          <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }}>
-            <View className="flex-row items-center gap-3 flex-1">
-              <View className="bg-amber-400 rounded-xl items-center justify-center" style={{ width: 40, height: 40 }}>
-                <Text style={{ fontSize: 18 }}>{'\uD83C\uDFAF'}</Text>
+          <FadeIn delay={300}>
+            <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }}>
+              <View className="flex-row items-center gap-3 flex-1">
+                <View className="bg-amber-400 rounded-xl items-center justify-center" style={{ width: 40, height: 40 }}>
+                  <Text style={{ fontSize: 18 }}>{'\uD83C\uDFAF'}</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-900 font-bold text-sm">{t('home.dailyChallenge')}</Text>
+                  <Text className="text-gray-600 text-xs">{dailyChallenge.description}</Text>
+                </View>
               </View>
-              <View className="flex-1">
-                <Text className="text-gray-900 font-bold text-sm">{t('home.dailyChallenge')}</Text>
-                <Text className="text-gray-600 text-xs">{dailyChallenge.description}</Text>
+              <View className="bg-amber-400 rounded-lg px-2 py-1">
+                <Text className="text-amber-900 font-bold text-xs">+{dailyChallenge.reward}</Text>
               </View>
             </View>
-            <View className="bg-amber-400 rounded-lg px-2 py-1">
-              <Text className="text-amber-900 font-bold text-xs">+{dailyChallenge.reward}</Text>
-            </View>
-          </View>
+          </FadeIn>
         )}
 
         {/* Rewards Section */}
-        <View className="mb-4">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
-            {featuredRewards.map((reward) => (
-              <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
-                <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
-                  <Text className="text-violet-500 text-lg font-bold">{t('common.reward')}</Text>
-                  <Badge variant="outline">{t('common.available', { count: reward.available })}</Badge>
+        <FadeIn delay={400}>
+          <View className="mb-4">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
+              {featuredRewards.map((reward) => (
+                <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
+                  <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
+                    <Text className="text-violet-500 text-lg font-bold">{t('common.reward')}</Text>
+                    <Badge variant="outline">{t('common.available', { count: reward.available })}</Badge>
+                  </View>
+                  <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
+                  <View className="bg-violet-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
+                    <Text className="text-white text-5xl font-extrabold">{reward.value}</Text>
+                  </View>
                 </View>
-                <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
-                <View className="bg-violet-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
-                  <Text className="text-white text-5xl font-extrabold">{reward.value}</Text>
-                </View>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+              ))}
+            </ScrollView>
+          </View>
+        </FadeIn>
 
         {/* Bottom padding for tab bar */}
         <View className="h-2" />

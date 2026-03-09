@@ -1,0 +1,131 @@
+appId: xyz.bondum.mobile
+
+---
+
+# ============================================================
+# Bondum Demo Video Flow (~2 minutes)
+# Pre-requisite: app is on welcome screen (run setup first)
+# Record with: maestro record maestro/demo-flow.yaml
+# ============================================================
+
+# --- Welcome Screen ---
+- extendedWaitUntil:
+    visible: "Pay. Earn. Enjoy."
+    timeout: 15000
+- takeScreenshot: screenshots/01-welcome
+
+# Login as guest
+- tapOn: "Continue as Guest"
+
+# --- Home Screen ---
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/02-home-top
+
+# Scroll down to show more content
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 30%"
+    duration: 1500
+- takeScreenshot: screenshots/03-home-scrolled
+
+# Scroll back up
+- swipe:
+    start: "50%, 30%"
+    end: "50%, 70%"
+    duration: 1000
+
+# --- Rewards Tab ---
+- tapOn: "Rewards"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/04-rewards
+
+# Tap into Panicafe Rewards
+- tapOn: "Panicafe Rewards"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/05-panicafe-rewards
+
+# Browse rewards
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 30%"
+    duration: 1500
+
+# Go back
+- swipe:
+    start: "50%, 30%"
+    end: "50%, 70%"
+    duration: 1000
+
+# Back to brands list
+- tapOn:
+    text: "Back to Brands"
+    optional: true
+- waitForAnimationToEnd
+
+# --- Trade Tab ---
+- tapOn: "Trade"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/06-trade
+
+# Pause on trade screen
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 40%"
+    duration: 1000
+
+- swipe:
+    start: "50%, 40%"
+    end: "50%, 70%"
+    duration: 800
+
+# --- Wallet/Assets Tab ---
+- tapOn: "Wallet"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/07-assets
+
+# Browse assets
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 30%"
+    duration: 1500
+- takeScreenshot: screenshots/08-assets-scrolled
+
+- swipe:
+    start: "50%, 30%"
+    end: "50%, 70%"
+    duration: 1000
+
+# --- Profile Tab ---
+- tapOn: "Profile"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/09-profile
+
+# Scroll profile
+- swipe:
+    start: "50%, 70%"
+    end: "50%, 40%"
+    duration: 1000
+
+- swipe:
+    start: "50%, 40%"
+    end: "50%, 70%"
+    duration: 800
+
+# --- Back to Home ---
+- tapOn: "Home"
+- waitForAnimationToEnd
+- takeScreenshot: screenshots/10-home-final
+
+# Final scroll
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 40%"
+    duration: 800
+
+- swipe:
+    start: "50%, 40%"
+    end: "50%, 60%"
+    duration: 800

@@ -7,7 +7,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useWalletNfts } from '../../../hooks/useWalletNfts'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Card } from '../../../components/ui'
+import { Card, Skeleton, FadeIn } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
 import { useLanguage } from '../../../contexts/LanguageContext'
 
@@ -32,10 +32,7 @@ export default function AssetsScreen() {
 
   return (
     <View className="flex-1 bg-violet-50">
-      <Header
-        userName={user?.username || 'User'}
-        balance={isBalanceLoading ? '...' : bondumBalance.toLocaleString()}
-      />
+      <Header userName={user?.username || 'User'} />
 
       {/* Content */}
       <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
@@ -46,6 +43,7 @@ export default function AssetsScreen() {
         </Text>
 
         {/* NFT Collection Card — bigger version */}
+        <FadeIn delay={0}>
         <Card className="mb-6" padding="none" style={{ padding: 24 }}>
           <View className="flex-row items-start justify-between mb-4">
             <View className="flex-1">
@@ -54,7 +52,7 @@ export default function AssetsScreen() {
                 <Text className="text-violet-500">{t('assets.collection')}</Text>
               </Text>
               {isNftsLoading ? (
-                <Text className="text-gray-900 text-3xl font-extrabold leading-tight">{t('assets.loadingNfts')}</Text>
+                <Skeleton width={120} height={28} borderRadius={8} />
               ) : nftCount === 0 ? (
                 <Text className="text-gray-900 text-2xl font-extrabold leading-tight">{t('assets.noNfts')}</Text>
               ) : (
@@ -105,6 +103,7 @@ export default function AssetsScreen() {
             </View>
           )}
         </Card>
+        </FadeIn>
 
         {/* Quick Actions */}
         <View className="flex-row gap-3 mb-6">
@@ -127,13 +126,23 @@ export default function AssetsScreen() {
         </View>
 
         {/* Token List */}
+        <FadeIn delay={100}>
         <Text className="text-gray-500 text-sm font-semibold mb-3">{t('assets.tokens')}</Text>
 
         <View className="mb-8">
           {isTokensLoading ? (
-            <Card padding="none" style={{ padding: 20 }}>
-              <Text className="text-gray-400 text-center text-lg">{t('assets.loadingBalances')}</Text>
-            </Card>
+            <View style={{ gap: 12 }}>
+              {[0, 1, 2, 3].map((i) => (
+                <View key={i} className="bg-white flex-row items-center" style={{ padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#E5E5E5' }}>
+                  <Skeleton width={44} height={44} borderRadius={22} style={{ marginRight: 12 }} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <Skeleton width={80} height={14} />
+                    <Skeleton width={50} height={12} />
+                  </View>
+                  <Skeleton width={60} height={14} />
+                </View>
+              ))}
+            </View>
           ) : (
             tokens.map((token, index) => (
               <Pressable
@@ -196,6 +205,7 @@ export default function AssetsScreen() {
             ))
           )}
         </View>
+        </FadeIn>
 
         {/* Bottom padding for tab bar */}
         <View className="h-4" />

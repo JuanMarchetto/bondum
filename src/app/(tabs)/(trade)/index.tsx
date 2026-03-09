@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Button } from '../../../components/ui'
+import { Button, Skeleton, FadeIn } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { useSwapQuote, type TokenSymbol, TOKENS } from '../../../hooks/useSwapQuote'
@@ -17,6 +17,7 @@ import { Buffer } from 'buffer'
 import { VersionedTransaction, Connection } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { useLanguage } from '../../../contexts/LanguageContext'
+import { colors } from '../../../constants'
 
 const bondumLogo = require('../../../assets/bondum_logo.png')
 const bLogo = require('../../../assets/b-logo.png')
@@ -160,7 +161,7 @@ export default function TradeScreen() {
   if (completedSwapTx) {
     return (
       <View className="flex-1 bg-violet-50">
-        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: colors.background.header }}>
           <View className="items-center mb-4">
             <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
           </View>
@@ -181,13 +182,11 @@ export default function TradeScreen() {
 
   return (
     <View className="flex-1 bg-violet-50">
-      <Header
-        userName={user?.username || 'User'}
-        balance={isBalanceLoading ? '...' : bondumBalance.toLocaleString()}
-      />
+      <Header userName={user?.username || 'User'} />
 
       {/* Swap Card */}
       <View className="flex-1 px-4" style={{ paddingTop: 24 }}>
+        <FadeIn>
         <View className="mb-4">
           <Text className="text-center mb-6">
             <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>{t('trade.title')} </Text>
@@ -250,56 +249,58 @@ export default function TradeScreen() {
 
           {/* To Token */}
           <View
-            className="bg-white rounded-2xl self-center relative"
+            className="bg-white rounded-2xl self-center"
             style={{
               width: '95%',
-              paddingVertical: 6,
+              paddingVertical: 12,
               paddingHorizontal: 16,
               borderWidth: 1,
               borderColor: '#9b9db5',
-              justifyContent: 'center',
             }}
           >
-            <View className="absolute left-4 flex-row items-center" style={{ top: '50%', marginTop: -15 }}>
+            <View className="flex-row items-center justify-between">
               <Pressable
                 onPress={() => setShowTokenPicker('to')}
-                className="flex-row items-center gap-2"
+                className="flex-row items-center gap-2 flex-shrink-0"
               >
                 {TOKEN_ICONS[toToken].isSvg ? (
                   <ExpoImage source={TOKEN_ICONS[toToken].source} style={{ width: 40, height: 40 }} contentFit="contain" />
                 ) : (
                   <Image source={TOKEN_ICONS[toToken].source} style={{ width: 40, height: 40 }} resizeMode="contain" />
                 )}
-                <View className="ml-2">
+                <View className="ml-1">
                   <Text className="text-gray-900 font-bold">{toTokenInfo.name}</Text>
-                  <Text className="text-gray-500 text-sm">
-                    {isQuoteLoading ? '...' : toAmount || '0.00'} {toTokenInfo.symbol}
-                  </Text>
+                  {isQuoteLoading ? (
+                    <Skeleton width={60} height={12} borderRadius={6} />
+                  ) : (
+                    <Text className="text-gray-500 text-xs">
+                      {toAmount || '0.00'} {toTokenInfo.symbol}
+                    </Text>
+                  )}
                 </View>
                 <Text style={{ fontSize: 12, marginLeft: 4 }}>{'\u25BC'}</Text>
               </Pressable>
+              {isQuoteLoading ? (
+                <Skeleton width={60} height={20} borderRadius={6} />
+              ) : (
+                <Text
+                  className="text-right font-bold flex-shrink-1"
+                  style={{ fontSize: 28, color: '#000000' }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                >
+                  {toAmount || '0.00'}
+                </Text>
+              )}
             </View>
-            <TextInput
-              style={{
-                fontSize: 36,
-                fontWeight: 'bold',
-                textAlign: 'center',
-                width: '100%',
-                color: '#000000',
-                backgroundColor: 'transparent',
-              }}
-              placeholder="0.00"
-              placeholderTextColor="#A3A3A3"
-              value={isQuoteLoading ? '...' : toAmount || '0.00'}
-              editable={false}
-            />
             {priceImpact > 0 && (
-              <Text className="text-center text-xs mt-1" style={{ color: priceImpact > 1 ? '#ef4444' : '#6b7280' }}>
+              <Text className="text-right text-xs mt-1" style={{ color: priceImpact > 1 ? '#ef4444' : '#6b7280' }}>
                 {t('trade.priceImpact', { percent: priceImpact.toFixed(2) })}
               </Text>
             )}
             {quoteError && (
-              <Text className="text-center text-xs mt-1 text-red-500">{quoteError}</Text>
+              <Text className="text-right text-xs mt-1 text-red-500">{quoteError}</Text>
             )}
           </View>
 
@@ -317,6 +318,7 @@ export default function TradeScreen() {
             </Button>
           </View>
         </View>
+        </FadeIn>
       </View>
 
       {/* Token Picker Modal */}

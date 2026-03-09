@@ -1,13 +1,13 @@
-import { View, Text, Pressable, StyleSheet, Image, Alert } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Image, Alert, Animated } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../contexts/AuthContext'
 import { useBondumBalance } from '../../hooks/useBondumBalance'
-import { Button } from '../../components/ui'
+import { Button, ChevronBack, FadeIn, ScalePulse } from '../../components/ui'
 import { TransactionConfirmation } from '../../components/TransactionConfirmation'
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
@@ -15,11 +15,39 @@ import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
 import { isPanicafeReward } from '../../utils/panicafeCoupons'
 import { useStreak } from '../../hooks/useStreak'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { colors } from '../../constants'
 
 const bondumLogo = require('../../assets/bondum_logo.png')
 
 function truncateUsername(name: string, max = 18): string {
   return name.length > max ? name.slice(0, max) + '...' : name
+}
+
+function ScanLine() {
+  const translateY = useRef(new Animated.Value(0)).current
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateY, { toValue: 220, duration: 2000, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: 0, duration: 2000, useNativeDriver: true }),
+      ])
+    ).start()
+  }, [translateY])
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        left: '15%',
+        right: '15%',
+        height: 2,
+        top: '15%',
+        backgroundColor: '#8B5CF6',
+        opacity: 0.8,
+        borderRadius: 1,
+        transform: [{ translateY }],
+      }}
+    />
+  )
 }
 
 export default function ScanScreen() {
@@ -44,6 +72,7 @@ export default function ScanScreen() {
   const handleBarCodeScanned = ({ data }: { data: string }) => {
     if (scanned) return
     setScanned(true)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     const parsed = parseQrCode(data)
     if (parsed) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
@@ -128,10 +157,13 @@ export default function ScanScreen() {
 
   // ─── Compact Header (shared across all scan states) ──────────────────────
   const ScanHeader = () => (
-    <View className="px-5 pb-4 rounded-b-3xl" style={{ paddingTop: insets.top + 12, backgroundColor: '#8b66df' }}>
+    <View className="px-5 pb-4 rounded-b-3xl" style={{ paddingTop: insets.top + 12, backgroundColor: colors.background.header }}>
       <View className="flex-row items-center justify-between">
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Text className="text-white font-bold" style={{ fontSize: 28 }}>{'<'} {t('common.back')}</Text>
+          <View className="flex-row items-center gap-1">
+            <ChevronBack size={28} color="white" />
+            <Text className="text-white font-bold" style={{ fontSize: 18 }}>{t('common.back')}</Text>
+          </View>
         </Pressable>
         <Image source={bondumLogo} style={{ width: 100, height: 40, resizeMode: 'contain' }} />
         <View style={{ width: 70 }}>
@@ -215,9 +247,11 @@ export default function ScanScreen() {
                   </>
                 ) : (
                   <View className="items-center" style={{ paddingVertical: 32 }}>
+                    <ScalePulse>
                     <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                       <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
                     </View>
+                    </ScalePulse>
                     <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 6 }}>{t('scan.rewardClaimed')}</Text>
                     <Text className="text-gray-500 text-center" style={{ fontSize: 15, marginBottom: 28 }}>
                       {t('scan.valueFromBrand', { value: parsedReward.value, brand: parsedReward.brand })}
@@ -241,6 +275,7 @@ export default function ScanScreen() {
           ) : (
             // ── Pre-claim: show reward preview ──
             <View className="flex-1 justify-center">
+              <FadeIn>
               <View
                 className="bg-white rounded-3xl items-center"
                 style={{ padding: 24, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
@@ -308,6 +343,7 @@ export default function ScanScreen() {
                   </View>
                 </View>
               </View>
+              </FadeIn>
             </View>
           )}
         </View>
@@ -347,6 +383,7 @@ export default function ScanScreen() {
               <View className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-violet-500 rounded-br-lg" />
             </View>
           </View>
+          <ScanLine />
         </View>
 
         <Text className="text-gray-400 text-center mt-6" style={{ fontSize: 15, lineHeight: 22 }}>

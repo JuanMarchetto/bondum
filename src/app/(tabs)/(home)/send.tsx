@@ -5,7 +5,8 @@ import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Button } from '../../../components/ui'
+import { Button, ChevronBack, FadeIn } from '../../../components/ui'
+import { colors } from '../../../constants'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { TOKENS, type TokenSymbol } from '../../../hooks/useSwapQuote'
 import { buildTransferTransaction } from '../../../services/solana'
@@ -125,7 +126,7 @@ export default function SendScreen() {
   if (completedTx) {
     return (
       <View className="flex-1 bg-violet-50">
-        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+        <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: colors.background.header }}>
           <View className="flex-row items-center justify-between">
             <View className="w-10" />
             <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
@@ -149,10 +150,10 @@ export default function SendScreen() {
   return (
     <View className="flex-1 bg-violet-50">
       {/* Header */}
-      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
+      <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: colors.background.header }}>
         <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2 -ml-2">
-            <Text className="text-white text-3xl">{'\u2190'}</Text>
+          <Pressable onPress={() => router.back()} className="p-2 -ml-2" hitSlop={12}>
+            <ChevronBack size={24} color="white" />
           </Pressable>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
           <View className="w-10" />
@@ -160,6 +161,7 @@ export default function SendScreen() {
       </View>
 
       <ScrollView className="flex-1 px-5 pt-6" keyboardShouldPersistTaps="handled">
+        <FadeIn>
         <Text className="text-center mb-6">
           <Text className="text-violet-500 font-bold" style={{ fontSize: 36 }}>{t('send.title')} </Text>
           <Text className="text-gray-900 font-extrabold" style={{ fontSize: 36 }}>{t('send.titleSuffix')}</Text>
@@ -234,6 +236,7 @@ export default function SendScreen() {
         >
           <Text style={{ color: '#FFFFFF', fontSize: 32 }}>{t('send.sendToken', { symbol: currentToken.symbol })}</Text>
         </Button>
+        </FadeIn>
       </ScrollView>
     </View>
   )
