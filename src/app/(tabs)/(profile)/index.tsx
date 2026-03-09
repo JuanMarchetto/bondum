@@ -51,7 +51,7 @@ export default function ProfileScreen() {
         {/* User Info + Avatar */}
         <View className="flex-row items-center justify-between mb-1">
           <View className="flex-1">
-            <Text className="text-white text-6xl font-extrabold" numberOfLines={1}>{(user?.username || 'User').length > 16 ? (user?.username || 'User').slice(0, 16) + '...' : user?.username || 'User'}</Text>
+            <Text className="text-white text-6xl font-extrabold" numberOfLines={1}>{(user?.username || 'User').length > 18 ? (user?.username || 'User').slice(0, 18) + '...' : user?.username || 'User'}</Text>
           </View>
           <Avatar source={avatarImage} size="custom" customSize={avatarSize} style={{ borderWidth: 6, borderColor: 'white' }} />
         </View>

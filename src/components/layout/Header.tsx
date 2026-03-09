@@ -55,7 +55,7 @@ export function Header({
       {/* User Info Row */}
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-white font-bold" style={{ fontSize: fontSize['2xl'] }} numberOfLines={1}>{t('header.hello', { name: userName.length > 16 ? userName.slice(0, 16) + '...' : userName })}</Text>
+          <Text className="text-white font-bold" style={{ fontSize: fontSize['2xl'] }} numberOfLines={1}>{t('header.hello', { name: userName.length > 18 ? userName.slice(0, 18) + '...' : userName })}</Text>
           <Text className="text-violet-200" style={{ fontSize: fontSize.lg }}>{balance} $BONDUM</Text>
         </View>
 

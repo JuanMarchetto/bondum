@@ -125,6 +125,7 @@ export const es: Translations = {
     panicafeRewards: 'Premios Panicafe',
     moreBrands: 'M\u00e1s marcas pr\u00f3ximamente',
     backToBrands: '\u2190 Volver a Marcas',
+    comingSoon: 'Próximamente',
   },
   rewardDetail: {
     claimReward: 'Reclamar premio',

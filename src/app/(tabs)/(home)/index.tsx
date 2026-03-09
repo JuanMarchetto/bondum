@@ -30,25 +30,26 @@ export default function HomeScreen() {
   const { balance: bondumBalance, isLoading: isBalanceLoading, refetch: refetchBalance } = useBondumBalance()
   const { nfts, nftCount, refetch: refetchNfts } = useWalletNfts()
   const { tokens, isLoading: isTokensLoading, refetch: refetchTokens } = useTokenBalances()
-  const { rewards, refetch: refetchRewards } = useRewards('Bondum')
+  const { rewards, refetch: refetchRewards } = useRewards('PaniCafe')
   const { currentStreak, totalScans, multiplier, nextMilestone } = useStreak()
   const { width } = useWindowDimensions()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   // Daily challenge
   const { data: dailyChallenge } = useQuery({
-    queryKey: ['dailyChallenge'],
-    queryFn: fetchDailyChallenge,
+    queryKey: ['dailyChallenge', language],
+    queryFn: () => fetchDailyChallenge(language),
     staleTime: 5 * 60_000,
   })
 
   // Smart recommendation
   const { data: smartRecommendation } = useQuery({
-    queryKey: ['smartRecommendation', address, currentStreak, bondumBalance],
+    queryKey: ['smartRecommendation', address, currentStreak, bondumBalance, language],
     queryFn: () => fetchSmartRecommendation({
       walletAddress: address!,
       streak: currentStreak,
       balance: bondumBalance,
+      language,
     }),
     enabled: !!address,
     staleTime: 2 * 60_000,
@@ -83,7 +84,7 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-1 mr-4">
             <Text className="text-white font-extrabold" style={{ fontSize: 28 }} numberOfLines={1}>
-              {(user?.username || 'User').length > 20 ? (user?.username || 'User').slice(0, 20) + '...' : user?.username || 'User'}
+              {(user?.username || 'User').length > 18 ? (user?.username || 'User').slice(0, 18) + '...' : user?.username || 'User'}
             </Text>
           </View>
           <Avatar source={avatarImage} size="custom" customSize={Math.round(width * 0.16)} style={{ borderWidth: 4, borderColor: 'white' }} />
@@ -242,8 +243,8 @@ export default function HomeScreen() {
                   <Badge variant="outline">{t('common.available', { count: reward.available })}</Badge>
                 </View>
                 <Text className="text-gray-900 font-semibold mb-3">{reward.title}</Text>
-                <View className="bg-red-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
-                  <Text className="text-white text-7xl font-extrabold">{reward.value}</Text>
+                <View className="bg-violet-600 rounded-xl items-center" style={{ paddingVertical: 37.04 }}>
+                  <Text className="text-white text-5xl font-extrabold">{reward.value}</Text>
                 </View>
               </View>
             ))}

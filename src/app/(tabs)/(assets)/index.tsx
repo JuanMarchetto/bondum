@@ -92,10 +92,16 @@ export default function AssetsScreen() {
           )}
 
           {nftCount === 0 && !isNftsLoading && (
-            <View className="flex-row" style={{ gap: 10 }}>
-              <View className="rounded-xl bg-violet-100" style={{ width: 72, height: 72 }} />
-              <View className="rounded-xl bg-pink-100" style={{ width: 72, height: 72 }} />
-              <View className="rounded-xl bg-orange-100" style={{ width: 72, height: 72 }} />
+            <View className="flex-row items-center justify-center py-4" style={{ gap: 10 }}>
+              <View className="rounded-xl bg-violet-100 items-center justify-center" style={{ width: 72, height: 72 }}>
+                <Text style={{ fontSize: 28 }}>{'\uD83D\uDDBC\uFE0F'}</Text>
+              </View>
+              <View className="rounded-xl bg-violet-50 items-center justify-center" style={{ width: 72, height: 72 }}>
+                <Text style={{ fontSize: 28 }}>{'\u2728'}</Text>
+              </View>
+              <View className="rounded-xl bg-violet-100 items-center justify-center" style={{ width: 72, height: 72 }}>
+                <Text style={{ fontSize: 28 }}>{'\uD83C\uDFA8'}</Text>
+              </View>
             </View>
           )}
         </Card>
