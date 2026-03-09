@@ -99,7 +99,7 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
       const address = embeddedWallet?.wallets?.[0]?.address || privyUser.id
 
       // Find email from linked accounts
-      const emailAccount = privyUser.linked_accounts?.find((account) => account.type === 'email') as
+      const emailAccount = privyUser.linked_accounts?.find((account: any) => account.type === 'email') as
         | { address?: string }
         | undefined
 
