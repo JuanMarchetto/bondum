@@ -5,8 +5,9 @@ import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
-import { Avatar, BellIcon } from '../../../components/ui'
+import { Avatar, BellIcon, Skeleton, FadeIn } from '../../../components/ui'
 import { useLanguage } from '../../../contexts/LanguageContext'
+import { colors } from '../../../constants'
 
 const avatarImage = undefined
 const bondumLogo = require('../../../assets/bondum_logo.png')
@@ -37,7 +38,7 @@ export default function ProfileScreen() {
   return (
     <View className="flex-1 bg-white">
       {/* Header — same as Home */}
-      <View className="px-5 pb-2.5 rounded-b-3xl" style={{ paddingTop: insets.top + 32, backgroundColor: '#8b66df' }}>
+      <View className="px-5 pb-2.5 rounded-b-3xl" style={{ paddingTop: insets.top + 32, backgroundColor: colors.background.header }}>
         {/* Logo */}
         <View className="flex-row items-center justify-between" style={{ marginBottom: 36 }}>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
@@ -59,21 +60,30 @@ export default function ProfileScreen() {
         {/* Balance */}
         <View className="flex-row items-center gap-3 mb-2">
           <Image source={bLogo} style={{ width: 24, height: 24, resizeMode: 'contain' }} />
-          <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
-            {isBalanceLoading ? '...' : bondumBalance.toLocaleString()} $BONDUM
-          </Text>
+          {isBalanceLoading ? (
+            <Skeleton width={100} height={24} borderRadius={6} />
+          ) : (
+            <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
+              {bondumBalance.toLocaleString()} $BONDUM
+            </Text>
+          )}
         </View>
 
         <View className="flex-row items-center gap-3">
           <Image source={usdcLogo} style={{ width: 24, height: 24, resizeMode: 'contain' }} />
-          <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
-            {isTokensLoading ? '...' : (tokens.find(tk => tk.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
-          </Text>
+          {isTokensLoading ? (
+            <Skeleton width={100} height={24} borderRadius={6} />
+          ) : (
+            <Text className="text-white font-extrabold" style={{ fontSize: 27 }}>
+              {(tokens.find(tk => tk.symbol === 'USDC')?.balance || 0).toLocaleString()} USDC
+            </Text>
+          )}
         </View>
       </View>
 
       {/* White content area */}
       <ScrollView className="flex-1 px-5 pt-6" contentContainerStyle={{ paddingBottom: 40 }}>
+        <FadeIn delay={0}>
         {/* Wallet Address — visible for all users */}
         <Text className="text-gray-500 text-sm font-semibold mb-2">{t('profile.walletAddress')}</Text>
         <Pressable
@@ -91,7 +101,9 @@ export default function ProfileScreen() {
             <Text className="text-white font-bold text-sm">{copied ? t('common.copied') : t('common.copy')}</Text>
           </View>
         </Pressable>
+        </FadeIn>
 
+        <FadeIn delay={100}>
         {/* Wallet Recovery / Security */}
         <Text className="text-gray-500 text-sm font-semibold mb-2 mt-6">{t('profile.walletSecurity')}</Text>
         {provider === 'privy' ? (
@@ -124,6 +136,7 @@ export default function ProfileScreen() {
             <Text className="text-gray-500 text-sm">{t('profile.guestModeDesc')}</Text>
           </View>
         )}
+        </FadeIn>
       </ScrollView>
     </View>
   )

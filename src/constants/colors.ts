@@ -50,7 +50,23 @@ export const colors = {
   background: {
     light: '#F8F7FC', // Light lavender background
     card: '#FFFFFF',
-    header: '#8B5CF6', // Purple header
+    header: '#8b66df', // Purple header (consistent)
+  },
+
+  // Border colors
+  border: {
+    light: '#E5E5E5',
+    muted: '#9b9db5',
+    violet: '#ddd6fe',
+  },
+
+  // Shadows
+  cardShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
 
   // Text colors

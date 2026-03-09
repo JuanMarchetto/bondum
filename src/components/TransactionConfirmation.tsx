@@ -2,6 +2,7 @@ import { View, Text, Pressable, Linking } from 'react-native'
 import { useState } from 'react'
 import * as Clipboard from 'expo-clipboard'
 import { Button } from './ui'
+import { ScalePulse } from './ui/ScalePulse'
 import { useLanguage } from '../contexts/LanguageContext'
 
 interface TransactionConfirmationProps {
@@ -46,19 +47,21 @@ export function TransactionConfirmation({
   return (
     <View className="items-center px-4" style={{ paddingVertical: 24 }}>
       {/* Success icon */}
-      <View
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: 36,
-          backgroundColor: '#ecfdf5',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
-      </View>
+      <ScalePulse>
+        <View
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: 36,
+            backgroundColor: '#ecfdf5',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 16,
+          }}
+        >
+          <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
+        </View>
+      </ScalePulse>
 
       {/* Title */}
       <Text className="text-gray-900 font-bold mb-1 text-center" style={{ fontSize: 24 }}>
@@ -74,7 +77,7 @@ export function TransactionConfirmation({
 
       {/* Transaction signature card */}
       {isRealTx && (
-        <Pressable onPress={copySignature} className="w-full" style={{ marginBottom: 12 }}>
+        <Pressable onPress={copySignature} className="w-full" style={{ marginBottom: 12 }} hitSlop={8}>
           <View
             style={{
               backgroundColor: '#f9fafb',
@@ -118,7 +121,7 @@ export function TransactionConfirmation({
 
       {/* Explorer link */}
       {isRealTx && (
-        <Pressable onPress={openExplorer} style={{ marginBottom: 20, paddingVertical: 6 }}>
+        <Pressable onPress={openExplorer} style={{ marginBottom: 20, paddingVertical: 6 }} hitSlop={8}>
           <Text style={{ color: '#7c3aed', fontWeight: '600', fontSize: 14 }}>
             {t('tx.viewExplorer')}
           </Text>

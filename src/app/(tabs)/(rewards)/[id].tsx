@@ -9,7 +9,7 @@ import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useReward } from '../../../hooks/useRewards'
 import { addClaimedReward } from '../../../services/rewardStorage'
 import { requestRedemption, redeemReward, requestPanicafeRewardClaim, submitPanicafeRewardClaim } from '../../../services/rewardApi'
-import { Button } from '../../../components/ui'
+import { Button, FadeIn, ScalePulse } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { PanicafeCouponCard } from '../../../components/PanicafeCouponCard'
@@ -27,7 +27,7 @@ export default function RewardDetailScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const { user, address, provider, getPrivyAccessToken } = useAuth()
-  const { balance: bondumBalance, isLoading: isBalanceLoading } = useBondumBalance()
+  const { balance: bondumBalance } = useBondumBalance()
   const { tokens } = useTokenBalances()
   const panicafeBalance = tokens.find((t) => t.symbol === 'PANICAFE')?.balance ?? 0
   const { reward: fetchedReward } = useReward(id || '1')
@@ -168,10 +168,7 @@ export default function RewardDetailScreen() {
   if (claimed) {
     return (
       <View className="flex-1 bg-gray-100">
-        <Header
-          userName={user?.username || 'User'}
-          balance={bondumBalance.toLocaleString()}
-        />
+        <Header userName={user?.username || 'User'} />
 
         {/* Celebration View */}
         <View className="flex-1 justify-center px-5">
@@ -193,9 +190,11 @@ export default function RewardDetailScreen() {
               </>
             ) : (
               <View className="items-center" style={{ paddingVertical: 20 }}>
-                <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
-                  <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
-                </View>
+                <ScalePulse>
+                  <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                    <Text style={{ fontSize: 40, color: '#10b981' }}>{'\u2713'}</Text>
+                  </View>
+                </ScalePulse>
 
                 <Text className="text-gray-900 font-bold text-center" style={{ fontSize: 24, marginBottom: 8 }}>
                   {t('rewardDetail.wonReward')}
@@ -236,14 +235,11 @@ export default function RewardDetailScreen() {
 
   return (
     <View className="flex-1 bg-gray-100">
-      <Header
-        userName={user?.username || 'User'}
-        balance={`~ ${bondumBalance.toLocaleString()}`}
-        showBackButton
-      />
+      <Header userName={user?.username || 'User'} showBackButton />
 
       {/* Reward Detail */}
       <View className="flex-1 px-2 pt-6 justify-center">
+        <FadeIn>
         <View className="bg-white rounded-3xl p-5 self-center" style={{ borderWidth: 1, borderColor: '#9b9db5', flex: 0.9, width: '96%' }}>
           <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
             <Text className="text-4xl font-extrabold">
@@ -289,6 +285,7 @@ export default function RewardDetailScreen() {
             </Text>
           )}
         </View>
+        </FadeIn>
       </View>
     </View>
   )

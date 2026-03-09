@@ -1,0 +1,6 @@
+appId: xyz.bondum.mobile
+---
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Pay. Earn. Enjoy."
+    timeout: 30000
