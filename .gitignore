@@ -47,6 +47,7 @@ app-example
 
 # Server runtime data
 server/streaks.json
+server/nonces.json
 
 # Build/health logs
 scripts/*.log

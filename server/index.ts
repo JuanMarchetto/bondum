@@ -15,6 +15,7 @@
  */
 
 import http from 'node:http'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import {
@@ -90,8 +91,57 @@ const BRAND_MINTS: Record<string, { mint: PublicKey; decimals: number }> = {
 // Max priority fee cap: 0.001 SOL
 const MAX_PRIORITY_FEE_SOL = 0.001
 
-// Anti-replay: track used nonces in memory (use Redis in production)
+// Max request body size: 1 MB
+const MAX_BODY_SIZE = 1024 * 1024
+
+// HMAC secret for QR code signature validation
+const HMAC_SECRET = process.env.HMAC_SECRET || ''
+if (!HMAC_SECRET) {
+  console.warn('[WARN] HMAC_SECRET not set — /claim endpoint will reject all requests in production')
+}
+
+// Base token reward per scan (server-authoritative, NOT from client)
+const SCAN_REWARD_AMOUNTS: Record<string, number> = {
+  bondum: 100,
+  panicafe: 50,
+}
+
+// CORS allowed origins (comma-separated via env, or permissive in development)
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+  : []
+
+// Anti-replay: file-persisted nonce set
+const NONCES_FILE = path.join(import.meta.dirname || __dirname, 'nonces.json')
 const usedNonces = new Set<string>()
+
+// Load persisted nonces on startup
+try {
+  if (fs.existsSync(NONCES_FILE)) {
+    const data = JSON.parse(fs.readFileSync(NONCES_FILE, 'utf-8'))
+    if (Array.isArray(data)) {
+      for (const n of data) usedNonces.add(n)
+    }
+    console.log(`[NONCE] Loaded ${usedNonces.size} nonces from disk`)
+  }
+} catch {
+  console.warn('[NONCE] Could not load nonces.json, starting fresh')
+}
+
+function persistNonces() {
+  try {
+    // Keep only the most recent 10,000 nonces to prevent unbounded growth
+    const arr = Array.from(usedNonces)
+    const trimmed = arr.length > 10_000 ? arr.slice(arr.length - 10_000) : arr
+    if (trimmed.length < arr.length) {
+      usedNonces.clear()
+      for (const n of trimmed) usedNonces.add(n)
+    }
+    fs.writeFileSync(NONCES_FILE, JSON.stringify(trimmed))
+  } catch {
+    console.warn('[NONCE] Could not persist nonces to disk')
+  }
+}
 
 // Connection
 const connection = new Connection(RPC_URL, 'confirmed')
@@ -110,7 +160,7 @@ function loadTreasury(): Keypair {
 const treasury = loadTreasury()
 console.log(`Treasury address: ${treasury.publicKey.toBase58()}`)
 
-// Rate limiting (in-memory, per IP)
+// Rate limiting (in-memory, per IP) with periodic cleanup
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 const RATE_LIMIT_WINDOW = 60_000 // 1 minute
 const RATE_LIMIT_MAX = 30 // 30 requests per minute per IP
@@ -125,6 +175,14 @@ function checkRateLimit(ip: string): boolean {
   entry.count++
   return entry.count <= RATE_LIMIT_MAX
 }
+
+// Periodic cleanup of expired rate limit entries (every 5 minutes)
+setInterval(() => {
+  const now = Date.now()
+  for (const [ip, entry] of rateLimitMap) {
+    if (now > entry.resetTime) rateLimitMap.delete(ip)
+  }
+}, 5 * 60_000)
 
 function isValidSolanaAddress(address: string): boolean {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
@@ -363,7 +421,16 @@ function updateStreak(address: string): { streak: StreakEntry; milestoneReached:
 function parseBody(req: http.IncomingMessage): Promise<any> {
   return new Promise((resolve, reject) => {
     let body = ''
-    req.on('data', (chunk) => (body += chunk))
+    let size = 0
+    req.on('data', (chunk: Buffer | string) => {
+      size += typeof chunk === 'string' ? Buffer.byteLength(chunk) : chunk.length
+      if (size > MAX_BODY_SIZE) {
+        req.destroy()
+        reject(new Error('Request body too large'))
+        return
+      }
+      body += chunk
+    })
     req.on('end', () => {
       try {
         resolve(body ? JSON.parse(body) : {})
@@ -375,12 +442,21 @@ function parseBody(req: http.IncomingMessage): Promise<any> {
   })
 }
 
-function sendJson(res: http.ServerResponse, status: number, data: any) {
+function getCorsOrigin(req: http.IncomingMessage): string {
+  const origin = req.headers.origin || ''
+  // In development (no ALLOWED_ORIGINS configured), allow all
+  if (ALLOWED_ORIGINS.length === 0) return '*'
+  // In production, only allow configured origins
+  return ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+}
+
+function sendJson(res: http.ServerResponse, status: number, data: any, req?: http.IncomingMessage) {
+  const corsOrigin = req ? getCorsOrigin(req) : '*'
   res.writeHead(status, {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': corsOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   })
   res.end(JSON.stringify(data))
 }
@@ -388,14 +464,14 @@ function sendJson(res: http.ServerResponse, status: number, data: any) {
 const server = http.createServer(async (req, res) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    sendJson(res, 200, {})
+    sendJson(res, 200, {}, req)
     return
   }
 
   // Rate limiting
   const clientIp = req.socket.remoteAddress || 'unknown'
   if (!checkRateLimit(clientIp)) {
-    sendJson(res, 429, { message: 'Too many requests. Please try again later.' })
+    sendJson(res, 429, { message: 'Too many requests. Please try again later.' }, req)
     return
   }
 
@@ -408,33 +484,51 @@ const server = http.createServer(async (req, res) => {
       const filtered = brand
         ? rewardCatalog.filter((r) => r.brand.toLowerCase() === brand.toLowerCase())
         : rewardCatalog
-      sendJson(res, 200, { rewards: filtered })
+      sendJson(res, 200, { rewards: filtered }, req)
       return
     }
 
     // ─── POST /claim ───
     if (req.method === 'POST' && url.pathname === '/claim') {
       const body = await parseBody(req)
-      const { walletAddress, brand, tokenAmount, nonce } = body
+      const { walletAddress, brand, nonce, signature, expiry } = body
 
-      if (!walletAddress || !brand || !tokenAmount) {
-        sendJson(res, 400, { message: 'Missing required fields: walletAddress, brand, tokenAmount' })
+      if (!walletAddress || !brand || !nonce) {
+        sendJson(res, 400, { message: 'Missing required fields: walletAddress, brand, nonce' }, req)
         return
       }
 
       if (!isValidSolanaAddress(walletAddress)) {
-        sendJson(res, 400, { message: 'Invalid wallet address format' })
+        sendJson(res, 400, { message: 'Invalid wallet address format' }, req)
         return
       }
 
-      // Anti-replay check
-      if (nonce) {
-        if (usedNonces.has(nonce)) {
-          sendJson(res, 409, { message: 'This QR code has already been claimed' })
+      // HMAC validation: QR code must be signed by the server
+      if (HMAC_SECRET) {
+        if (!signature) {
+          sendJson(res, 403, { message: 'Missing QR signature' }, req)
           return
         }
-        usedNonces.add(nonce)
+        const payload = `${nonce}:${brand}:${expiry || ''}`
+        const expected = crypto.createHmac('sha256', HMAC_SECRET).update(payload).digest('hex')
+        if (!crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(expected, 'hex'))) {
+          sendJson(res, 403, { message: 'Invalid QR signature' }, req)
+          return
+        }
+        // Check expiry if provided
+        if (expiry && Date.now() > Number(expiry)) {
+          sendJson(res, 410, { message: 'QR code has expired' }, req)
+          return
+        }
       }
+
+      // Anti-replay check (nonce is required)
+      if (usedNonces.has(nonce)) {
+        sendJson(res, 409, { message: 'This QR code has already been claimed' }, req)
+        return
+      }
+      usedNonces.add(nonce)
+      persistNonces()
 
       // Update streak
       const { streak, milestoneReached, milestoneBonus } = updateStreak(walletAddress)
@@ -451,13 +545,13 @@ const server = http.createServer(async (req, res) => {
         persistStreaks()
       }
 
-      // Apply multiplier to token amount
-      const baseAmount = tokenAmount
+      // Server-derived token amount (NOT from client)
+      const brandKey = brand.toLowerCase()
+      const baseAmount = SCAN_REWARD_AMOUNTS[brandKey] ?? SCAN_REWARD_AMOUNTS.bondum
       const multipliedAmount = Math.floor(baseAmount * multiplier)
       const totalAmount = multipliedAmount + milestoneBonus
 
       // Resolve mint for brand
-      const brandKey = brand.toLowerCase()
       const mintInfo = BRAND_MINTS[brandKey] || BRAND_MINTS.bondum
 
       // Transfer tokens from treasury to user
@@ -480,7 +574,7 @@ const server = http.createServer(async (req, res) => {
         currentStreak: streak.currentStreak,
         milestoneReached,
         milestoneBonus,
-      })
+      }, req)
       return
     }
 
@@ -490,22 +584,22 @@ const server = http.createServer(async (req, res) => {
       const { walletAddress, rewardId } = body
 
       if (!walletAddress || !rewardId) {
-        sendJson(res, 400, { message: 'Missing required fields: walletAddress, rewardId' })
+        sendJson(res, 400, { message: 'Missing required fields: walletAddress, rewardId' }, req)
         return
       }
 
       if (!isValidSolanaAddress(walletAddress)) {
-        sendJson(res, 400, { message: 'Invalid wallet address format' })
+        sendJson(res, 400, { message: 'Invalid wallet address format' }, req)
         return
       }
 
       const reward = rewardCatalog.find((r) => r.id === rewardId)
       if (!reward) {
-        sendJson(res, 404, { message: 'Reward not found' })
+        sendJson(res, 404, { message: 'Reward not found' }, req)
         return
       }
       if (reward.available <= 0) {
-        sendJson(res, 410, { message: 'Reward is no longer available' })
+        sendJson(res, 410, { message: 'Reward is no longer available' }, req)
         return
       }
 
@@ -517,7 +611,7 @@ const server = http.createServer(async (req, res) => {
       const userAta = findAta(userPubkey, paymentMint.mint)
       const userAtaInfo = await connection.getAccountInfo(userAta)
       if (!userAtaInfo) {
-        sendJson(res, 400, { message: 'No BONDUM token account found for this wallet' })
+        sendJson(res, 400, { message: 'No BONDUM token account found for this wallet' }, req)
         return
       }
 
@@ -551,7 +645,7 @@ const server = http.createServer(async (req, res) => {
         rewardId,
         cost: reward.cost,
         lastValidBlockHeight,
-      })
+      }, req)
       return
     }
 
@@ -571,7 +665,7 @@ const server = http.createServer(async (req, res) => {
         const reward = targetRewardId ? rewardCatalog.find((r) => r.id === targetRewardId) : null
         if (reward) {
           if (reward.available <= 0) {
-            sendJson(res, 410, { message: 'Reward is no longer available' })
+            sendJson(res, 410, { message: 'Reward is no longer available' }, req)
             return
           }
           reward.available--
@@ -586,23 +680,23 @@ const server = http.createServer(async (req, res) => {
           txSignature,
           rewardId: targetRewardId,
           message: reward ? `Reward "${reward.title}" redeemed on-chain` : 'Transaction confirmed',
-        })
+        }, req)
         return
       }
 
       // Legacy flow (backward compatible): server-side redemption
       if (!walletAddress || !rewardId) {
-        sendJson(res, 400, { message: 'Missing required fields: signedTransaction or (walletAddress + rewardId)' })
+        sendJson(res, 400, { message: 'Missing required fields: signedTransaction or (walletAddress + rewardId)' }, req)
         return
       }
 
       const reward = rewardCatalog.find((r) => r.id === rewardId)
       if (!reward) {
-        sendJson(res, 404, { message: 'Reward not found' })
+        sendJson(res, 404, { message: 'Reward not found' }, req)
         return
       }
       if (reward.available <= 0) {
-        sendJson(res, 410, { message: 'Reward is no longer available' })
+        sendJson(res, 410, { message: 'Reward is no longer available' }, req)
         return
       }
 
@@ -623,7 +717,7 @@ const server = http.createServer(async (req, res) => {
           txSignature,
           rewardId,
           message: `${(reward as any).tokenAmount} tokens sent to ${walletAddress.slice(0, 8)}...`,
-        })
+        }, req)
         return
       }
 
@@ -635,7 +729,7 @@ const server = http.createServer(async (req, res) => {
         rewardId,
         requires2Step: true,
         message: `Reward "${reward.title}" redeemed successfully`,
-      })
+      }, req)
       return
     }
 
@@ -643,7 +737,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname.startsWith('/streak/')) {
       const walletAddress = url.pathname.split('/')[2]
       if (!walletAddress) {
-        sendJson(res, 400, { message: 'Missing wallet address' })
+        sendJson(res, 400, { message: 'Missing wallet address' }, req)
         return
       }
 
@@ -657,7 +751,7 @@ const server = http.createServer(async (req, res) => {
         totalScans: streak.totalScans,
         multiplier,
         nextMilestone,
-      })
+      }, req)
       return
     }
 
@@ -671,9 +765,9 @@ const server = http.createServer(async (req, res) => {
         const dateKey = getDateString(new Date())
         const key = `${dateKey}:${challenge.type}`
         const progress = streak.challengeProgress?.[key] || 0
-        sendJson(res, 200, { ...challenge, progress, completed: progress >= challenge.target })
+        sendJson(res, 200, { ...challenge, progress, completed: progress >= challenge.target }, req)
       } else {
-        sendJson(res, 200, { ...challenge, progress: 0, completed: false })
+        sendJson(res, 200, { ...challenge, progress: 0, completed: false }, req)
       }
       return
     }
@@ -684,7 +778,7 @@ const server = http.createServer(async (req, res) => {
       const { walletAddress, streak, balance } = body
 
       if (!walletAddress) {
-        sendJson(res, 400, { message: 'Missing walletAddress' })
+        sendJson(res, 400, { message: 'Missing walletAddress' }, req)
         return
       }
 
@@ -695,15 +789,16 @@ const server = http.createServer(async (req, res) => {
         balance: balance ?? 0,
       }, rewardCatalog)
 
-      sendJson(res, 200, result)
+      sendJson(res, 200, result, req)
       return
     }
 
     // ─── 404 ───
-    sendJson(res, 404, { message: 'Not found' })
+    sendJson(res, 404, { message: 'Not found' }, req)
   } catch (err: any) {
     console.error('Request error:', err)
-    sendJson(res, 500, { message: err?.message || 'Internal server error' })
+    // Sanitize error messages — don't leak internals to clients
+    sendJson(res, 500, { message: 'Internal server error' }, req)
   }
 })
 

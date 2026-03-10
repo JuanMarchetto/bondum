@@ -123,6 +123,7 @@ export default function ScanScreen() {
             tokenAmount: parsedReward.tokenAmount,
             nonce: parsedReward.nonce,
             signature: parsedReward.sig,
+            expiry: parsedReward.exp,
           })
         }
         setTxSignature(result.txSignature)

@@ -93,9 +93,10 @@ export async function claimScanReward(params: {
   brand: string
   type: string
   value: string
-  tokenAmount: number
+  tokenAmount?: number
   nonce?: string
   signature?: string
+  expiry?: number
 }): Promise<ClaimResult> {
   if (params.walletAddress === DEMO_ADDRESS) {
     await new Promise(r => setTimeout(r, 1500))
