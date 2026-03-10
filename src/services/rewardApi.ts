@@ -416,7 +416,7 @@ export async function fetchSmartRecommendation(params: {
 
 // ─── Offline Fallback Catalog ────────────────────────────────────────────────
 
-function getOfflineCatalog(brand?: string, language: string = 'en'): RewardCatalogItem[] {
+export function getOfflineCatalog(brand?: string, language: string = 'en'): RewardCatalogItem[] {
   const isEs = language === 'es'
 
   const bondumRewards: RewardCatalogItem[] = [

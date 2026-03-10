@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchRewards, type RewardCatalogItem } from '../services/rewardApi'
+import { fetchRewards, getOfflineCatalog, type RewardCatalogItem } from '../services/rewardApi'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useAuth } from '../contexts/AuthContext'
 
 /**
  * Hook to fetch the reward catalog for a specific brand or all brands.
  * Falls back to bundled catalog when the API is unreachable.
  */
 export function useRewards(brand?: string) {
+  const { provider } = useAuth()
+  const isDemo = provider === 'guest'
   const { language } = useLanguage()
   const {
     data: rewards = [],
@@ -18,7 +21,12 @@ export function useRewards(brand?: string) {
     queryFn: () => fetchRewards(brand, language),
     staleTime: 60_000,
     refetchOnMount: 'always',
+    enabled: !isDemo,
   })
+
+  if (isDemo) {
+    return { rewards: getOfflineCatalog(brand, language), isLoading: false, error: null, refetch: async () => ({} as any) }
+  }
 
   return { rewards, isLoading, error, refetch }
 }

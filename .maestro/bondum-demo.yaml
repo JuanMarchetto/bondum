@@ -1,44 +1,30 @@
 # Bondum Full Demo Recording
 #
-# Records a comprehensive walkthrough of the Bondum loyalty wallet app.
-# Guest mode provides fake balances, NFTs, streak, and mock transactions.
+# Drives the app through all screens for demo recording.
+# Assumes app is already on the welcome screen (no clearState needed).
+# Run adb screenrecord in parallel to capture the video.
 #
 # Prerequisites:
 # - Android device connected via ADB
-# - App installed (xyz.bondum.mobile)
+# - App on welcome screen
 # - Dev server running (npx expo start)
-# - No backend needed (guest mode uses mock data)
-#
-# Run:   maestro test .maestro/bondum-demo.yaml
-# Record: maestro record .maestro/bondum-demo.yaml
 
 appId: xyz.bondum.mobile
 ---
 
 # ==========================================
-# LAUNCH + WELCOME SCREEN
+# WELCOME SCREEN
 # ==========================================
 
-- launchApp:
-    clearState: true
-
-- swipe:
-    direction: DOWN
-    duration: 100
-
-# Dev client launcher appears after clearState — tap the server URL to connect
-- extendedWaitUntil:
-    visible: "localhost"
-    timeout: 10000
-
-- tapOn: "localhost"
-
-# Wait for bundle to load and welcome screen to appear
+# Skip launchApp — app is already on the welcome screen (dev client)
 - extendedWaitUntil:
     visible: "Continue as Guest"
-    timeout: 120000
+    timeout: 30000
 
-- takeScreenshot: 01-welcome
+# Pause to show welcome screen
+- swipe:
+    direction: DOWN
+    duration: 2000
 
 # ==========================================
 # LOGIN AS GUEST
@@ -48,9 +34,12 @@ appId: xyz.bondum.mobile
 
 - extendedWaitUntil:
     visible: "Home"
-    timeout: 10000
+    timeout: 15000
 
-- takeScreenshot: 02-home-dashboard
+# Pause to show home dashboard
+- swipe:
+    direction: DOWN
+    duration: 2000
 
 # ==========================================
 # EXPLORE HOME SCREEN
@@ -59,28 +48,32 @@ appId: xyz.bondum.mobile
 # Scroll down to show streak + daily challenge
 - swipe:
     direction: UP
-    duration: 500
+    duration: 800
 
-- takeScreenshot: 03-home-streak-challenge
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # Scroll more to show featured rewards
 - swipe:
     direction: UP
-    duration: 500
+    duration: 800
 
-- takeScreenshot: 04-home-featured-rewards
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # Scroll back to top
 - swipe:
     direction: DOWN
-    duration: 500
+    duration: 800
 
 - swipe:
     direction: DOWN
-    duration: 500
+    duration: 1500
 
 # ==========================================
-# SCAN QR CODE (auto-trigger in guest mode)
+# SCAN QR CODE
 # ==========================================
 
 - tapOn: "Scan"
@@ -90,17 +83,23 @@ appId: xyz.bondum.mobile
     visible: "Claim"
     timeout: 10000
 
-- takeScreenshot: 06-reward-preview
+# Pause to show reward preview
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # Claim the PaniCafe box reward
 - tapOn: "Claim"
 
-# Wait for success confirmation
+# Wait for success confirmation (look for button that only appears after claim)
 - extendedWaitUntil:
-    visible: "Reward Claimed"
-    timeout: 10000
+    visible: "Scan Another"
+    timeout: 15000
 
-- takeScreenshot: 07-reward-claimed
+# Pause to show success
+- swipe:
+    direction: DOWN
+    duration: 2000
 
 # Navigate to rewards via Done button
 - tapOn: "Done"
@@ -113,7 +112,10 @@ appId: xyz.bondum.mobile
     visible: "Affiliated Brands"
     timeout: 5000
 
-- takeScreenshot: 08-rewards-brands
+# Pause to show brands
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # Open PaniCafe rewards
 - tapOn: "Panicafe Rewards"
@@ -122,62 +124,48 @@ appId: xyz.bondum.mobile
     visible: "Reward"
     timeout: 5000
 
-- takeScreenshot: 09-panicafe-rewards
+# Pause to show reward list
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # Scroll through reward list
 - swipe:
     direction: UP
-    duration: 500
-
-- takeScreenshot: 10-panicafe-scrolled
+    duration: 800
 
 - swipe:
     direction: DOWN
-    duration: 500
+    duration: 1000
 
-# Select "Free Coffee with any pastry purchase" (pc-1, cost 1000)
-- tapOn: "Free Coffee with any pastry purchase"
+- swipe:
+    direction: DOWN
+    duration: 800
 
-- extendedWaitUntil:
-    visible: "Claim reward"
-    timeout: 5000
+# Scroll back up to show brands
+- swipe:
+    direction: DOWN
+    duration: 800
 
-- takeScreenshot: 11-coupon-detail
-
-# Claim the coupon
-- tapOn: "Claim reward"
-
-# Wait for redemption success
-- extendedWaitUntil:
-    visible:
-      text: "Won"
-    timeout: 10000
-
-- takeScreenshot: 12-coupon-claimed
-
-# Back to rewards
-- tapOn: "Back to Rewards"
+# Pause on reward list
+- swipe:
+    direction: DOWN
+    duration: 1500
 
 # ==========================================
-# BACK TO BRANDS, THEN TRADE TAB
+# TRADE TAB
 # ==========================================
 
-- extendedWaitUntil:
-    visible: "Panicafe Rewards"
-    timeout: 3000
-
-- tapOn:
-    text: "Back to Brands"
-    optional: true
-
-# Switch to Trade tab
 - tapOn: "Trade"
 
 - extendedWaitUntil:
     visible: "SWAP"
     timeout: 5000
 
-- takeScreenshot: 13-trade-swap
+# Pause to show trade screen
+- swipe:
+    direction: DOWN
+    duration: 2000
 
 # ==========================================
 # WALLET / ASSETS TAB
@@ -189,17 +177,25 @@ appId: xyz.bondum.mobile
     visible: "YOUR"
     timeout: 5000
 
-- takeScreenshot: 14-wallet-nfts
-
-- swipe:
-    direction: UP
-    duration: 500
-
-- takeScreenshot: 15-wallet-tokens
-
+# Pause to show NFTs
 - swipe:
     direction: DOWN
-    duration: 500
+    duration: 1500
+
+# Scroll to show tokens
+- swipe:
+    direction: UP
+    duration: 800
+
+# Pause on tokens
+- swipe:
+    direction: DOWN
+    duration: 1500
+
+# Scroll back up
+- swipe:
+    direction: DOWN
+    duration: 800
 
 # ==========================================
 # PROFILE TAB
@@ -211,17 +207,24 @@ appId: xyz.bondum.mobile
     visible: "WALLET"
     timeout: 5000
 
-- takeScreenshot: 16-profile
+# Pause to show profile
+- swipe:
+    direction: DOWN
+    duration: 1500
 
+# Scroll to show wallet security
 - swipe:
     direction: UP
-    duration: 500
-
-- takeScreenshot: 17-profile-security
+    duration: 800
 
 - swipe:
     direction: DOWN
-    duration: 500
+    duration: 1500
+
+# Scroll back
+- swipe:
+    direction: DOWN
+    duration: 800
 
 # ==========================================
 # BACK TO HOME - FINAL SHOT
@@ -233,4 +236,7 @@ appId: xyz.bondum.mobile
     visible: "Scan"
     timeout: 3000
 
-- takeScreenshot: 18-final-home
+# Final pause on home
+- swipe:
+    direction: DOWN
+    duration: 3000
