@@ -14,26 +14,6 @@ A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM
 
 **Already live** with [PaniCafe](https://panicafe.com.ar), serving **~8,000 real users** with on-chain reward transactions in production.
 
-## Demo
-
-<p align="center">
-  <a href="https://github.com/JuanMarchetto/bondum/releases/download/v1.1.0/bondum-demo.mp4">
-    <img src="screenshots/02-home-top.png" alt="Watch Demo Video" width="200" />
-  </a>
-</p>
-
-<p align="center">
-  <b><a href="https://github.com/JuanMarchetto/bondum/releases/download/v1.1.0/bondum-demo.mp4">▶ Watch Full Demo Video</a></b>
-</p>
-
-<p align="center">
-  <img src="screenshots/01-welcome.png" width="150" />
-  <img src="screenshots/02-home-top.png" width="150" />
-  <img src="screenshots/04-rewards.png" width="150" />
-  <img src="screenshots/07-assets.png" width="150" />
-  <img src="screenshots/09-profile.png" width="150" />
-</p>
-
 ## Download
 
 | Platform | Link |
@@ -274,3 +254,4 @@ MIT -- See [LICENSE](LICENSE)
 - Website: [bondum.xyz](https://bondum.xyz)
 - Solana dApp Store: [dappstore.app](https://dappstore.app)
 - PaniCafe: [panicafe.com.ar](https://panicafe.com.ar)
+- [Demo video](https://github.com/JuanMarchetto/bondum/releases/download/v1.1.0/bondum-demo.mp4)
