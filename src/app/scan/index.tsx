@@ -11,7 +11,7 @@ import { Button, ChevronBack, FadeIn, ScalePulse } from '../../components/ui'
 import { TransactionConfirmation } from '../../components/TransactionConfirmation'
 import { parseQrCode, type ParsedQrReward } from '../../services/qrParser'
 import { addClaimedReward } from '../../services/rewardStorage'
-import { claimScanReward, claimPanicafeBox } from '../../services/rewardApi'
+import { claimScanReward, claimPanicafeBox, type ClaimResult } from '../../services/rewardApi'
 import { isPanicafeReward } from '../../utils/panicafeCoupons'
 import { useStreak } from '../../hooks/useStreak'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -129,8 +129,8 @@ export default function ScanScreen() {
         setTxSignature(result.txSignature)
         if (result.tokenAmount) setClaimedAmount(result.tokenAmount)
 
-        const r = result as any
-        if (r.multiplier) {
+        const r = result as ClaimResult & { multiplier?: number; streakBonus?: number; currentStreak?: number; milestoneReached?: string | null; milestoneBonus?: number }
+        if (r.multiplier && typeof r.multiplier === 'number') {
           setStreakInfo({
             multiplier: r.multiplier,
             streakBonus: r.streakBonus || 0,
@@ -197,7 +197,7 @@ export default function ScanScreen() {
   // ─── Demo: show scanner UI without camera in guest mode ─────────────
   if (provider === 'guest' && !parsedReward && !rewardClaimed) {
     return (
-      <View className="flex-1 bg-gray-50">
+      <View className="flex-1 bg-gray-50" testID="scan-screen">
         <ScanHeader />
         <View className="flex-1 px-5 pt-4">
           <Text className="text-center mb-4">
@@ -253,7 +253,7 @@ export default function ScanScreen() {
   // ─── Reward preview / claimed state ──────────────────────────────────────
   if (parsedReward) {
     return (
-      <View className="flex-1 bg-gray-50">
+      <View testID="scan-screen" className="flex-1 bg-gray-50">
         <ScanHeader />
 
         <View className="flex-1 px-5" style={{ paddingTop: 16 }}>
@@ -262,6 +262,7 @@ export default function ScanScreen() {
             <View className="flex-1 justify-center">
               <View
                 className="bg-white rounded-3xl"
+                testID="scan-claimed-card"
                 style={{ padding: 20, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
               >
                 {txSignature ? (
@@ -305,12 +306,12 @@ export default function ScanScreen() {
                     </Text>
                     <View className="flex-row gap-3" style={{ width: '100%', paddingHorizontal: 8 }}>
                       <View style={{ flex: 1 }}>
-                        <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
+                        <Button variant="outline" onPress={resetScanner} testID="scan-another-btn" style={{ width: '100%', minHeight: 48 }}>
                           <Text style={{ fontSize: 16 }}>{t('scan.scanAnother')}</Text>
                         </Button>
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')} style={{ width: '100%', minHeight: 48 }}>
+                        <Button variant="primary" onPress={() => router.replace('/(tabs)/(rewards)')} testID="scan-view-rewards-btn" style={{ width: '100%', minHeight: 48 }}>
                           <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('scan.viewRewards')}</Text>
                         </Button>
                       </View>
@@ -325,6 +326,7 @@ export default function ScanScreen() {
               <FadeIn>
               <View
                 className="bg-white rounded-3xl items-center"
+                testID="scan-reward-preview"
                 style={{ padding: 24, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } }}
               >
                 {/* Brand badge */}
@@ -379,12 +381,12 @@ export default function ScanScreen() {
                 {/* Action buttons */}
                 <View className="flex-row gap-3" style={{ width: '100%' }}>
                   <View style={{ flex: 1 }}>
-                    <Button variant="outline" onPress={resetScanner} style={{ width: '100%', minHeight: 48 }}>
+                    <Button variant="outline" onPress={resetScanner} testID="scan-cancel-btn" style={{ width: '100%', minHeight: 48 }}>
                       <Text style={{ fontSize: 16 }}>{t('common.cancel')}</Text>
                     </Button>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Button variant="primary" onPress={handleClaimReward} loading={isClaiming} style={{ width: '100%', minHeight: 48 }}>
+                    <Button variant="primary" onPress={handleClaimReward} loading={isClaiming} testID="scan-claim-btn" style={{ width: '100%', minHeight: 48 }}>
                       <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('common.claim')}</Text>
                     </Button>
                   </View>
@@ -402,7 +404,7 @@ export default function ScanScreen() {
 
   // ─── Scanner view ────────────────────────────────────────────────────────
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50" testID="scan-screen">
       <ScanHeader />
 
       <View className="flex-1 px-5 pt-4">

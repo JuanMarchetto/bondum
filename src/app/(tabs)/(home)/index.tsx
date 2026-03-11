@@ -58,22 +58,25 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts(), refetchRewards()])
-    setRefreshing(false)
+    try {
+      await Promise.all([refetchBalance(), refetchTokens(), refetchNfts(), refetchRewards()])
+    } finally {
+      setRefreshing(false)
+    }
   }, [refetchBalance, refetchTokens, refetchNfts, refetchRewards])
 
   const quickActions = [
-    { icon: scanIcon, label: t('home.scan'), onPress: () => router.push('/scan') },
-    { icon: sendIcon, label: t('home.send'), onPress: () => router.push('/(tabs)/(home)/send') },
-    { icon: boxesIcon, label: t('home.boxes'), onPress: () => router.push('/(tabs)/(rewards)') },
-    { icon: settingsIcon, label: t('home.settings'), onPress: () => router.push('/(tabs)/(home)/settings') },
+    { icon: scanIcon, label: t('home.scan'), onPress: () => router.push('/scan'), testID: 'home-scan-action' },
+    { icon: sendIcon, label: t('home.send'), onPress: () => router.push('/(tabs)/(home)/send'), testID: 'home-send-action' },
+    { icon: boxesIcon, label: t('home.boxes'), onPress: () => router.push('/(tabs)/(rewards)'), testID: 'home-boxes-action' },
+    { icon: settingsIcon, label: t('home.settings'), onPress: () => router.push('/(tabs)/(home)/settings'), testID: 'home-settings-action' },
   ]
 
-  // Featured rewards from API (show first 2)
+  // Featured PaniCafe rewards (show first 2)
   const featuredRewards = rewards.slice(0, 2)
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" testID="home-screen">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 8, backgroundColor: colors.background.header }}>
         {/* Logo */}
@@ -98,7 +101,7 @@ export default function HomeScreen() {
             {isBalanceLoading ? (
               <Skeleton width={80} height={20} borderRadius={6} />
             ) : (
-              <Text className="text-white font-bold" style={{ fontSize: 18 }}>{bondumBalance.toLocaleString()} $BONDUM</Text>
+              <Text className="text-white font-bold" style={{ fontSize: 18 }} testID="home-balance">{bondumBalance.toLocaleString()} $BONDUM</Text>
             )}
           </View>
           {!isTokensLoading && (tokens.find(t => t.symbol === 'USDC')?.balance || 0) > 0 && (
@@ -147,16 +150,17 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />}>
+      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B5CF6" />} testID="home-scroll">
         {/* Quick Actions */}
         <FadeIn delay={0}>
-          <View className="flex-row justify-around mb-4">
+          <View className="flex-row justify-around mb-4" testID="home-quick-actions">
             {quickActions.map((action) => (
               <IconButton
                 key={action.label}
                 icon={<Image source={action.icon} style={{ width: 24, height: 24 }} resizeMode="contain" />}
                 label={action.label}
                 onPress={action.onPress}
+                testID={action.testID}
               />
             ))}
           </View>
@@ -164,7 +168,7 @@ export default function HomeScreen() {
 
         {/* Streak Banner with Multiplier */}
         <FadeIn delay={100}>
-          <View className="mx-2 mb-4 bg-violet-50 rounded-2xl" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }}>
+          <View className="mx-2 mb-4 bg-violet-50 rounded-2xl" style={{ padding: 16, borderWidth: 1, borderColor: '#ddd6fe' }} testID="home-streak-banner">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-row items-center gap-3">
                 <View className="bg-violet-500 rounded-xl items-center justify-center" style={{ width: 44, height: 44 }}>
@@ -227,7 +231,7 @@ export default function HomeScreen() {
         {/* Daily Challenge */}
         {dailyChallenge && (
           <FadeIn delay={300}>
-            <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }}>
+            <View className="mx-2 mb-4 bg-amber-50 rounded-2xl flex-row items-center justify-between" style={{ padding: 16, borderWidth: 1, borderColor: '#fde68a' }} testID="home-daily-challenge">
               <View className="flex-row items-center gap-3 flex-1">
                 <View className="bg-amber-400 rounded-xl items-center justify-center" style={{ width: 40, height: 40 }}>
                   <Text style={{ fontSize: 18 }}>{'\uD83C\uDFAF'}</Text>
@@ -247,7 +251,7 @@ export default function HomeScreen() {
         {/* Rewards Section */}
         <FadeIn delay={400}>
           <View className="mb-4">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-2 px-2" testID="home-featured-rewards">
               {featuredRewards.map((reward) => (
                 <View key={reward.id} className="mr-3 w-[75%] bg-gray-100 rounded-3xl" style={{ borderWidth: 1, borderColor: '#9b9db5', padding: 18.52 }}>
                   <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>

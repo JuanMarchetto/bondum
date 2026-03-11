@@ -26,12 +26,15 @@ export default function AssetsScreen() {
   const { t } = useLanguage()
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
-    setRefreshing(false)
+    try {
+      await Promise.all([refetchBalance(), refetchTokens(), refetchNfts()])
+    } finally {
+      setRefreshing(false)
+    }
   }, [refetchBalance, refetchTokens, refetchNfts])
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-violet-50" testID="assets-screen">
       <Header userName={user?.username || 'User'} />
 
       {/* Content */}
@@ -44,7 +47,7 @@ export default function AssetsScreen() {
 
         {/* NFT Collection Card — bigger version */}
         <FadeIn delay={0}>
-        <Card className="mb-6" padding="none" style={{ padding: 24 }}>
+        <Card className="mb-6" padding="none" style={{ padding: 24 }} testID="assets-nft-card">
           <View className="flex-row items-start justify-between mb-4">
             <View className="flex-1">
               <Text className="text-lg leading-tight mb-1">
@@ -111,6 +114,7 @@ export default function AssetsScreen() {
             onPress={() => router.push('/(tabs)/(trade)')}
             className="flex-1 bg-violet-500 rounded-2xl items-center justify-center flex-row gap-2"
             style={{ paddingVertical: 14 }}
+            testID="assets-swap-btn"
           >
             <Ionicons name="swap-horizontal" size={20} color="white" />
             <Text className="text-white font-bold text-base">{t('common.swap')}</Text>
@@ -119,6 +123,7 @@ export default function AssetsScreen() {
             onPress={() => router.push('/(tabs)/(home)/send')}
             className="flex-1 bg-gray-100 rounded-2xl items-center justify-center flex-row gap-2"
             style={{ paddingVertical: 14, borderWidth: 1, borderColor: '#E5E5E5' }}
+            testID="assets-send-btn"
           >
             <Ionicons name="paper-plane-outline" size={20} color="#8B5CF6" />
             <Text className="text-violet-500 font-bold text-base">{t('common.send')}</Text>
@@ -129,7 +134,7 @@ export default function AssetsScreen() {
         <FadeIn delay={100}>
         <Text className="text-gray-500 text-sm font-semibold mb-3">{t('assets.tokens')}</Text>
 
-        <View className="mb-8">
+        <View className="mb-8" testID="assets-token-list">
           {isTokensLoading ? (
             <View style={{ gap: 12 }}>
               {[0, 1, 2, 3].map((i) => (

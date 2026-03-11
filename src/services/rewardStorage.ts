@@ -15,7 +15,8 @@ export async function getClaimedRewards(): Promise<ClaimedReward[]> {
   try {
     const data = await SecureStore.getItemAsync(CLAIMED_REWARDS_KEY)
     return data ? JSON.parse(data) : []
-  } catch {
+  } catch (error) {
+    console.warn('[rewardStorage] getClaimedRewards failed:', error)
     return []
   }
 }

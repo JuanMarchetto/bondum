@@ -6,6 +6,7 @@ interface CardProps {
   className?: string
   padding?: 'none' | 'sm' | 'md' | 'lg'
   style?: ViewStyle
+  testID?: string
 }
 
 const paddingClasses = {
@@ -15,9 +16,10 @@ const paddingClasses = {
   lg: 'p-6',
 }
 
-export function Card({ children, className = '', padding = 'md', style }: CardProps) {
+export function Card({ children, className = '', padding = 'md', style, testID }: CardProps) {
   return (
     <View
+      testID={testID}
       className={`
         bg-white rounded-2xl shadow-sm
         ${paddingClasses[padding]}

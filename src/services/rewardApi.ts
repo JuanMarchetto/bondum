@@ -77,8 +77,8 @@ export async function fetchRewards(brand?: string, language: string = 'en'): Pro
     if (!response.ok) throw new Error('Failed to fetch rewards')
     const data = await response.json()
     return data.rewards
-  } catch {
-    // Fallback to bundled catalog when API is unreachable
+  } catch (error) {
+    console.warn('[rewardApi] fetchRewards failed, using offline catalog:', error)
     return getOfflineCatalog(brand, language)
   }
 }
@@ -290,7 +290,8 @@ export async function getReferralStats(walletAddress: string): Promise<{
     const response = await fetch(`${REWARD_API_URL}/referral/${walletAddress}`)
     if (!response.ok) throw new Error()
     return response.json()
-  } catch {
+  } catch (error) {
+    console.warn('[rewardApi] getReferralStats failed:', error)
     return {
       referralCode: walletAddress.slice(0, 8),
       referralCount: 0,
@@ -349,7 +350,7 @@ export async function submitSignedRedemption(params: {
 /**
  * Fetches server-side streak data for a wallet.
  */
-export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
+export async function fetchStreak(walletAddress: string): Promise<StreakInfo | null> {
   if (walletAddress === DEMO_ADDRESS) {
     return { currentStreak: 7, longestStreak: 12, totalScans: 23, multiplier: 1.7, nextMilestone: { days: 14, bonus: 500, label: '2 Weeks' } }
   }
@@ -358,8 +359,9 @@ export async function fetchStreak(walletAddress: string): Promise<StreakInfo> {
     const response = await fetch(`${REWARD_API_URL}/streak/${walletAddress}`)
     if (!response.ok) throw new Error()
     return response.json()
-  } catch {
-    return { currentStreak: 0, longestStreak: 0, totalScans: 0, multiplier: 1.0, nextMilestone: null }
+  } catch (error) {
+    console.warn('[rewardApi] fetchStreak failed, falling back to local data:', error)
+    return null
   }
 }
 
@@ -371,7 +373,8 @@ export async function fetchDailyChallenge(language: string = 'en'): Promise<Dail
     const response = await fetch(`${REWARD_API_URL}/daily-challenge`)
     if (!response.ok) throw new Error()
     return response.json()
-  } catch {
+  } catch (error) {
+    console.warn('[rewardApi] fetchDailyChallenge failed:', error)
     return { type: 'scan', description: language === 'es' ? 'Escaneá un código QR hoy' : 'Scan a QR code today', reward: 100, target: 1, dayOfYear: 0 }
   }
 }
@@ -402,7 +405,8 @@ export async function fetchSmartRecommendation(params: {
     })
     if (!response.ok) throw new Error()
     return response.json()
-  } catch {
+  } catch (error) {
+    console.warn('[rewardApi] fetchSmartRecommendation failed:', error)
     const isEs = (params.language || 'en') === 'es'
     return {
       recommendation: isEs

@@ -30,14 +30,18 @@ export default function ProfileScreen() {
 
   const handleCopyAddress = async () => {
     if (!address) return
-    await Clipboard.setStringAsync(address)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await Clipboard.setStringAsync(address)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard access denied — silently ignore
+    }
   }
 
   return (
-    <View className="flex-1 bg-white">
-      {/* Header — same as Home */}
+    <View className="flex-1 bg-white" testID="profile-screen">
+      {/* Header */}
       <View className="px-5 pb-2.5 rounded-b-3xl" style={{ paddingTop: insets.top + 32, backgroundColor: colors.background.header }}>
         {/* Logo */}
         <View className="flex-row items-center justify-between" style={{ marginBottom: 36 }}>
@@ -90,6 +94,7 @@ export default function ProfileScreen() {
           onPress={handleCopyAddress}
           className="bg-gray-100 rounded-2xl flex-row items-center justify-between"
           style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}
+          testID="profile-copy-btn"
         >
           <View className="flex-1 mr-3">
             <Text className="text-gray-900 font-bold text-lg mb-1">{truncatedAddress}</Text>
@@ -107,7 +112,7 @@ export default function ProfileScreen() {
         {/* Wallet Recovery / Security */}
         <Text className="text-gray-500 text-sm font-semibold mb-2 mt-6">{t('profile.walletSecurity')}</Text>
         {provider === 'privy' ? (
-          <View className="bg-green-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#bbf7d0' }}>
+          <View className="bg-green-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#bbf7d0' }} testID="profile-security">
             <Text className="text-green-700 font-bold text-lg mb-2">{t('profile.embeddedWallet')}</Text>
             <Text className="text-green-600 text-sm mb-3">
               {t('profile.embeddedWalletDesc')}
@@ -118,7 +123,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         ) : provider === 'solana' ? (
-          <View className="bg-amber-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#fde68a' }}>
+          <View className="bg-amber-50 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#fde68a' }} testID="profile-security">
             <Text className="text-amber-700 font-bold text-lg mb-2">{t('profile.externalWallet')}</Text>
             <Text className="text-amber-600 text-sm mb-3">
               {t('profile.externalWalletDesc')}
@@ -131,7 +136,7 @@ export default function ProfileScreen() {
             </View>
           </View>
         ) : (
-          <View className="bg-gray-100 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }}>
+          <View className="bg-gray-100 rounded-2xl" style={{ padding: 18, borderWidth: 1, borderColor: '#E5E5E5' }} testID="profile-security">
             <Text className="text-gray-700 font-bold text-lg mb-1">{t('profile.guestMode')}</Text>
             <Text className="text-gray-500 text-sm">{t('profile.guestModeDesc')}</Text>
           </View>

@@ -181,7 +181,7 @@ export default function TradeScreen() {
   }
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-violet-50" testID="trade-screen">
       <Header userName={user?.username || 'User'} />
 
       {/* Swap Card */}
@@ -199,6 +199,7 @@ export default function TradeScreen() {
               <Pressable
                 onPress={() => setShowTokenPicker('from')}
                 className="flex-row items-center gap-2"
+                testID="trade-from-picker"
               >
                 {TOKEN_ICONS[fromToken].isSvg ? (
                   <ExpoImage source={TOKEN_ICONS[fromToken].source} style={{ width: 24, height: 24 }} contentFit="contain" />
@@ -233,6 +234,7 @@ export default function TradeScreen() {
               }}
               keyboardType="numeric"
               editable={!isSwapping}
+              testID="trade-amount-input"
             />
           </View>
 
@@ -242,6 +244,7 @@ export default function TradeScreen() {
               onPress={handleSwapTokens}
               className="bg-violet-100 w-10 h-10 rounded-full items-center justify-center"
               disabled={isSwapping}
+              testID="trade-swap-direction"
             >
               <Image source={swapArrows} style={{ width: 24, height: 24 }} resizeMode="contain" />
             </Pressable>
@@ -262,6 +265,7 @@ export default function TradeScreen() {
               <Pressable
                 onPress={() => setShowTokenPicker('to')}
                 className="flex-row items-center gap-2 flex-shrink-0"
+                testID="trade-to-picker"
               >
                 {TOKEN_ICONS[toToken].isSvg ? (
                   <ExpoImage source={TOKEN_ICONS[toToken].source} style={{ width: 40, height: 40 }} contentFit="contain" />
@@ -313,6 +317,7 @@ export default function TradeScreen() {
               onPress={handleSwap}
               disabled={!quote || isSwapping || isQuoteLoading || !fromAmount || parseFloat(fromAmount) <= 0}
               loading={isSwapping}
+              testID="trade-swap-btn"
             >
               <Text style={{ color: '#FFFFFF', fontSize: 36 }}>{t('trade.swap')}</Text>
             </Button>
@@ -330,7 +335,7 @@ export default function TradeScreen() {
       >
         <View className="flex-1 bg-black/50 justify-end">
           <Pressable className="flex-1" onPress={() => setShowTokenPicker(null)} />
-          <View className="bg-white rounded-t-3xl p-6" style={{ maxHeight: '50%' }}>
+          <View className="bg-white rounded-t-3xl p-6" style={{ maxHeight: '50%' }} testID="trade-token-modal">
             <Text className="text-xl font-bold mb-4">{t('trade.selectToken')}</Text>
             <ScrollView>
               {(Object.keys(TOKENS) as TokenSymbol[]).map((symbol) => {
@@ -341,6 +346,7 @@ export default function TradeScreen() {
                 return (
                   <Pressable
                     key={symbol}
+                    testID={`trade-token-${symbol}`}
                     onPress={() => handleTokenSelect(symbol)}
                     disabled={isDisabled}
                     className={`flex-row items-center p-4 rounded-xl mb-2 ${

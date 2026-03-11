@@ -8,6 +8,7 @@ interface IconButtonProps {
   size?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'outline'
   className?: string
+  testID?: string
 }
 
 const sizeValues = {
@@ -28,9 +29,10 @@ export function IconButton({
   size = 'md',
   variant = 'default',
   className = '',
+  testID,
 }: IconButtonProps) {
   return (
-    <Pressable onPress={onPress} className={`items-center ${className}`}>
+    <Pressable testID={testID} onPress={onPress} className={`items-center ${className}`}>
       <View
         style={{
           width: sizeValues[size],

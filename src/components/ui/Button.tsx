@@ -14,6 +14,7 @@ interface ButtonProps {
   fullWidth?: boolean
   className?: string
   style?: ViewStyle
+  testID?: string
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -52,6 +53,7 @@ export function Button({
   fullWidth = false,
   className = '',
   style,
+  testID,
 }: ButtonProps) {
   const isDisabled = disabled || loading
 
@@ -59,6 +61,7 @@ export function Button({
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
       disabled={isDisabled}
       className={`

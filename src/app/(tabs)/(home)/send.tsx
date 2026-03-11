@@ -48,8 +48,12 @@ export default function SendScreen() {
   const tokenBalance = tokens.find((tk) => tk.symbol === currentToken.symbol)?.balance || 0
 
   const handlePaste = async () => {
-    const text = await Clipboard.getStringAsync()
-    if (text) setRecipient(text)
+    try {
+      const text = await Clipboard.getStringAsync()
+      if (text) setRecipient(text)
+    } catch {
+      // Clipboard access denied
+    }
   }
 
   const handleMax = () => {
@@ -148,11 +152,11 @@ export default function SendScreen() {
   }
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-violet-50" testID="send-screen">
       {/* Header */}
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: colors.background.header }}>
         <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2 -ml-2" hitSlop={12}>
+          <Pressable onPress={() => router.back()} className="p-2 -ml-2" hitSlop={12} testID="send-back-btn">
             <ChevronBack size={24} color="white" />
           </Pressable>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
@@ -178,8 +182,9 @@ export default function SendScreen() {
             onChangeText={setRecipient}
             autoCapitalize="none"
             autoCorrect={false}
+            testID="send-recipient-input"
           />
-          <Pressable onPress={handlePaste} className="ml-2 bg-violet-100 rounded-lg px-3 py-1">
+          <Pressable onPress={handlePaste} className="ml-2 bg-violet-100 rounded-lg px-3 py-1" testID="send-paste-btn">
             <Text className="text-violet-600 font-semibold text-sm">{t('send.paste')}</Text>
           </Pressable>
         </View>
@@ -193,6 +198,7 @@ export default function SendScreen() {
               onPress={() => setSelectedToken(index)}
               className={`rounded-xl px-4 py-2 mr-2 ${index === selectedToken ? 'bg-violet-500' : 'bg-white'}`}
               style={{ borderWidth: 1, borderColor: index === selectedToken ? '#8B5CF6' : '#9b9db5' }}
+              testID={`send-token-${token.symbol}`}
             >
               <Text className={`font-bold ${index === selectedToken ? 'text-white' : 'text-gray-900'}`}>
                 {token.symbol}
@@ -215,8 +221,9 @@ export default function SendScreen() {
               setAmount(formatted)
             }}
             keyboardType="numeric"
+            testID="send-amount-input"
           />
-          <Pressable onPress={handleMax} className="ml-2 bg-violet-100 rounded-lg px-3 py-1">
+          <Pressable onPress={handleMax} className="ml-2 bg-violet-100 rounded-lg px-3 py-1" testID="send-max-btn">
             <Text className="text-violet-600 font-semibold text-sm">{t('send.max')}</Text>
           </Pressable>
         </View>
@@ -233,6 +240,7 @@ export default function SendScreen() {
           loading={isSending}
           disabled={!recipient || !amount || parseFloat(amount) <= 0 || isSending}
           style={{ paddingVertical: 14, borderRadius: 20 }}
+          testID="send-submit-btn"
         >
           <Text style={{ color: '#FFFFFF', fontSize: 32 }}>{t('send.sendToken', { symbol: currentToken.symbol })}</Text>
         </Button>

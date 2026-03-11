@@ -178,7 +178,7 @@ export default function WelcomeScreen() {
 
   // Auth selection screen (default)
   return (
-    <View className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
+    <View testID="welcome-screen" className="flex-1 px-8" style={{ paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: '#8b66df' }}>
       {/* Logo Section */}
       <View className="flex-1 items-center justify-center">
         <View className="w-32 h-32 bg-white rounded-full items-center justify-center mb-8 shadow-lg">
@@ -200,6 +200,7 @@ export default function WelcomeScreen() {
       <View className="pb-8 gap-4">
         {hasSeedVault ? (
           <Button
+            testID="welcome-solana-btn"
             variant="outline"
             size="lg"
             fullWidth
@@ -212,6 +213,7 @@ export default function WelcomeScreen() {
           </Button>
         ) : (
           <Button
+            testID="welcome-solana-btn"
             variant="outline"
             size="lg"
             fullWidth
@@ -234,13 +236,13 @@ export default function WelcomeScreen() {
           <View className="flex-1 h-px bg-violet-400" />
         </View>
 
-        <Button variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white" style={{ paddingVertical: 21.6 }}>
+        <Button testID="welcome-email-btn" variant="outline" size="lg" fullWidth onPress={() => setAuthMode('email')} className="bg-white" style={{ paddingVertical: 21.6 }}>
           <Text className="text-violet-500 font-bold" style={{ fontSize: 24 }}>{t('welcome.continueEmail')}</Text>
         </Button>
 
         {error && <Text className="text-red-200 text-center mt-2">{error}</Text>}
 
-        <Pressable onPress={connectAsGuest} className="py-3 mt-2">
+        <Pressable testID="welcome-guest-btn" onPress={connectAsGuest} className="py-3 mt-2">
           <Text className="text-violet-200 text-center font-medium">{t('welcome.continueGuest')}</Text>
         </Pressable>
       </View>

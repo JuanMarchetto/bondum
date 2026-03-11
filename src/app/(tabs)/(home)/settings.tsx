@@ -18,8 +18,12 @@ export default function SettingsScreen() {
 
   const handleCopyAddress = async () => {
     if (address) {
-      await Clipboard.setStringAsync(address)
-      Alert.alert(t('common.copied'), t('settings.copiedAddress'))
+      try {
+        await Clipboard.setStringAsync(address)
+        Alert.alert(t('common.copied'), t('settings.copiedAddress'))
+      } catch {
+        // Clipboard access denied
+      }
     }
   }
 
@@ -32,8 +36,9 @@ export default function SettingsScreen() {
         onPress: async () => {
           try {
             await disconnect()
-          } catch {
-            Alert.alert(t('common.error'), t('settings.logOutFailed'))
+          } catch (error: any) {
+            console.warn('[settings] logout failed:', error)
+            Alert.alert(t('common.error'), error?.message || t('settings.logOutFailed'))
           }
         },
       },
@@ -55,14 +60,14 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white" testID="settings-screen">
       {/* Header */}
       <View
         className="px-5 pb-6 rounded-b-3xl"
         style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}
       >
         <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2 -ml-2">
+          <Pressable onPress={() => router.back()} className="p-2 -ml-2" testID="settings-back-btn">
             <Text className="text-white text-3xl">{'\u2190'}</Text>
           </Pressable>
           <Text className="text-white font-bold text-xl">{t('settings.title')}</Text>
@@ -108,7 +113,7 @@ export default function SettingsScreen() {
         </View>
 
         {/* Streak Stats */}
-        <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
+        <View className="bg-gray-100 rounded-2xl p-4 mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }} testID="settings-streak-stats">
           <Text className="text-gray-500 text-sm mb-2">{t('settings.streakStats')}</Text>
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-gray-900 text-sm">{t('settings.currentStreak')}</Text>
@@ -126,7 +131,7 @@ export default function SettingsScreen() {
 
         {/* Settings Options */}
         <View className="bg-gray-100 rounded-2xl mb-6" style={{ borderWidth: 1, borderColor: '#E5E5E5' }}>
-          <Pressable onPress={handleLanguageChange} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }}>
+          <Pressable onPress={handleLanguageChange} className="flex-row items-center justify-between p-4" style={{ borderBottomWidth: 1, borderBottomColor: '#E5E5E5' }} testID="settings-language-btn">
             <Text className="text-gray-900 text-base">{t('settings.language')}</Text>
             <View className="flex-row items-center">
               <Text className="text-violet-500 text-sm font-bold mr-2">{language === 'es' ? t('settings.languageSpanish') : t('settings.languageEnglish')}</Text>
@@ -155,6 +160,7 @@ export default function SettingsScreen() {
           onPress={handleLogout}
           loading={isLoading}
           style={{ paddingVertical: 12 }}
+          testID="settings-logout-btn"
         >
           <Text style={{ fontSize: 30, color: '#FFFFFF' }}>{t('settings.logOut')}</Text>
         </Button>

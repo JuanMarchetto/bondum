@@ -32,7 +32,7 @@ export default function RewardsScreen() {
   const filteredRewards = viewMode === 'panicafe' ? panicafeRewards : bondumRewards
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-violet-50" testID="rewards-screen">
       <Header userName={user?.username || 'User'} />
 
       {/* Content */}
@@ -49,6 +49,7 @@ export default function RewardsScreen() {
             {/* PaniCafe Row */}
             <FadeIn delay={0}>
               <Pressable
+                testID="rewards-panicafe-brand"
                 onPress={() => setViewMode('panicafe')}
                 className="flex-row items-center mb-6 bg-white rounded-2xl p-5"
                 style={{ borderWidth: 1, borderColor: '#9b9db5' }}
@@ -65,7 +66,7 @@ export default function RewardsScreen() {
         ) : (
           // Rewards View (Bondum or PaniCafe)
           <View>
-            <Pressable onPress={() => setViewMode('brands')} className="mb-4">
+            <Pressable testID="rewards-back-brands" onPress={() => setViewMode('brands')} className="mb-4">
               <Text className="text-violet-500 font-semibold">{t('rewards.backToBrands')}</Text>
             </Pressable>
 
@@ -75,7 +76,7 @@ export default function RewardsScreen() {
 
             {filteredRewards.map((reward, index) => (
               <FadeIn key={reward.id} delay={index * 80}>
-                <Pressable onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
+                <Pressable testID={`rewards-item-${reward.id}`} onPress={() => router.push(`/(tabs)/(rewards)/${reward.id}`)}>
                   <View className="mb-4 bg-gray-100 rounded-3xl p-5" style={{ borderWidth: 1, borderColor: '#9b9db5' }}>
                     <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
                       <Text className="text-violet-500 text-lg font-bold">{t('common.reward')}</Text>

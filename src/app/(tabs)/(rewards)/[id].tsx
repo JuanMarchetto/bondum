@@ -8,8 +8,8 @@ import { useBondumBalance } from '../../../hooks/useBondumBalance'
 import { useTokenBalances } from '../../../hooks/useTokenBalances'
 import { useReward } from '../../../hooks/useRewards'
 import { addClaimedReward } from '../../../services/rewardStorage'
-import { requestRedemption, redeemReward, requestPanicafeRewardClaim, submitPanicafeRewardClaim } from '../../../services/rewardApi'
-import { Button, FadeIn, ScalePulse } from '../../../components/ui'
+import { requestRedemption, requestPanicafeRewardClaim, submitPanicafeRewardClaim } from '../../../services/rewardApi'
+import { Button, ScalePulse } from '../../../components/ui'
 import { Header } from '../../../components/layout/Header'
 import { TransactionConfirmation } from '../../../components/TransactionConfirmation'
 import { PanicafeCouponCard } from '../../../components/PanicafeCouponCard'
@@ -122,12 +122,7 @@ export default function RewardDetailScreen() {
       return result.signature
     }
 
-    const result = await redeemReward({
-      walletAddress: address,
-      rewardId: reward.id,
-      brand: reward.brand,
-    })
-    return result.txSignature || ''
+    throw new Error(`Unsupported wallet provider: ${provider}`)
   }
 
   const handleClaim = async () => {
@@ -176,7 +171,7 @@ export default function RewardDetailScreen() {
 
   if (claimed) {
     return (
-      <View className="flex-1 bg-gray-100">
+      <View className="flex-1 bg-gray-100" testID="reward-detail-claimed">
         <Header userName={user?.username || 'User'} />
 
         {/* Celebration View */}
@@ -231,7 +226,7 @@ export default function RewardDetailScreen() {
                   </View>
                 )}
 
-                <Button variant="primary" size="lg" style={{ paddingVertical: 18, borderRadius: 14, width: '100%' }} onPress={() => router.replace('/(tabs)/(rewards)')}>
+                <Button testID="reward-detail-back-btn" variant="primary" size="lg" style={{ paddingVertical: 18, borderRadius: 14, width: '100%' }} onPress={() => router.replace('/(tabs)/(rewards)')}>
                   <Text className="text-white font-bold" style={{ fontSize: 18 }}>{t('rewardDetail.backToRewards')}</Text>
                 </Button>
               </View>
@@ -243,13 +238,12 @@ export default function RewardDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-100">
+    <View className="flex-1 bg-gray-100" testID="reward-detail-screen">
       <Header userName={user?.username || 'User'} showBackButton />
 
       {/* Reward Detail */}
       <View className="flex-1 px-2 pt-6 justify-center">
-        <FadeIn>
-        <View className="bg-white rounded-3xl p-5 self-center" style={{ borderWidth: 1, borderColor: '#9b9db5', flex: 0.9, width: '96%' }}>
+        <View className="bg-white rounded-3xl p-5 self-center" style={{ borderWidth: 1, borderColor: '#9b9db5', width: '96%' }}>
           <View className="flex-row items-start justify-between" style={{ marginBottom: 2 }}>
             <Text className="text-4xl font-extrabold">
               <Text className="text-gray-900">{reward.cost.toLocaleString()} </Text>
@@ -276,6 +270,7 @@ export default function RewardDetailScreen() {
 
           <View className="items-center">
             <Button
+              testID="reward-detail-claim-btn"
               variant="primary"
               size="lg"
               className="w-[66%]"
@@ -294,7 +289,6 @@ export default function RewardDetailScreen() {
             </Text>
           )}
         </View>
-        </FadeIn>
       </View>
     </View>
   )

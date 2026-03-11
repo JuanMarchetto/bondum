@@ -22,14 +22,20 @@ export default function ReferralScreen() {
 
   useEffect(() => {
     if (address) {
-      getReferralStats(address).then(setStats)
+      getReferralStats(address).then(setStats).catch(() => {
+        // Already logged in rewardApi
+      })
     }
   }, [address])
 
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(referralLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await Clipboard.setStringAsync(referralLink)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard access denied
+    }
   }
 
   const handleShare = async () => {
@@ -43,10 +49,10 @@ export default function ReferralScreen() {
   }
 
   return (
-    <View className="flex-1 bg-violet-50">
+    <View className="flex-1 bg-violet-50" testID="referral-screen">
       <View className="px-5 pb-6 rounded-b-3xl" style={{ paddingTop: insets.top + 16, backgroundColor: '#8b66df' }}>
         <View className="flex-row items-center justify-between">
-          <Pressable onPress={() => router.back()} className="p-2 -ml-2">
+          <Pressable onPress={() => router.back()} className="p-2 -ml-2" testID="referral-back-btn">
             <Text className="text-white text-3xl">{'\u2190'}</Text>
           </Pressable>
           <Image source={bondumLogo} style={{ width: 128, height: 64, resizeMode: 'contain' }} />
@@ -68,10 +74,10 @@ export default function ReferralScreen() {
           <Text className="text-gray-400 text-xs mb-1">{t('referral.yourCode')}</Text>
           <Text className="text-gray-900 font-bold text-2xl mb-3">{stats.referralCode || '...'}</Text>
           <View className="flex-row gap-3">
-            <Button variant="outline" onPress={handleCopy} style={{ flex: 1 }}>
+            <Button variant="outline" onPress={handleCopy} style={{ flex: 1 }} testID="referral-copy-btn">
               <Text style={{ fontSize: 16 }}>{copied ? t('common.copied') : t('referral.copyLink')}</Text>
             </Button>
-            <Button variant="primary" onPress={handleShare} style={{ flex: 1 }}>
+            <Button variant="primary" onPress={handleShare} style={{ flex: 1 }} testID="referral-share-btn">
               <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('common.share')}</Text>
             </Button>
           </View>

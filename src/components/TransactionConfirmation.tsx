@@ -35,13 +35,19 @@ export function TransactionConfirmation({
 
 
   const openExplorer = () => {
-    Linking.openURL(`${EXPLORER_BASE}/${signature}`)
+    Linking.openURL(`${EXPLORER_BASE}/${signature}`).catch(() => {
+      // No browser available
+    })
   }
 
   const copySignature = async () => {
-    await Clipboard.setStringAsync(signature)
-    setCopiedSig(true)
-    setTimeout(() => setCopiedSig(false), 2000)
+    try {
+      await Clipboard.setStringAsync(signature)
+      setCopiedSig(true)
+      setTimeout(() => setCopiedSig(false), 2000)
+    } catch {
+      // Clipboard access denied
+    }
   }
 
   return (
@@ -132,13 +138,13 @@ export function TransactionConfirmation({
       <View className="flex-row gap-3" style={{ width: '100%' }}>
         {onScanAnother && (
           <View style={{ flex: 1 }}>
-            <Button variant="outline" onPress={onScanAnother} style={{ width: '100%', minHeight: 48 }}>
+            <Button testID="tx-scan-another-btn" variant="outline" onPress={onScanAnother} style={{ width: '100%', minHeight: 48 }}>
               <Text style={{ fontSize: 16 }}>{t('tx.scanAnother')}</Text>
             </Button>
           </View>
         )}
         <View style={{ flex: 1 }}>
-          <Button variant="primary" onPress={onDone} style={{ width: '100%', minHeight: 48 }}>
+          <Button testID="tx-done-btn" variant="primary" onPress={onDone} style={{ width: '100%', minHeight: 48 }}>
             <Text style={{ fontSize: 16, color: '#FFFFFF' }}>{t('tx.done')}</Text>
           </Button>
         </View>
