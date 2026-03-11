@@ -1,0 +1,59 @@
+# Same as .gitignore but allows .env for EAS builds
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+android/
+ios/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# typescript
+*.tsbuildinfo
+
+app-example
+.claude/
+
+# Misc documents
+*.docx
+
+# Server runtime data
+server/streaks.json
+server/nonces.json
+
+# Build/health logs
+scripts/*.log
+
+# Anchor / Solana program build artifacts
+target/
+
+# webreel recording artifacts
+.webreel
+
+# Large files not needed in build
+*.apk
+*.mp4
+videos/

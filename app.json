@@ -6,7 +6,7 @@
     "web": {
       "output": "static"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "name": "Bondum",
     "slug": "bondum-mobile",
     "icon": "./src/assets/app-icon.png",
