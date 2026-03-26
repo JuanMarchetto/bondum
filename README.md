@@ -1,4 +1,4 @@
-# Bondum Mobile
+# Bondum
 
 [![Solana](https://img.shields.io/badge/Solana-9945FF?logo=solana&logoColor=white)](https://solana.com)
 [![Expo](https://img.shields.io/badge/Expo-000020?logo=expo&logoColor=white)](https://expo.dev)
@@ -10,9 +10,18 @@
 
 ![Bondum - Simply scan your everyday products and get the rewards](banner.jpeg)
 
-A mobile-first loyalty rewards platform on Solana. Scan products, earn **$BONDUM** tokens, build streaks for multiplied rewards, and redeem real products at partner brands -- all with on-chain verification and wallet signing.
+A blockchain loyalty platform on Solana. Brands create SPL tokens as loyalty coins, customers earn them by scanning products, build streaks for multiplied rewards, and redeem real products -- all with on-chain verification.
 
 **Already live** with [PaniCafe](https://panicafe.com.ar), serving **~8,000 real users** with on-chain reward transactions in production.
+
+## Bondum Ecosystem
+
+| Product | Description | Link |
+|---------|-------------|------|
+| **Bondum Launchpad** | Web platform for brands to create and manage on-chain loyalty tokens (SPL) on Solana. Whitelist-gated coin creation, brand directory, tokenomics wizard, and on-chain deploy. | [launchpad.bondum.xyz](https://launchpad.bondum.xyz) / [Source](https://github.com/JuanMarchetto/bondum-launchpad) |
+| **Bondum Mobile** | Consumer mobile app — scan products, earn tokens, build streaks, redeem rewards, swap via Jupiter. Live on Solana dApp Store. | [Download](https://github.com/JuanMarchetto/bondum/releases/latest) / This repo |
+| **Reward Server** | Backend API for reward distribution, streak tracking, on-chain transaction building and submission. | [`server/`](server/) |
+| **Scan Guard** | Anchor program for on-chain nonce replay protection on QR scan claims. | [`programs/scan_guard/`](programs/scan_guard/) |
 
 ## Download
 
