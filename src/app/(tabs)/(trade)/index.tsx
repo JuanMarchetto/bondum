@@ -11,7 +11,7 @@ import { TransactionConfirmation } from '../../../components/TransactionConfirma
 import { useSwapQuote, type TokenSymbol, TOKENS } from '../../../hooks/useSwapQuote'
 import { getSwapTransaction } from '../../../services/jupiter'
 import { getTransactionDecoder } from '@solana/kit'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useMobileWallet } from '../../../providers/mobileWallet'
 import { useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { Buffer } from 'buffer'
 import { VersionedTransaction, Connection } from '@solana/web3.js'

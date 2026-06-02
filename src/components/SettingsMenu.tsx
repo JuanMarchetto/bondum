@@ -1,5 +1,5 @@
 import { Text, Pressable, Alert } from 'react-native'
-import * as DropdownMenu from 'zeego/dropdown-menu'
+import { MenuView } from '@react-native-menu/menu'
 import * as Clipboard from 'expo-clipboard'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -28,30 +28,38 @@ export function SettingsMenu({ trigger }: SettingsMenuProps) {
   }
 
   return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        {trigger || (
-          <Pressable className="p-2">
-            <Text className="text-2xl">{'\u2699\uFE0F'}</Text>
-          </Pressable>
-        )}
-      </DropdownMenu.Trigger>
-
-      <DropdownMenu.Content>
-        {address ? (
-          <DropdownMenu.Item key="copy-address" onSelect={handleCopyAddress}>
-            <DropdownMenu.ItemIcon ios={{ name: 'doc.on.doc' }} />
-            <DropdownMenu.ItemTitle>{t('settingsMenu.copyAddress')}</DropdownMenu.ItemTitle>
-          </DropdownMenu.Item>
-        ) : null}
-
-        <DropdownMenu.Separator />
-
-        <DropdownMenu.Item key="logout" onSelect={handleLogout} destructive disabled={isLoading}>
-          <DropdownMenu.ItemIcon ios={{ name: 'rectangle.portrait.and.arrow.right' }} />
-          <DropdownMenu.ItemTitle>{isLoading ? t('settingsMenu.disconnecting') : t('settingsMenu.logout')}</DropdownMenu.ItemTitle>
-        </DropdownMenu.Item>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
+    <MenuView
+      testID="settings-menu"
+      onPressAction={({ nativeEvent }) => {
+        if (nativeEvent.event === 'copy-address') handleCopyAddress()
+        if (nativeEvent.event === 'logout') handleLogout()
+      }}
+      actions={[
+        ...(address
+          ? [
+              {
+                id: 'copy-address',
+                title: t('settingsMenu.copyAddress'),
+                image: 'doc.on.doc',
+              },
+            ]
+          : []),
+        {
+          id: 'logout',
+          title: isLoading ? t('settingsMenu.disconnecting') : t('settingsMenu.logout'),
+          image: 'rectangle.portrait.and.arrow.right',
+          attributes: {
+            destructive: true,
+            disabled: isLoading,
+          },
+        },
+      ]}
+    >
+      {trigger || (
+        <Pressable className="p-2">
+          <Text className="text-2xl">{'\u2699\uFE0F'}</Text>
+        </Pressable>
+      )}
+    </MenuView>
   )
 }

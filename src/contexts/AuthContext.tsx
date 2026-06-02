@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import { Platform } from 'react-native'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useMobileWallet } from '../providers/mobileWallet'
 import { usePrivy, useLoginWithEmail, useEmbeddedSolanaWallet } from '@privy-io/expo'
 import { useQueryClient } from '@tanstack/react-query'
 import { secureStorage } from '../services/storage'
@@ -34,15 +34,16 @@ export function AuthContextProvider({ children }: AuthProviderProps) {
   const [pendingPrivyEmail, setPendingPrivyEmail] = useState<string | null>(null)
 
   const queryClient = useQueryClient()
-  // On web, these native-only hooks are unavailable (providers skipped)
-  const solanaWallet = Platform.OS === 'web' ? { account: null, connect: async () => {}, disconnect: async () => {} } as any : useMobileWallet()
-  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout, getAccessToken } = Platform.OS === 'web'
+  const isWeb = Platform.OS === 'web'
+  // MWA is Android-only; Privy works on iOS + Android (skip both on web)
+  const solanaWallet = isWeb ? { account: null, connect: async () => {}, disconnect: async () => {} } as any : useMobileWallet()
+  const { isReady: isPrivyReady, user: privyUser, logout: privyLogout, getAccessToken } = isWeb
     ? { isReady: false, user: null, logout: async () => {}, getAccessToken: async () => null } as any
     : usePrivy()
-  const { sendCode, loginWithCode, state: privyLoginState } = Platform.OS === 'web'
+  const { sendCode, loginWithCode, state: privyLoginState } = isWeb
     ? { sendCode: async () => {}, loginWithCode: async () => {}, state: { status: 'idle' } } as any
     : useLoginWithEmail()
-  const embeddedWallet = Platform.OS === 'web' ? { status: 'not-connected', wallets: [] } as any : useEmbeddedSolanaWallet()
+  const embeddedWallet = isWeb ? { status: 'not-connected', wallets: [] } as any : useEmbeddedSolanaWallet()
 
   // Check for existing auth on mount
   useEffect(() => {

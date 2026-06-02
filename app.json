@@ -23,7 +23,11 @@
       ]
     },
     "ios": {
-      "bundleIdentifier": "xyz.bondum.mobile"
+      "bundleIdentifier": "xyz.bondum.mobile",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": [
       [
